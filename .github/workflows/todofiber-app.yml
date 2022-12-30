@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  GOGINNOTES_DOCKER_IMAGE: ghcr.io/${{ github.repository }}/todofiber
+  TODOFIBER_DOCKER_IMAGE: ghcr.io/${{ github.repository }}/todofiber
   POSTGRES_DOCKER_IMAGE: ghcr.io/${{ github.repository }}/postgres
   ALPINE_IMAGE: ghcr.io/${{ github.repository }}/alpine
 
@@ -119,13 +119,13 @@ jobs:
 
       
 
-      - name: Build gin app
+      - name: Build todofiber
         run: |
-            cd app
-            docker build . -f Dockerfile -t $GOGINNOTES_DOCKER_IMAGE
+            cd todofiber-app/todofiber
+            docker build . -f Dockerfile -t $TODOFIBER_DOCKER_IMAGE
       - name: Build Postgresql
         run: |
-            cd postgresql
+            cd todofiber-app/postgresql
             docker build . -f Dockerfile -t $POSTGRES_DOCKER_IMAGE
             docker build . -f Dockerfile_alpine -t $ALPINE_IMAGE 
 
@@ -138,11 +138,11 @@ jobs:
         run: |
           echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           VERSION=${GITHUB_SHA::8}
-          echo GOGINNOTES_DOCKER_IMAGE=$GOGINNOTES_DOCKER_IMAGE
+          echo TODOFIBER_DOCKER_IMAGE=$TODOFIBER_DOCKER_IMAGE
           echo VERSION=$VERSION
-          docker tag $GOGINNOTES_DOCKER_IMAGE $GOGINNOTES_DOCKER_IMAGE:$VERSION 
-          docker push $GOGINNOTES_DOCKER_IMAGE:$VERSION
-          docker push $GOGINNOTES_DOCKER_IMAGE
+          docker tag $TODOFIBER_DOCKER_IMAGE $TODOFIBER_DOCKER_IMAGE:$VERSION 
+          docker push $TODOFIBER_DOCKER_IMAGE:$VERSION
+          docker push $TODOFIBER_DOCKER_IMAGE
           docker tag $POSTGRES_DOCKER_IMAGE $POSTGRES_DOCKER_IMAGE:$VERSION 
           docker push $POSTGRES_DOCKER_IMAGE:$VERSION
           docker push $POSTGRES_DOCKER_IMAGE
