@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: somename-ingress-tls
+data:
+  tls.crt: <path:azure-key-vault-dev#dev-tls-crt>
+  tls.key: <path:azure-key-vault-dev#dev-tls-key>
+
+
+

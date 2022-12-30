@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  ARGOCD_ENV_AZURE_TENANT_ID: xxx
+  ARGOCD_ENV_AZURE_CLIENT_ID: xxx
+  ARGOCD_ENV_AZURE_CLIENT_SECRET: xxx
+  AVP_TYPE: azurekeyvault
+  VAULT_ADDR: https://keyvault.vault.azure.net
+kind: Secret
+metadata:
+  name: argocd-vault-plugin-credentials
+  namespace: argocd
+type: Opaque

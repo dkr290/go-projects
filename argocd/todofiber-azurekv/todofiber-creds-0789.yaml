@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: <path:azure-vault-dev#container-registry-argo> #base64 encrypted
+kind: Secret
+metadata:
+  name: todofiber-creds-0789
+type: kubernetes.io/dockerconfigjson
