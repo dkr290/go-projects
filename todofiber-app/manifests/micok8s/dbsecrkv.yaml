@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dbusecret
+type: Opaque
+
+data:
+  database-user: <path:azure-vault-dev#todofiber-psql-user>
+  database-pass: <path:azure-vault-dev#todofiber-psql-passwd>
+
+
+

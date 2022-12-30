@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todofiber
+  labels:
+      app: todofiber
+spec:
+  # The replica count is kept to one for simplicity purposes.
+  # To create a highly available app, the replica count would
+  # be higher.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todofiber
+  template:
+    metadata:
+      labels:
+        app: todofiber
+    spec:
+      containers:
+        - name: todofiber
+          # The docker image is pulled from dockerhub.
+          image: containerreg/todolist:latest
+          imagePullPolicy: Always
+          env: # we extract the values we set in the configmap and mount them as environment variables in the pods.
+          - name: DATABASE_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: dbhostconfigmap
+                key: DATABASE_HOST
+
+          - name: DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: dbusecret
+                key: database-user
+          - name: DATABASE_PASS
+            valueFrom:
+              secretKeyRef:
+                name: dbusecret
+                key: database-pass
+
+          - name: DATABASE_PORT
+            value: "5432"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+      imagePullSecrets:
+      - name: todofiber-creds-0789
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: todofiber-service
+  name: todofiber-service
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+    targetPort: 3000
+  type: ClusterIP
+  selector:
+    app: todofiber
