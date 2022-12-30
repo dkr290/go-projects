@@ -61,7 +61,7 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           cd todofiber-app/todofiber
-          docker build -t $GOGINNOTES_DOCKER_IMAGE:${{ github.sha }} .
+          docker build -t $TODOFIBER_DOCKER_IMAGE:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner to notes-app docker image after build
         uses: aquasecurity/trivy-action@master
