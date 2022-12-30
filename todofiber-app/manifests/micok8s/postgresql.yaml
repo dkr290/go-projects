@@ -30,7 +30,7 @@ spec:
           mountPath: "/bitnami/postgresql"
      
       containers:
-      - image: bitnami/postgresql:latest
+      - image: ghcr.io/dkr290/go-projects/postgres:latest
         name: postgresql
        
         env:

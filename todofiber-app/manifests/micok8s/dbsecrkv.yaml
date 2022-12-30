@@ -5,8 +5,8 @@ metadata:
 type: Opaque
 
 data:
-  database-user: <path:azure-vault-dev#todofiber-psql-user>
-  database-pass: <path:azure-vault-dev#todofiber-psql-passwd>
+  database-user: cG9zdGdyZXM=
+  database-pass: UGFzc3dvcmQxMjM=
 
 
 
