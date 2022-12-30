@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
     paths-ignore:
     - 'argocd/**'
-    - 'mtodofiber-app/manifests/**'
+    - 'todofiber-app/manifests/**'
   #    - '.github/**'
   pull_request:
     branches: [ "main" ]
