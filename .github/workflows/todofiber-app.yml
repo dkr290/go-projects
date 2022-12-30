@@ -55,7 +55,7 @@ jobs:
       
       - name: Run OPA Conftest
         run: |
-          cd app
+          cd todofiber-app/todofiber
           docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego  Dockerfile
 
       - name: Build an image from Dockerfile
