@@ -29,9 +29,13 @@ func main() {
 	Repo.DbName = "todos"
 	Repo.DbPass = os.Getenv("DATABASE_PASS")
 	Repo.APPPort = os.Getenv("APP_PORT")
-	Repo.DbPort = "5432"
+	Repo.DbPort = os.Getenv("DATABASE_PORT")
 
-	connInfo := fmt.Sprintf("user=%s password=%s host=%s sslmode=disable", Repo.DbUser, Repo.DbPass, Repo.DbHost)
+	if Repo.DbPort == "" {
+		Repo.DbPort = "5432"
+	}
+
+	connInfo := fmt.Sprintf("user=%s password=%s port=%s host=%s sslmode=disable", Repo.DbUser, Repo.DbPass, Repo.DbPort, Repo.DbHost)
 	initdb, err := sql.Open("postgres", connInfo)
 	if err != nil {
 		log.Fatal(err)
@@ -39,15 +43,16 @@ func main() {
 
 	dbName := Repo.DbName
 	_, err = initdb.Exec("create database " + dbName)
-	defer func() {
-		if strings.Contains(err.Error(), "already exists") && err != nil {
+
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
 			//handle the error
 			fmt.Println("Database already created")
 
 		} else {
 			log.Fatalln("Cannot create database", err)
 		}
-	}()
+	}
 
 	initdb.Close()
 
