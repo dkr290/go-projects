@@ -15,6 +15,6 @@ resources:
 
 images:
 - name: ghcr.io/dkr290/go-projects/todofiber
-  newTag: 453c0a3e
+  newTag: latest
 - name: ghcr.io/dkr290/go-projects/postgres
-  newTag: 453c0a3e
+  newTag: latest
