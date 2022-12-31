@@ -5,8 +5,8 @@ metadata:
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
  
-  labels:
-    name: todofiber-argo-app
+  # labels:
+  #   name: todofiber-argo-app
 spec:
   # The project the application belongs to.
   project: todofiber
