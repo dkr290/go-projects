@@ -9,8 +9,8 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   rules:
-  host: argocd.mydomain.ops
-  - http:
+  - host: argocd.mydomain.ops
+    http:
       paths:
       - path: /
         pathType: Prefix
