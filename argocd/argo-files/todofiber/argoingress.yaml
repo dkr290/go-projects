@@ -12,7 +12,7 @@ spec:
  # - host: argocd.example.com
   - http:
       paths:
-      - path: /
+      - path: /argocd
         pathType: Prefix
         backend:
           service:
