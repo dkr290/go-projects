@@ -21,6 +21,7 @@ spec:
     kustomize:
       images:
       - ghcr.io/dkr290/go-projects/todofiber:8bb3c774
+      namePreffix: staging
       # commonLabels: 
       #   app: todofiber-argo-app-kustomize
 
