@@ -18,11 +18,12 @@ spec:
     path: todofiber-app/manifests/microk8s  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
     # plugin:
     #   name: argocd-vault-plugin
-    # kustomize:
-    #   # images:
-    #   # - ghcr.io/dkr290/go-projects/todofiber:8bb3c774
-    #   commonLabels: 
-    #     app: todofiber-argo-app-kustomize
+    kustomize:
+      images:
+      - name: ghcr.io/dkr290/go-projects/todofiber
+        newTag: 8bb3c774
+      commonLabels: 
+        app: todofiber-argo-app-kustomize
 
    
     # directory
