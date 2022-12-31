@@ -4,6 +4,8 @@ metadata:
   name: todofiber-argo
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: ghcr.io/dkr290/go-projects/todofiber:latest
  
   # labels:
   #   name: todofiber-argo-app
