@@ -21,8 +21,8 @@ spec:
     kustomize:
       images:
       - ghcr.io/dkr290/go-projects/todofiber:8bb3c774
-      commonLabels: 
-        app: todofiber-argo-app-kustomize
+      # commonLabels: 
+      #   app: todofiber-argo-app-kustomize
 
    
     # directory
