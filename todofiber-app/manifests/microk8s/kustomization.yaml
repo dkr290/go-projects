@@ -1,7 +1,7 @@
 commonLabels: 
   app: todofiber-argo-app-kustomize
-images:
-  - ghcr.io/dkr290/go-projects/todofiber:8bb3c774
+# images:
+#   - ghcr.io/dkr290/go-projects/todofiber:8bb3c774
 resources:
 - todofiber.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
