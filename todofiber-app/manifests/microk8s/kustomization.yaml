@@ -1,19 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- ./base
-# - todofiber.yaml
-# - cm.yaml
-# - dbsecrkv.yaml
-# - ingress.yaml
-# - pgadmin4.yaml
-# - postgresql-pvc.yaml
-# - postgresql.yaml
+- todofiber.yaml
+- cm.yaml
+- dbsecrkv.yaml
+- ingress.yaml
+- pgadmin4.yaml
+- postgresql-pvc.yaml
+- postgresql.yaml
 
 
 
 
 
 images:
-- name: ghcr.io/dkr290/go-projects/todofiber:8bb3c774
-#  newTag: 8bb3c774
+- name: ghcr.io/dkr290/go-projects/todofiber
+  newTag: 8bb3c774
