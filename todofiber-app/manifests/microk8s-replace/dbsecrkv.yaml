@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dbusecret
+type: Opaque
+
+data:
+  database-user: cG9zdGdyZXM=
+  database-pass: UGFzc3dvcmQxMjM=
+
+
+
