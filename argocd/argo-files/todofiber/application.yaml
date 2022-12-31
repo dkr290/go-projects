@@ -26,8 +26,8 @@ spec:
 
    
     # directory
-    directory:
-      recurse: true
+    # directory:
+    #   recurse: true
     #   jsonnet:
     #     # A list of Jsonnet External Variables
     #     extVars:
