@@ -1,4 +1,4 @@
-namePreffix: todofiber-
+namePrefix: todofiber-
 
 
 apiVersion: kustomize.config.k8s.io/v1beta1
