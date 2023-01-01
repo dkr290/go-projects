@@ -1,0 +1,9 @@
+namePrefix: sync-phase-practice-
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pre-sync-job.yaml
+- post-sync-job.yaml
+- sync-job.yaml
+- skip-job.yaml
