@@ -12,16 +12,16 @@ spec:
 
   # Source of the application manifests
   source:
-    repoURL: https://istio-release.storage.googleapis.com/charts # Can point to either a Helm chart repo or a git repo.
-    targetRevision: 1.16.1 # For Helm, this refers to the chart version.
-    chart: istiod
+    repoURL: https://github.com/dkr290/go-projects.git # Can point to either a Helm chart repo or a git repo.
+    targetRevision: main # For Helm, this refers to the chart version.
+    path: argocd/argo-files/sync-jobs
  
   
   # Destination cluster and namespace to deploy the application
   destination:
     server: https://kubernetes.default.svc
     # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
-    namespace: istio-system
+    namespace: sync-jobs
 
   # Sync policy
   syncPolicy:
@@ -43,11 +43,6 @@ spec:
         duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
         factor: 2 # a factor to multiply the base duration after each failed retry
         maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
-  ignoreDifferences:
-  # for the specified json pointers
-  - group: admissionregistration.k8s.io
-    kind: MutatingWebhookConfiguration
-    jqPathExpressions:
-      - '.webhooks[]?.clientConfig.caBundle'
+
  
   revisionHistoryLimit: 10
