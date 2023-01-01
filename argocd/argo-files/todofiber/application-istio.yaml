@@ -47,7 +47,7 @@ spec:
   # for the specified json pointers
   - group: admissionregistration.k8s.io
     kind: MutatingWebhookConfiguration
-    jqPathExpression:
+    jqPathExpressions:
       - '.webhooks[]?.clientConfig.caBundle'
  
   revisionHistoryLimit: 10
