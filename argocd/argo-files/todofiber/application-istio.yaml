@@ -13,7 +13,7 @@ spec:
   # Source of the application manifests
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts # Can point to either a Helm chart repo or a git repo.
-    targetRevision: 1.15.4  # For Helm, this refers to the chart version.
+    targetRevision: 1.13.4 # For Helm, this refers to the chart version.
     chart: istiod
  
   
