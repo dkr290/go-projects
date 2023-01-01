@@ -1,9 +1,0 @@
-images:
-- name: ghcr.io/dkr290/go-projects/todofiber:5dda076b
-- name: ghcr.io/dkr290/go-projects/postgres:5dda076b
-resources:
-- todofiber.yaml
-- postgresql.yaml
-
-
-
