@@ -4,11 +4,13 @@ metadata:
   name: todofiber
   labels:
       app: todofiber
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   # The replica count is kept to one for simplicity purposes.
   # To create a highly available app, the replica count would
   # be higher.
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: todofiber

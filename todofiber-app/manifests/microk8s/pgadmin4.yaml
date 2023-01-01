@@ -4,6 +4,8 @@ metadata:
   name: pgadmin4
   labels:
     app: pgadmin4
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: 1
   selector:
