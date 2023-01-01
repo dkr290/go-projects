@@ -8,7 +8,7 @@ spec:
   # The replica count is kept to one for simplicity purposes.
   # To create a highly available app, the replica count would
   # be higher.
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: todofiber
