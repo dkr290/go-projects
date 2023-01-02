@@ -22,7 +22,7 @@ patchesJson6902:
     version: v1
 - patch: |-
     - op: replace
-      path: /data/modelname
+      path: /data/env
       value: dev
   target:
     group: ""
