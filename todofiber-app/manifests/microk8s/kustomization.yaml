@@ -13,7 +13,7 @@ resources:
 patchesJson6902:
 - patch: |-
     - op: replace
-      path: /data/modelname/__MODELNAME__
+      path: /data/modelname
       value: buzzword
   target:
     group: ""
@@ -22,7 +22,7 @@ patchesJson6902:
     version: v1
 - patch: |-
     - op: replace
-      path: /data/modelname/__ENV__
+      path: /data/modelname
       value: dev
   target:
     group: ""
