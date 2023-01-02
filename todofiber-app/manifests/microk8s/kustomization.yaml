@@ -9,7 +9,25 @@ resources:
 - postgresql-pvc.yaml
 - postgresql.yaml
 
-
+patchesJson6902:
+- patch: |-
+    - op: replace
+      path: /data/modelname/__MODELNAME__
+      value: buzzword
+  target:
+    group: ""
+    kind: ConfigMap
+    name: cm-exmaple
+    version: v1
+- patch: |-
+    - op: replace
+      path: /data/modelname/__ENV__
+      value: dev
+  target:
+    group: ""
+    kind: ConfigMap
+    name: cm-exmaple
+    version: v1
 
 
 
