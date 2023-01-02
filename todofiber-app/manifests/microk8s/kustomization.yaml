@@ -18,3 +18,6 @@ images:
   newTag: 5dda076b
 - name: ghcr.io/dkr290/go-projects/postgres
   newTag: 5dda076b
+
+commonAnnotations:
+  todofiber/version: v1.2
