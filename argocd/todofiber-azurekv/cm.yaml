@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dbhostconfigmap
-data:
-  DATABASE_HOST: postgres-db-svc
-
-
-
