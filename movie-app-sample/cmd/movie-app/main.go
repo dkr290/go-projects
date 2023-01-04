@@ -14,11 +14,11 @@ func main() {
 	// new router in mux
 	r := mux.NewRouter()
 
-	r.HandleFunc("/movies", handlers.GetMovies()).Methods("GET")
-	r.HandleFunc("/movies/{id}", handlers.GetMovie()).Methods("GET")
-	r.HandleFunc("/movies/", handlers.CreateMovie()).Methods("POST")
-	r.HandleFunc("/movies/{id}", handlers.UpdateMovie()).Methods("PUT")
-	r.HandleFunc("/movies/{id}", handlers.DeleteMovie()).Methods("DELETE")
+	r.HandleFunc("/movies", handlers.GetMovies).Methods("GET")
+	r.HandleFunc("/movies/{id}", handlers.GetMovie).Methods("GET")
+	r.HandleFunc("/movies/", handlers.CreateMovie).Methods("POST")
+	r.HandleFunc("/movies/{id}", handlers.UpdateMovie).Methods("PUT")
+	r.HandleFunc("/movies/{id}", handlers.DeleteMovie).Methods("DELETE")
 
 	fmt.Printf("Starting the server at port %s", "8080")
 
