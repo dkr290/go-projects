@@ -7,6 +7,8 @@ on:
     paths-ignore:
     - 'argocd/**'
     - 'todofiber-app/manifests/**'
+    - 'file-encrypt-decrypt/**'
+    - 'movie-app-sample/**'
   #    - '.github/**'
   pull_request:
     branches: [ "main" ]
