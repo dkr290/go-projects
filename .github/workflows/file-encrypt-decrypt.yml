@@ -1,11 +1,8 @@
 on:
   release:
     types: [created]
-    paths-ignore:
-    - 'argocd/**'
-    - 'todofiber-app/manifests/**'
-    - 'todofiber-app/**'
-    - 'movie-app-sample/**'
+    paths:
+    - 'file-encrypt-decrypt/**'
 
 jobs:
   releases-matrix:

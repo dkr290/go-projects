@@ -4,11 +4,9 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
-    paths-ignore:
-    - 'argocd/**'
-    - 'todofiber-app/manifests/**'
-    - 'file-encrypt-decrypt/**'
-    - 'movie-app-sample/**'
+    paths:
+    - 'todofiber-app/todofiber/**'
+   
   #    - '.github/**'
   pull_request:
     branches: [ "main" ]
