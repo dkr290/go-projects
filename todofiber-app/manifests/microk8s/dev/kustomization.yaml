@@ -33,4 +33,4 @@ images:
   newTag: latest
 
 commonAnnotations:
-  todofiber/version: v1.3
+  todofiber/version: v1.4
