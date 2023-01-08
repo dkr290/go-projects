@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 data:
-  modelname: devmodel
-  env: dev
+  modelname: uatmodel
+  env: uat
   actioname: action
   sometype: type
