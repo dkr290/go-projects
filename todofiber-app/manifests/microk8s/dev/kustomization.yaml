@@ -6,8 +6,25 @@ kind: Kustomization
 bases:
 - ../base
 
-patchesStrategicMerge:
-- cm.example.yaml
+patchesJson6902:
+- patch: |-
+    - op: replace
+      path: /data/modelname
+      value: buzzword
+  target:
+    group: ""
+    kind: ConfigMap
+    name: cm-exmaple
+    version: v1
+- patch: |-
+    - op: replace
+      path: /data/env
+      value: dev
+  target:
+    group: ""
+    kind: ConfigMap
+    name: cm-exmaple
+    version: v1
 
 images:
 - name: ghcr.io/dkr290/go-projects/todofiber

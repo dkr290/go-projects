@@ -10,33 +10,8 @@ resources:
 - postgresql.yaml
 - cm-example.yaml
 
-patchesJson6902:
-- patch: |-
-    - op: replace
-      path: /data/modelname
-      value: buzzword
-  target:
-    group: ""
-    kind: ConfigMap
-    name: cm-exmaple
-    version: v1
-- patch: |-
-    - op: replace
-      path: /data/env
-      value: dev
-  target:
-    group: ""
-    kind: ConfigMap
-    name: cm-exmaple
-    version: v1
 
 
-images:
-- name: ghcr.io/dkr290/go-projects/todofiber
-  newTag: 5dda076b
-- name: ghcr.io/dkr290/go-projects/postgres
-  newTag: 5dda076b
 
-commonAnnotations:
-  todofiber/version: v1.2
+
 
