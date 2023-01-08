@@ -5,6 +5,14 @@ kind: Kustomization
 
 resources:
 - ../../base
+- todofiber.yaml
+- cm.yaml
+- dbsecrkv.yaml
+- ingress.yaml
+- pgadmin4.yaml
+- postgresql-pvc.yaml
+- postgresql.yaml
+- cm-example.yaml
 
 patchesJson6902:
 - patch: |-
