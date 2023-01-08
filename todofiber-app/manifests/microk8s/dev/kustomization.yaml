@@ -18,7 +18,7 @@ patchesJson6902:
 - patch: |-
     - op: replace
       path: /data/modelname
-      value: buzzword
+      value: buzzworddev
   target:
     group: ""
     kind: ConfigMap
