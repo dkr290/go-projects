@@ -58,8 +58,50 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 
 func UpdateBookByID(w http.ResponseWriter, r *http.Request) {
 
+	var updateBook = &models.Book{}
+	utils.ParseBody(r, updateBook)
+	vars := mux.Vars(r)
+	bookId := vars["BookId"]
+	ID, err := strconv.ParseInt(bookId, 0, 0)
+
+	if err != nil {
+		log.Fatalln("Error parsing from update", err)
+	}
+	bookDetail, db := models.GetBookById(ID)
+
+	if updateBook.Name != "" {
+		bookDetail.Name = updateBook.Name
+	}
+
+	if updateBook.Author != "" {
+		bookDetail.Author = updateBook.Author
+	}
+
+	if updateBook.Publication != "" {
+		bookDetail.Publication = updateBook.Publication
+	}
+
+	db.Save(&bookDetail)
+	res, _ := json.Marshal(bookDetail)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+
 }
 
 func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	bookId := vars["bookId"]
+	ID, err := strconv.ParseInt(bookId, 0, 0)
+	if err != nil {
+		log.Fatalln("Error parsing from Delete book by id", err)
+	}
+	book := models.DeleteBook(ID)
+
+	res, _ := json.Marshal(book)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 
 }
