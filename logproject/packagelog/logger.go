@@ -19,7 +19,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 		l.output = os.Stdout
 	}
 	if l.treshold <= LevelDebug {
-		_, _ = fmt.Fprintf(l.output, format, args...)
+		l.logf(format, args...)
 	}
 }
 
@@ -31,7 +31,7 @@ func (l *Logger) Infof(format string, args ...any) {
 	}
 
 	if l.treshold <= LevelInfo {
-		_, _ = fmt.Printf(format+"\n", args...)
+		l.logf(format, args...)
 
 	}
 
@@ -42,7 +42,7 @@ func (l *Logger) Errorf(format string, args ...any) {
 		l.output = os.Stdout
 	}
 	if l.treshold <= LevelError {
-		_, _ = fmt.Printf(format+"\n", args...)
+		l.logf(format, args...)
 	}
 
 }
@@ -54,4 +54,9 @@ func New(treshold Level, output io.Writer) *Logger {
 		treshold: treshold,
 		output:   output,
 	}
+}
+
+// logf prints the message to the output
+func (l *Logger) logf(format string, args ...any) {
+	_, _ = fmt.Fprintf(l.output, format+"\n", args...)
 }
