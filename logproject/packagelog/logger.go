@@ -21,7 +21,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 	if l.treshold <= LevelDebug {
 
-		l.logf(format, args...)
+		l.logf(LevelDebug, format, args...)
 	}
 }
 
@@ -33,7 +33,7 @@ func (l *Logger) Infof(format string, args ...any) {
 	}
 
 	if l.treshold <= LevelInfo {
-		l.logf(format, args...)
+		l.logf(LevelInfo, format, args...)
 
 	}
 
@@ -44,7 +44,7 @@ func (l *Logger) Errorf(format string, args ...any) {
 		l.output = os.Stdout
 	}
 	if l.treshold <= LevelError {
-		l.logf(format, args...)
+		l.logf(LevelError, format, args...)
 	}
 
 }
@@ -59,9 +59,27 @@ func New(treshold Level, output io.Writer) *Logger {
 }
 
 // logf prints the message to the output
-func (l *Logger) logf(format string, args ...any) {
+func (l *Logger) logf(lvl Level, format string, args ...any) {
+
+	if l.treshold > lvl {
+		return
+	}
+
+	var NewLevel string
+	switch lvl {
+	case 0:
+		NewLevel = "Debug"
+
+	case 1:
+		NewLevel = "Info"
+	case 2:
+		NewLevel = "Error"
+	}
 
 	t := time.Now()
 	s := t.Format(time.RFC850)
-	_, _ = fmt.Fprintf(l.output, s+" "+format+"\n", args...)
+	_, _ = fmt.Fprintf(l.output, "time: %s\n", s)
+	_, _ = fmt.Fprintf(l.output, "level: %v\n", NewLevel)
+	_, _ = fmt.Fprintf(l.output, "message: "+format+"\n", args...)
+	fmt.Println("")
 }
