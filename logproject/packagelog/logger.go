@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 // Logger is used
@@ -19,6 +20,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 		l.output = os.Stdout
 	}
 	if l.treshold <= LevelDebug {
+
 		l.logf(format, args...)
 	}
 }
@@ -58,5 +60,8 @@ func New(treshold Level, output io.Writer) *Logger {
 
 // logf prints the message to the output
 func (l *Logger) logf(format string, args ...any) {
-	_, _ = fmt.Fprintf(l.output, format+"\n", args...)
+
+	t := time.Now()
+	s := t.Format(time.RFC850)
+	_, _ = fmt.Fprintf(l.output, s+" "+format+"\n", args...)
 }

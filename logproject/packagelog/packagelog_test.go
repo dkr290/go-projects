@@ -16,9 +16,9 @@ func TestPackageLog_Debugf(t *testing.T) {
 // 	contents string
 // }
 
-// func (t *testWriter) Write(p []byte)(n int,err error){
-// 	t.contents = t.contents+string(p)
-// 	return len(p),nil
+// func (t *testWriter) Write(p []byte) (n int, err error) {
+// 	t.contents = t.contents + string(p)
+// 	return len(p), nil
 // }
 
 // const (
@@ -49,12 +49,20 @@ func TestPackageLog_Debugf(t *testing.T) {
 // 		},
 // 	}
 
-// 	for name,tc := range tt{
-// 		t.Run(name func (t *&testing.T{
-// 			tw := &testWriter{}
-// 			 testedLogger := packagelog.New(tc.level,packagelog.)
-// 		}){
+// 	for name, tc := range tt {
 
-// 		}
+// 		t.Run(name, func(t *testing.T) {
+// 			tw := &testWriter{}
+// 			logging := packagelog.New(tc.level, os.Stdout)
+// 			logging.Debugf(debugMessage)
+// 			logging.Infof(infoMessage)
+// 			logging.Errorf(errorMessage)
+
+// 			if tw.contents != tc.expected {
+// 				t.Errorf("invalid contents, expected %s, got %s", tc.expected, tw.contents)
+// 			}
+// 		})
+
+// 	}
 
 // }
