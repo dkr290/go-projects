@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: todo-postgresql    
-  name: todo-postgresql
+    app: postgresql-deployment
+  name: postgresql-deployment
   annotations:
     argocd.argoproj.io/sync-wave: "0"
  
@@ -11,14 +11,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: todo-postgresql
+      app: postgresql-deployment
   strategy:
     type: Recreate
       
   template:
     metadata:
       labels:
-        app: todo-postgresql
+        app: postgresql-deployment
         
     spec:
       initContainers:
@@ -75,5 +75,5 @@ spec:
       protocol: TCP
   type: ClusterIP
   selector:
-    app: todo-postgresql 
+    app: sspostgresql-deployment
 
