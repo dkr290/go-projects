@@ -73,7 +73,7 @@ spec:
       port: 5432
       targetPort: 5432
       protocol: TCP
-  type: ClusterIP
+  type: NodePort
   selector:
     app: postgresql-deployment
 
