@@ -46,9 +46,19 @@ func (c *CommentStore) CreateComment(t *gonews.Comment) error {
 }
 
 func (c *CommentStore) UpdateComment(t *gonews.Comment) error {
-	panic("not implemented") // TODO: Implement
+	if err := c.DB.Get(t, `UPDATE comments SET post_id = $1, content = $2, votes = $3 WHERE id =$4 RETURNING *`,
+		t.PostID,
+		t.Content,
+		t.Votes,
+		t.ID); err != nil {
+		return fmt.Errorf("error updating comment %w", err)
+	}
+	return nil
 }
 
 func (c *CommentStore) DeleteComment(id uuid.UUID) error {
-	panic("not implemented") // TODO: Implement
+	if _, err := c.DB.Exec(`DELETE FROM comments WHERE id = $1`, id); err != nil {
+		return fmt.Errorf("error deleting comment %w", err)
+	}
+	return nil
 }
