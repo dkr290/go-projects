@@ -72,6 +72,17 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      
+      - name: Run Kubeaudit
+        uses: grebois/kube-tools@v1.5.2
+        with:
+          kubeaudit: 0.11.5
+          command: |
+            echo "Run kubeaudit"
+            cd odofiber-app/todofiber/manifests/microk8s/base
+            kubeaudit nonroot -f todofiber.yaml
+            
      
       - name: Build an image from Dockerfile
         run: |
