@@ -51,8 +51,8 @@ spec:
             requests:
               memory: 256Mi
               cpu: "0.2"
-        securityContext:
-          runAsNonRoot: true
+      securityContext:
+        runAsNonRoot: true
 
 ---
 apiVersion: v1
