@@ -9,6 +9,9 @@ import (
 
 const wordLength = 5
 
+// errInvlidWorldLength is returned when the guess has wrong number of characters
+var errInvlidWorldLength = fmt.Errorf("invalid guess, word does not have the same number of characters as the solution")
+
 type Game struct {
 	reader *bufio.Reader
 }
@@ -42,10 +45,19 @@ func (g *Game) ask() []rune {
 		guess := []rune(string(playerIn))
 
 		//verify if the guess is with valid length
-		if len(guess) != wordLength {
-			_, _ = fmt.Fprintf(os.Stderr, "Your attempt is invalid. Expected %d characters , got %d", wordLength, len(guess))
+		if err := g.validateGuess(guess); err != nil {
+
+			_, _ = fmt.Fprintf(os.Stderr, "Your attempt is invalid with the solution %s \n", err.Error())
 		} else {
 			return guess
 		}
 	}
+}
+
+func (g *Game) validateGuess(guess []rune) error {
+	if len(guess) != wordLength {
+		return fmt.Errorf("expected %d characters , got %d, %w", wordLength, len(guess), errInvlidWorldLength)
+	}
+
+	return nil
 }
