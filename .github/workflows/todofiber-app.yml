@@ -80,7 +80,7 @@ jobs:
           kubeaudit: 0.11.5
           command: |
             echo "Run kubeaudit"
-            cd odofiber-app/todofiber/manifests/microk8s/base
+            cd todofiber-app/todofiber/manifests/microk8s/base
             kubeaudit nonroot -f todofiber.yaml
             
      
