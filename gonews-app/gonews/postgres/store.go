@@ -3,15 +3,14 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/dkr290/go-projects/gonews"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 type Store struct {
-	gonews.ThreadStore
-	gonews.PostStore
-	gonews.CommentStore
+	*ThreadStore
+	*PostStore
+	*CommentStore
 }
 
 func NewStore(dataSource string) (*Store, error) {
@@ -26,9 +25,9 @@ func NewStore(dataSource string) (*Store, error) {
 	}
 
 	return &Store{
-		ThreadStore:  NewThreadStore(db),
-		PostStore:    NewPostStore(db),
-		CommentStore: NewCommentStore(db),
+		ThreadStore:  &ThreadStore{DB: db},
+		PostStore:    &PostStore{DB: db},
+		CommentStore: &CommentStore{DB: db},
 	}, nil
 
 }
