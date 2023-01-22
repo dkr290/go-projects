@@ -53,6 +53,7 @@ spec:
               cpu: "0.2"
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1500
 
 ---
 apiVersion: v1

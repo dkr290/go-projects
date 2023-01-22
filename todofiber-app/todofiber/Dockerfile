@@ -15,7 +15,7 @@ RUN go build cmd/todofiber/main.go
 FROM golang:1.19.2-alpine3.15
 # Add maintainer info
 LABEL maintainer="Danail Surudzhiyski"
-RUN addgroup -S pipeline && adduser -S k8s-pipeline -G pipeline
+RUN addgroup -S pipeline && adduser -S  k8s-pipeline --uid 1500 -G pipeline
 
 WORKDIR /home/k8s-pipeline
 COPY --from=builder /build/main .
