@@ -9,6 +9,7 @@ resources:
 - postgresql-pvc.yaml
 - postgresql.yaml
 - cm-example.yaml
+- jaeger.yaml
 
 
 
