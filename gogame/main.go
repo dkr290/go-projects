@@ -8,6 +8,6 @@ import (
 
 func main() {
 
-	g := game.NewGame(os.Stdin)
+	g := game.NewGame(os.Stdin, "hello", 5)
 	g.Play()
 }
