@@ -44,6 +44,8 @@ spec:
 
           - name: DATABASE_PORT
             value: "5432"
+          - name: JAEGER_AGENT_HOST
+            value: jaeger-agent
           resources:
             limits:
               memory: "512Mi"
