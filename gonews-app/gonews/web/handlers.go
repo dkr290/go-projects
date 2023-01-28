@@ -20,7 +20,7 @@ func NewHandler(store gonews.Store) *Handler {
 		store: store,
 	}
 
-	h.Get("/threads", h)
+	h.Get("/threads", h.ThreadsList())
 
 	return h
 }
