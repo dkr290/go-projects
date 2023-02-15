@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/dkr290/go-projects/remotecmd/remotecmd"
@@ -15,7 +17,12 @@ import (
 )
 
 var (
-	private = flag.String("private", "", "The path to the ssh key for this connection")
+	private  string
+	username string
+	host     string
+	cmd      string
+	err      error
+	timeout  = time.After(5 * time.Second)
 )
 
 var auth ssh.AuthMethod
@@ -23,47 +30,90 @@ var auth ssh.AuthMethod
 // TODO better command line arguments
 func main() {
 
+	results := make(chan *remotecmd.OutputString, 10)
+	flag.StringVar(&private, "i", "default", `path to the private key, if not include -i the default will be home .ssh/id_rsa,  -i "" to prompt for password`)
+	flag.StringVar(&username, "u", "", "Username to connect")
+	flag.StringVar(&host, "h", "", "Host to connect or ip address [host:port] or [host] or [ip]")
+	flag.StringVar(&cmd, "c", "", "Command to execute")
+	password := flag.Bool("p", false, "Use for password prompt /either -i or -p but noth both")
+
 	flag.Parse()
-	if len(os.Args) != 4 {
-		log.Fatalln("error: command must have 2 args, [host] [command] [user]")
+
+	if username == "" || host == "" || cmd == "" {
+		flag.Usage()
+		return
+
 	}
 
-	_, _, err := net.SplitHostPort(os.Args[1])
-	if err != nil {
-		os.Args[1] = os.Args[1] + ":22"
-		_, _, err = net.SplitHostPort(os.Args[1])
+	hst := strings.Split(host, ",")
+	var newhosts []string
+
+	for _, singleHost := range hst {
+		_, _, err := net.SplitHostPort(singleHost)
 		if err != nil {
-			log.Fatalln("error: problem with the host passed ", err)
+			singleHost = singleHost + ":22"
+			_, _, err = net.SplitHostPort(singleHost)
+			if err != nil {
+				log.Fatalln("error: problem with the host passed ", err)
+			}
+			newhosts = append(newhosts, singleHost)
 		}
+
 	}
 
-	if *private == "" {
-		fi, _ := os.Stdin.Stat()
-		if (fi.Mode() & os.ModeCharDevice) == 0 {
-			log.Fatal("-private not set, cannot use password when STDIN as a pipe")
+	if !*password {
+		if private == "default" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if runtime.GOOS == "windows" {
+				private = home + "\\.ssh\\id_rsa"
+			} else {
+				private = home + "/.ssh/id_rsa"
+			}
+
 		}
-		auth, err = passwordFromTerm()
+		auth, err = publicKey(private)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	} else {
-		auth, err = publicKey(*private)
+		auth, err = passwordFromTerm()
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
 
-	u := os.Args[3]
-
 	config := &ssh.ClientConfig{
 
-		User:            u,
+		User:            username,
 		Auth:            []ssh.AuthMethod{auth},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         5 * time.Second,
 	}
 
-	remotecmd.Connect("tcp", os.Args, config)
+	for _, h := range newhosts {
+
+		// result := remotecmd.Connect("tcp", h, cmd, config)
+		// fmt.Println(result)
+
+		go func(hostname string) {
+			results <- remotecmd.Connect("tcp", hostname, cmd, config)
+		}(h)
+	}
+	for i := 0; i < len(newhosts); i++ {
+		select {
+		case res := <-results:
+			fmt.Println("-----------------------------------------------------------------------------")
+			fmt.Printf("Hostname: %s\n", res.Host)
+			fmt.Println("")
+			fmt.Println(res.Out)
+		case <-timeout:
+			fmt.Println("Timed out!")
+			return
+		}
+	}
 
 }
 

@@ -2,16 +2,20 @@ package remotecmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
 	"golang.org/x/crypto/ssh"
 )
 
-func Connect(protocol string, arg []string, config *ssh.ClientConfig) {
+type OutputString struct {
+	Host string
+	Out  string
+}
 
-	conn, err := ssh.Dial(protocol, arg[1], config)
+func Connect(protocol string, host string, cmd string, config *ssh.ClientConfig) *OutputString {
+
+	conn, err := ssh.Dial(protocol, host, config)
 	if err != nil {
 		log.Fatalln("error: could not dial to the host: ", err)
 	}
@@ -20,11 +24,15 @@ func Connect(protocol string, arg []string, config *ssh.ClientConfig) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	out, err := combinedOutput(ctx, conn, arg[2])
+	out, err := combinedOutput(ctx, conn, cmd)
 	if err != nil {
 		log.Println("command error: ", err)
 	}
-	fmt.Println(out)
+
+	return &OutputString{
+		Host: host,
+		Out:  out,
+	}
 }
 
 func combinedOutput(ctx context.Context, conn *ssh.Client, cmd string) (string, error) {
