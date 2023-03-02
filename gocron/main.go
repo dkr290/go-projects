@@ -14,7 +14,7 @@ import (
 func task() {
 
 	filename := GetFilenameDate()
-
+	os.Setenv("LOKI_ADDR", "http://loki-stack:3100")
 	cmd := exec.Command("logcli", "query", "--since=1h", "--limit=500000000000000", `'{namespace="loki"}'`)
 
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
