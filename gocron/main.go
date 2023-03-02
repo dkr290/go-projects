@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -15,7 +16,7 @@ func task() {
 
 	filename := GetFilenameDate()
 	os.Setenv("LOKI_ADDR", "http://loki-stack:3100")
-	cmd := exec.Command("logcli", "query", "--since=1h", "--limit=500000000000000", `'{namespace="loki"}'`)
+	cmd := exec.Command("logcli", "query", "--since=1h05m", "--limit=500000000000000", `'{namespace="loki"}'`)
 
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 
@@ -38,6 +39,8 @@ func task() {
 
 	go io.Copy(writer, stdoutPipe)
 	cmd.Wait()
+
+	fmt.Println("Exporting logs at " + time.Now().String())
 
 }
 
