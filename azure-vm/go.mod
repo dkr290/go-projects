@@ -7,7 +7,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute v1.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.1.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.0.0
 	github.com/dkr290/go-devops/azure-instance v0.0.0-20230305220328-cbdf4e83502b
 	github.com/joho/godotenv v1.5.1
 	github.com/wardviaene/golang-for-devops-course/ssh-demo v0.0.0-20220808124401-b38a9cd3df80

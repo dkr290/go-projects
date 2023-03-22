@@ -27,7 +27,7 @@ func genSSHK() {
 
 }
 
-func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, subnetID string, subscription_id, VmName, networkSecurityGroupID string) error {
+func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, subnetID string, subscription_id, VmName string) error {
 	// generate the tokens
 	genSSHK()
 
@@ -57,9 +57,7 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 					},
 				},
 
-				NetworkSecurityGroup: &armnetwork.SecurityGroup{
-					ID: to.Ptr(networkSecurityGroupID),
-				},
+				NetworkSecurityGroup: nil,
 			},
 		},
 		nil,
@@ -111,7 +109,7 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 				VMSize: to.Ptr(armcompute.VirtualMachineSizeTypes("Standard_B2s")), // VM size include vCPUs,RAM,Data Disks,Temp storage.
 			},
 			OSProfile: &armcompute.OSProfile{ //
-				ComputerName:  to.Ptr("server01"),
+				ComputerName:  to.Ptr(VmName),
 				AdminUsername: to.Ptr("azureadmin"),
 				LinuxConfiguration: &armcompute.LinuxConfiguration{
 					DisablePasswordAuthentication: to.Ptr(true),

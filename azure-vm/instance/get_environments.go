@@ -26,13 +26,12 @@ func GetEnvs() *Parameters {
 	}
 
 	pp := Parameters{
-		Location:               os.Getenv("AZURE_LOCATION"),
-		RG:                     os.Getenv("AZURE_RESOURCEGROUP"),
-		VnetID:                 os.Getenv("AZURE_VNET_ID"),
-		SubnetID:               os.Getenv("AZURE_SUBNET_ID"),
-		SubscriptionID:         os.Getenv("AZURE_SUBSCRIPTION_ID"),
-		VmName:                 os.Getenv("AZURE_VMNAME"),
-		NetworkSecurityGroupID: os.Getenv("AZURE_NSGID"),
+		Location:       os.Getenv("AZURE_LOCATION"),
+		RG:             os.Getenv("AZURE_RESOURCEGROUP"),
+		VnetID:         os.Getenv("AZURE_VNET_ID"),
+		SubnetID:       os.Getenv("AZURE_SUBNET_ID"),
+		SubscriptionID: os.Getenv("AZURE_SUBSCRIPTION_ID"),
+		VmName:         os.Getenv("AZURE_VMNAME"),
 	}
 
 	if len(pp.Location) == 0 {
@@ -54,19 +53,15 @@ func GetEnvs() *Parameters {
 	if len(pp.VmName) == 0 {
 		log.Fatal("You must set your 'AZURE_VMNAME' environmental variable. See\n\t https://pkg.go.dev/os#Getenv")
 	}
-	if len(pp.NetworkSecurityGroupID) == 0 {
-		log.Fatal("You must set your 'AZURE_NSGID' environmental variable. See\n\t https://pkg.go.dev/os#Getenv")
-	}
 
 	return &Parameters{
-		Location:               pp.Location,
-		RG:                     pp.RG,
-		VnetID:                 pp.VnetID,
-		SubnetID:               pp.SubnetID,
-		SubscriptionID:         pp.SubscriptionID,
-		Context:                context.Background(),
-		VmName:                 pp.VmName,
-		NetworkSecurityGroupID: pp.NetworkSecurityGroupID,
+		Location:       pp.Location,
+		RG:             pp.RG,
+		VnetID:         pp.VnetID,
+		SubnetID:       pp.SubnetID,
+		SubscriptionID: pp.SubscriptionID,
+		Context:        context.Background(),
+		VmName:         pp.VmName,
 	}
 
 }
