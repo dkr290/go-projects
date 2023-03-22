@@ -17,8 +17,7 @@ func main() {
 		parameters.VnetID,
 		parameters.SubnetID,
 		parameters.SubscriptionID,
-		parameters.VmName,
-		parameters.NetworkSecurityGroupID); err != nil {
+		parameters.VmName); err != nil {
 		log.Fatalln("Launch instance error", err)
 	}
 

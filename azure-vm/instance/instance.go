@@ -96,7 +96,7 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 					Version:   to.Ptr("latest"),
 				},
 				OSDisk: &armcompute.OSDisk{
-					Name:         to.Ptr("disk-01"),
+					Name:         to.Ptr(VmName + "disk-01"),
 					CreateOption: to.Ptr(armcompute.DiskCreateOptionTypesFromImage),
 					Caching:      to.Ptr(armcompute.CachingTypesReadWrite),
 					ManagedDisk: &armcompute.ManagedDiskParameters{
@@ -133,7 +133,7 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 		},
 	}
 
-	pollerResponse, err := vmClient.BeginCreateOrUpdate(ctx, resourceGroupName, "Server01", parameters, nil)
+	pollerResponse, err := vmClient.BeginCreateOrUpdate(ctx, resourceGroupName, VmName, parameters, nil)
 	if err != nil {
 		return err
 	}
