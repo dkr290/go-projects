@@ -2,11 +2,9 @@ package instance
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
@@ -27,30 +25,37 @@ func genSSHK() {
 
 }
 
-func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, subnetID string, subscription_id, VmName string) error {
+func LaunchInstance(ctx context.Context, pp *Parameters) error {
 	// generate the tokens
 	genSSHK()
 
-	interfaceClient, err := armnetwork.NewInterfacesClient(subscription_id, sshk.Token, nil)
+	interfaceClient, err := armnetwork.NewInterfacesClient(pp.SubscriptionID, sshk.Token, nil)
 	if err != nil {
 		return err
 	}
 
+	if ok, err := findINetworkNterface(ctx, pp.RG, pp.VmName+pp.VmInterfaceSuffix, interfaceClient); err != nil {
+		log.Fatal("finding interface error occured", err)
+
+	} else if ok {
+		log.Fatal("the interface already exists in azure : " + pp.VmName + pp.VmInterfaceSuffix + " in resource group " + pp.RG)
+	}
+
 	netInterfacePolerResponse, err := interfaceClient.BeginCreateOrUpdate(
 		ctx,
-		resourceGroupName,
-		VmName+"interface-01",
+		pp.RG,
+		pp.VmName+pp.VmInterfaceSuffix,
 		armnetwork.Interface{
-			Location: to.Ptr(location),
+			Location: to.Ptr(pp.Location),
 			Properties: &armnetwork.InterfacePropertiesFormat{
 
 				IPConfigurations: []*armnetwork.InterfaceIPConfiguration{
 					{
-						Name: to.Ptr(VmName + "privipConfig"),
+						Name: to.Ptr(pp.VmName + "privipConfig"),
 						Properties: &armnetwork.InterfaceIPConfigurationPropertiesFormat{
 							PrivateIPAllocationMethod: to.Ptr(armnetwork.IPAllocationMethodDynamic),
 							Subnet: &armnetwork.Subnet{
-								ID: to.Ptr(subnetID),
+								ID: to.Ptr(pp.SubnetID),
 							},
 							PublicIPAddress: nil,
 						},
@@ -75,14 +80,24 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 
 	// Create the vm
 
-	fmt.Println("Creating the vm")
-	vmClient, err := armcompute.NewVirtualMachinesClient(subscription_id, sshk.Token, nil)
+	vmClient, err := armcompute.NewVirtualMachinesClient(pp.SubscriptionID, sshk.Token, nil)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Checking if the vm exists..")
+	// findVirtualMachine checks if the vertual machine already exists
+	if ok, err := findVirtualMachine(ctx, pp.RG, pp.VmName, vmClient); err != nil {
+		log.Fatal("finding virtual machine error occured", err)
+
+	} else if ok {
+		log.Fatalf("the virtual machine already exists in azure : %s  in resource group %s", pp.VmName, pp.RG)
+	}
+
+	fmt.Println("Creating the vm" + pp.VmName)
+
 	parameters := armcompute.VirtualMachine{
-		Location: to.Ptr(location),
+		Location: to.Ptr(pp.Location),
 		Identity: &armcompute.VirtualMachineIdentity{
 			Type: to.Ptr(armcompute.ResourceIdentityTypeNone),
 		},
@@ -90,27 +105,27 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 			StorageProfile: &armcompute.StorageProfile{
 				ImageReference: &armcompute.ImageReference{
 
-					Offer:     to.Ptr("0001-com-ubuntu-server-focal"),
-					Publisher: to.Ptr("canonical"),
-					SKU:       to.Ptr("20_04-lts-gen2"),
-					Version:   to.Ptr("latest"),
+					Offer:     to.Ptr(pp.Offer),
+					Publisher: to.Ptr(pp.Publisher),
+					SKU:       to.Ptr(pp.Sku),
+					Version:   to.Ptr(pp.Version),
 				},
 				OSDisk: &armcompute.OSDisk{
-					Name:         to.Ptr(VmName + "disk-01"),
+					Name:         to.Ptr(pp.VmName + pp.OSDiskSuffix),
 					CreateOption: to.Ptr(armcompute.DiskCreateOptionTypesFromImage),
 					Caching:      to.Ptr(armcompute.CachingTypesReadWrite),
 					ManagedDisk: &armcompute.ManagedDiskParameters{
-						StorageAccountType: to.Ptr(armcompute.StorageAccountTypesStandardLRS), // OSDisk type Standard/Premium HDD/SSD
+						StorageAccountType: to.Ptr(pp.StorageAccountType),
 					},
-					DiskSizeGB: to.Ptr[int32](50), // default 127G
+					DiskSizeGB: to.Ptr(pp.DiskSizeGB), // default 127G
 				},
 			},
 			HardwareProfile: &armcompute.HardwareProfile{
-				VMSize: to.Ptr(armcompute.VirtualMachineSizeTypes("Standard_B2s")), // VM size include vCPUs,RAM,Data Disks,Temp storage.
+				VMSize: to.Ptr(armcompute.VirtualMachineSizeTypes(pp.VMType)), // VM size include vCPUs,RAM,Data Disks,Temp storage.
 			},
-			OSProfile: &armcompute.OSProfile{ //
-				ComputerName:  to.Ptr(VmName),
-				AdminUsername: to.Ptr("azureadmin"),
+			OSProfile: &armcompute.OSProfile{
+				ComputerName:  to.Ptr(pp.VmName),
+				AdminUsername: to.Ptr(pp.AdminUsername),
 				LinuxConfiguration: &armcompute.LinuxConfiguration{
 					DisablePasswordAuthentication: to.Ptr(true),
 					SSH: &armcompute.SSHConfiguration{
@@ -133,7 +148,7 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 		},
 	}
 
-	pollerResponse, err := vmClient.BeginCreateOrUpdate(ctx, resourceGroupName, VmName, parameters, nil)
+	pollerResponse, err := vmClient.BeginCreateOrUpdate(ctx, pp.RG, pp.VmName, parameters, nil)
 	if err != nil {
 		return err
 	}
@@ -142,24 +157,9 @@ func LaunchInstance(ctx context.Context, resourceGroupName, location, vnetID, su
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("Virtual Machine %v is creating...\n", *vmResponse.Name)
+		fmt.Printf("Virtual Machine %v is created...\n", *vmResponse.Name)
 	}
 
 	return nil
-
-}
-
-func findVnet(ctx context.Context, rg, vnetName string, vnetClient *armnetwork.VirtualNetworksClient) (bool, error) {
-
-	_, err := vnetClient.Get(ctx, rg, vnetName, nil)
-	if err != nil {
-		var errResponse *azcore.ResponseError
-		if errors.As(err, &errResponse) && errResponse.ErrorCode == "ResourceNotFound" {
-			return false, nil
-		}
-		return false, err
-
-	}
-	return true, nil
 
 }

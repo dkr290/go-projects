@@ -10,14 +10,7 @@ func main() {
 
 	parameters := instance.GetEnvs()
 
-	if err := instance.LaunchInstance(
-		parameters.Context,
-		parameters.RG,
-		parameters.Location,
-		parameters.VnetID,
-		parameters.SubnetID,
-		parameters.SubscriptionID,
-		parameters.VmName); err != nil {
+	if err := instance.LaunchInstance(parameters.Context, parameters); err != nil {
 		log.Fatalln("Launch instance error", err)
 	}
 
