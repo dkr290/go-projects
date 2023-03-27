@@ -5,11 +5,13 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/dkr290/go-projects/web3/models"
 )
 
 var tmplCache = make(map[string]*template.Template)
 
-func RenderTemplate(w http.ResponseWriter, t string) {
+func RenderTemplate(w http.ResponseWriter, t string, pd *models.PageData) {
 
 	var tmpl *template.Template
 	var err error
@@ -25,7 +27,7 @@ func RenderTemplate(w http.ResponseWriter, t string) {
 	}
 
 	tmpl = tmplCache[t]
-	err = tmpl.Execute(w, nil)
+	err = tmpl.Execute(w, pd)
 	if err != nil {
 		log.Println(err)
 	}
