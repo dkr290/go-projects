@@ -4,15 +4,23 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dkr290/go-projects/web3/pkg/config"
 	"github.com/dkr290/go-projects/web3/pkg/handlers"
 )
 
 func main() {
 
-	http.HandleFunc("/", handlers.HomeHandler)
-	http.HandleFunc("/about", handlers.AboutHandler)
+	var app config.AppConfig
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
 
-	if err := http.ListenAndServe("localhost:8080", nil); err != nil {
+	srv := &http.Server{
+		Addr:    "localhost:8080",
+		Handler: routes(&app),
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+
 }
