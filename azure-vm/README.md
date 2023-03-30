@@ -19,4 +19,6 @@ AZURE_VM_TYPE="Standard_B2s" //VM type
 AZURE_VM_INTERFACE_SUFF="interface-01" // interface suffix
 AZURE_VM_ADMINUSERNAME="admin" //admin user
 AZURE_VM_OSSORAGEACCOUNTTYPE="Premium LRS" // account type
+
+AZURE_SHARED_GALLERY_IMAGE_ID=  "some image gallery or empty"
 ```
