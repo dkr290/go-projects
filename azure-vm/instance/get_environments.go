@@ -20,6 +20,7 @@ type Parameters struct {
 	VmName         string
 	VMParameters
 	VMsize
+	VmParametersGallery
 }
 
 type VMParameters struct {
@@ -27,6 +28,10 @@ type VMParameters struct {
 	Publisher string
 	Sku       string
 	Version   string
+}
+type VmParametersGallery struct {
+	VmSharedGallery string
+	Enabled         bool
 }
 
 type VMsize struct {
@@ -71,6 +76,7 @@ func GetEnvs() *Parameters {
 	pp.AdminUsername = os.Getenv("AZURE_VM_ADMINUSERNAME")
 
 	OSStorageAccountType = os.Getenv("AZURE_VM_OSSORAGEACCOUNTTYPE")
+	pp.VmSharedGallery = os.Getenv("AZURE_SHARED_GALLERY_IMAGE_ID")
 
 	if len(pp.Location) == 0 {
 		log.Fatal("You must set your 'AZURE_LOCATION' environmental variable. See\n\t https://pkg.go.dev/os#Getenv")
@@ -123,6 +129,12 @@ func GetEnvs() *Parameters {
 
 	if len(OSStorageAccountType) == 0 {
 		log.Fatal("You must set your 'AZURE_VM_OSSORAGEACCOUNTTYPE' environmental variable. or the default 'Standard LRS' will be used See\n\t https://pkg.go.dev/os#Getenv")
+	}
+
+	if len(pp.VmSharedGallery) == 0 || pp.VmSharedGallery == "" {
+		pp.VmParametersGallery.Enabled = false
+	} else {
+		pp.VmParametersGallery.Enabled = true
 	}
 
 	pp.StorageAccountType = GetStorageAccountType(OSStorageAccountType)

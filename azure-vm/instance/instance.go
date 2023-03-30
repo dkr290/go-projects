@@ -96,6 +96,22 @@ func LaunchInstance(ctx context.Context, pp *Parameters) error {
 
 	fmt.Println("Creating the vm" + pp.VmName)
 
+	var imageRef *armcompute.ImageReference
+
+	if !pp.VmParametersGallery.Enabled {
+
+		imageRef = &armcompute.ImageReference{
+			Offer:     to.Ptr(pp.Offer),
+			Publisher: to.Ptr(pp.Publisher),
+			SKU:       to.Ptr(pp.Sku),
+			Version:   to.Ptr(pp.Version),
+		}
+	} else {
+
+		imageRef = &armcompute.ImageReference{
+			SharedGalleryImageID: to.Ptr(pp.VmSharedGallery),
+		}
+	}
 	parameters := armcompute.VirtualMachine{
 		Location: to.Ptr(pp.Location),
 		Identity: &armcompute.VirtualMachineIdentity{
@@ -103,13 +119,7 @@ func LaunchInstance(ctx context.Context, pp *Parameters) error {
 		},
 		Properties: &armcompute.VirtualMachineProperties{
 			StorageProfile: &armcompute.StorageProfile{
-				ImageReference: &armcompute.ImageReference{
-
-					Offer:     to.Ptr(pp.Offer),
-					Publisher: to.Ptr(pp.Publisher),
-					SKU:       to.Ptr(pp.Sku),
-					Version:   to.Ptr(pp.Version),
-				},
+				ImageReference: imageRef,
 				OSDisk: &armcompute.OSDisk{
 					Name:         to.Ptr(pp.VmName + pp.OSDiskSuffix),
 					CreateOption: to.Ptr(armcompute.DiskCreateOptionTypesFromImage),
