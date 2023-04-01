@@ -23,7 +23,6 @@ func main() {
 	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
 	app.Session = sessionManager
 
-	var app config.AppConfig
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
 
