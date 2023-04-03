@@ -8,6 +8,15 @@
         <div class="col">
             <h1>{{ index .StrMap "title" }}</h1>
             <p>{{ .StrMap.intro }}</p>
+
+            <p>
+                {{ if ne (.StrMap.userid) "" }}
+
+                 Your user id is {{ .StrMap.userid }}
+                {{ else }}
+                  You arent logged in. Login here <a href="/">Home</a>
+                {{ end }}
+            </p>
         </div>
     </div>
 
