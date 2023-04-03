@@ -24,7 +24,7 @@ func GetStorageAccountType(StType string) armcompute.StorageAccountTypes {
 	case "Standard SSD LRS":
 		storagetypes = armcompute.StorageAccountTypesStandardSSDLRS
 
-	case "Standart SSD ZRS":
+	case "Standard SSD ZRS":
 		storagetypes = armcompute.StorageAccountTypesStandardSSDZRS
 
 	case "Ultra SSD LRS":

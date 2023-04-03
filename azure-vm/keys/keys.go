@@ -1,12 +1,17 @@
 package keys
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
 
+	"golang.org/x/crypto/ssh"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/wardviaene/golang-for-devops-course/ssh-demo"
 )
 
 type SshKeys struct {
@@ -16,23 +21,39 @@ type SshKeys struct {
 }
 
 func (s *SshKeys) MyGenerateKeys() error {
-	k, p, err := ssh.GenerateKeys()
+	k, p, err := GenerateKeys()
 	if err != nil {
 		fmt.Printf("Error %s\n", err)
 		os.Exit(1)
 	}
 	s.PublicKey = p
 	s.PrivateKey = k
-	if err = os.WriteFile("mykey.pem", s.PrivateKey, 0600); err != nil {
+	if err = os.WriteFile("azureadmin.pem", s.PrivateKey, 0600); err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return err
 	}
-	if err = os.WriteFile("mykey.pub", s.PublicKey, 0644); err != nil {
+	if err = os.WriteFile("azureadmin.pub", s.PublicKey, 0644); err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return err
 	}
 	return nil
 
+}
+
+func GenerateKeys() ([]byte, []byte, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
+
+	pubKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return pem.EncodeToMemory(privateKeyPEM), ssh.MarshalAuthorizedKey(pubKey), nil
 }
 
 func (s *SshKeys) GetToken() error {
