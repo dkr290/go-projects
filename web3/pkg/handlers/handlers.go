@@ -35,16 +35,32 @@ func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) AboutHandler(w http.ResponseWriter, r *http.Request) {
 
-	userid := m.App.Session.GetString(r.Context(), "userid")
+	//userid := m.App.Session.GetString(r.Context(), "userid")
 
-	var strMap = map[string]string{
-		"title":  "About",
-		"intro":  "This page is where we talk about ourselves.",
-		"userid": userid,
-	}
+	// var strMap = map[string]string{
+	// 	"title":  "About",
+	// 	"intro":  "This page is where we talk about ourselves.",
+	// 	"userid": userid,
+	// }
 
-	render.RenderTemplate(w, "about.page.html", &models.PageData{
-		StrMap: strMap,
-	})
+	render.RenderTemplate(w, "about.page.html", &models.PageData{})
+
+}
+
+func (m *Repository) LoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	render.RenderTemplate(w, "login.page.html", &models.PageData{})
+
+}
+
+func (m *Repository) MakePostHandler(w http.ResponseWriter, r *http.Request) {
+
+	render.RenderTemplate(w, "make-post.page.html", &models.PageData{})
+
+}
+
+func (m *Repository) PageHandler(w http.ResponseWriter, r *http.Request) {
+
+	render.RenderTemplate(w, "page.page.html", &models.PageData{})
 
 }
