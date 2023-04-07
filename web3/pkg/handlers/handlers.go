@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/dkr290/go-projects/web3/models"
 	"github.com/dkr290/go-projects/web3/pkg/config"
+	"github.com/dkr290/go-projects/web3/pkg/forms"
 	"github.com/dkr290/go-projects/web3/pkg/render"
 )
 
@@ -56,22 +57,49 @@ func (m *Repository) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) MakePostHandler(w http.ResponseWriter, r *http.Request) {
 
-	render.RenderTemplate(w, r, "make-post.page.html", &models.PageData{})
+	render.RenderTemplate(w, r, "make-post.page.html", &models.PageData{
+		Form: forms.New(nil),
+	})
+
+}
+
+func (m *Repository) PostMakePostHandler(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// blog_title := r.Form.Get("blog_title")
+	// blog_article := r.Form.Get("blog_article")
+
+	// fmt.Fprintf(w, "%s", blog_title)
+	// fmt.Fprintf(w, "%s", blog_article)
+
+	article := models.Article{
+		BlogTitle:   r.Form.Get("blog_title"),
+		BlogArticle: r.Form.Get("blog_article"),
+	}
+
+	form := forms.New(r.PostForm)
+	form.HasValue("blog_title", r)
+
+	data := make(map[string]interface{})
+	if !form.Valid() {
+
+		data["article"] = article
+		render.RenderTemplate(w, r, "make-post.page.html", &models.PageData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
 
 }
 
 func (m *Repository) PageHandler(w http.ResponseWriter, r *http.Request) {
 
 	render.RenderTemplate(w, r, "page.page.html", &models.PageData{})
-
-}
-
-func (m *Repository) PostMakePostHandler(w http.ResponseWriter, r *http.Request) {
-
-	blog_title := r.Form.Get("blog_title")
-	blog_article := r.Form.Get("blog_article")
-
-	fmt.Fprintf(w, "%s", blog_title)
-	fmt.Fprintf(w, "%s", blog_article)
 
 }
