@@ -57,8 +57,13 @@ func (m *Repository) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) MakePostHandler(w http.ResponseWriter, r *http.Request) {
 
+	var emptyArticle models.Article
+	data := make(map[string]interface{})
+	data["article"] = emptyArticle
+
 	render.RenderTemplate(w, r, "make-post.page.html", &models.PageData{
 		Form: forms.New(nil),
+		Data: data,
 	})
 
 }
@@ -83,7 +88,11 @@ func (m *Repository) PostMakePostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	form := forms.New(r.PostForm)
-	form.HasValue("blog_title", r)
+
+	form.HasRequired("blog_title", "blog_article")
+
+	form.MinLenght("blog_title", 5, r)
+	form.MinLenght("blog_article", 5, r)
 
 	data := make(map[string]interface{})
 	if !form.Valid() {
@@ -95,6 +104,29 @@ func (m *Repository) PostMakePostHandler(w http.ResponseWriter, r *http.Request)
 		})
 		return
 	}
+	m.App.Session.Put(r.Context(), "article", article)
+	http.Redirect(w, r, "/article-received", http.StatusSeeOther)
+
+}
+
+func (m *Repository) ArticleReceived(w http.ResponseWriter, r *http.Request) {
+	article, ok := m.App.Session.Get(r.Context(), "article").(models.Article)
+	if !ok {
+		log.Println("Can't get data from session")
+
+		m.App.Session.Put(r.Context(), "error", "Can't get data from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["article"] = article
+
+	render.RenderTemplate(w, r, "article-received.page.html", &models.PageData{
+
+		Data: data,
+	})
 
 }
 

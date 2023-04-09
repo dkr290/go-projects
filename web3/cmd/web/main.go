@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/gob"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/dkr290/go-projects/web3/models"
 	"github.com/dkr290/go-projects/web3/pkg/config"
 	"github.com/dkr290/go-projects/web3/pkg/handlers"
 )
@@ -15,6 +17,8 @@ var sessionManager *scs.SessionManager
 var app config.AppConfig
 
 func main() {
+
+	gob.Register(models.Article{})
 
 	sessionManager = scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
