@@ -7,11 +7,17 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/web3/models"
+	"github.com/justinas/nosurf"
 )
 
 var tmplCache = make(map[string]*template.Template)
 
-func RenderTemplate(w http.ResponseWriter, t string, pd *models.PageData) {
+func AddCSRFData(pd *models.PageData, r *http.Request) *models.PageData {
+	pd.CSRFToken = nosurf.Token(r)
+	return pd
+}
+
+func RenderTemplate(w http.ResponseWriter, r *http.Request, t string, pd *models.PageData) {
 
 	var tmpl *template.Template
 	var err error
@@ -27,6 +33,8 @@ func RenderTemplate(w http.ResponseWriter, t string, pd *models.PageData) {
 	}
 
 	tmpl = tmplCache[t]
+	pd = AddCSRFData(pd, r)
+
 	err = tmpl.Execute(w, pd)
 	if err != nil {
 		log.Println(err)

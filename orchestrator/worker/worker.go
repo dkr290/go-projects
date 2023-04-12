@@ -22,3 +22,11 @@ func (w *Worker) CollectStats() {
 func (w *Worker) RunTask() {
 	fmt.Println("I will start or stop a task")
 }
+
+func (w *Worker) StartTask() {
+	fmt.Println("I will start the task")
+}
+
+func (w *Worker) StopTask() {
+	fmt.Println("I will stop the task")
+}
