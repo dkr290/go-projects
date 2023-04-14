@@ -13,7 +13,7 @@ import (
 
 func GetAndDeleteTopic(ctx context.Context, RG string, NamespaceName string, SubscriptionID string, topics string) {
 
-	fmt.Printf("Please check also that %s namespace is not paired and needs to delete all the topics prior pairing\n", NamespaceName)
+	fmt.Printf("Please check also that %s namespace is not paired because will delete all the topics prior pairing\n", NamespaceName)
 	fmt.Printf("Do you want to start deleting of all topics from %s namespace: y\\n :", NamespaceName)
 	for {
 		reader := bufio.NewReader(os.Stdin)
