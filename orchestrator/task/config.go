@@ -7,7 +7,7 @@ type Config struct {
 	AttachStderr  bool
 	Cmd           []string
 	Image         string
-	Memory        string
+	Memory        int64
 	Disk          int64
 	Env           []string
 	RestartPolicy string
