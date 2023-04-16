@@ -114,7 +114,7 @@ func (d *Docker) Run() DockerResult {
 	}
 
 	stdcopy.StdCopy(os.Stdout, os.Stderr, out)
-
+	//return
 	return DockerResult{
 		ContainerId: resp.ID,
 		Action:      "start",
