@@ -126,14 +126,14 @@ func (d *Docker) Stop(id string) DockerResult {
 
 	log.Printf("Attempting to stop the container %s", id)
 	ctx := context.Background()
-	opts := container.StopOptions{
-		Signal: "SIGTERM",
-	}
-	err := d.Client.ContainerStop(ctx, id, opts)
-	if err != nil {
-		log.Printf("Unable to stop container %s: %s", id, err)
+	// opts := container.StopOptions{
+	// 	Signal: "SIGTERM",
+	// }
+	// err := d.Client.ContainerStop(ctx, id, opts)
+	// if err != nil {
+	// 	log.Printf("Unable to stop container %s: %s", id, err)
 
-	}
+	// }
 	removeOptions := types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
@@ -144,7 +144,7 @@ func (d *Docker) Stop(id string) DockerResult {
 
 	}
 
-	err = d.Client.ConfigRemove(ctx, id)
+	err := d.Client.ConfigRemove(ctx, id)
 	if err != nil {
 		panic(err)
 	}
