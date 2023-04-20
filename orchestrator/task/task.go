@@ -2,7 +2,6 @@ package task
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -132,8 +131,17 @@ func (d *Docker) Stop(id string) DockerResult {
 	}
 	err := d.Client.ContainerStop(ctx, id, opts)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		log.Printf("Unable to stop container %s: %s", id, err)
+
+	}
+	removeOptions := types.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		Force:         true,
+	}
+
+	if err := d.Client.ContainerRemove(ctx, id, removeOptions); err != nil {
+		log.Printf("Unable to remove container: %s", err)
+
 	}
 
 	err = d.Client.ConfigRemove(ctx, id)
