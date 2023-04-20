@@ -144,11 +144,6 @@ func (d *Docker) Stop(id string) DockerResult {
 
 	}
 
-	err = d.Client.ConfigRemove(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-
 	return DockerResult{
 		Action: "stop",
 		Result: "success",
