@@ -17,7 +17,7 @@ type Book struct {
 	Title  string `json:"title"`
 }
 
-func loadBookCl(filepath string) ([]BookReader, error) {
+func loadBookReades(filepath string) ([]BookReader, error) {
 
 	f, err := os.Open(filepath)
 	if err != nil {
@@ -36,5 +36,30 @@ func loadBookCl(filepath string) ([]BookReader, error) {
 }
 
 func findCommonBooks(bookreaders []BookReader) []Book {
+	booksOnShelves := booksCount(bookreaders)
 
+	var commonBooks []Book
+
+	for book, count := range booksOnShelves {
+		if count > 1 {
+			commonBooks = append(commonBooks, book)
+		}
+	}
+
+	return commonBooks
+}
+
+// bookCount registers all the books and their occurances from the bookreaders shelves.
+
+func booksCount(bookreaders []BookReader) map[Book]uint {
+
+	count := make(map[Book]uint)
+
+	for _, bookreader := range bookreaders {
+		for _, book := range bookreader.Books {
+			count[book]++
+		}
+	}
+
+	return count
 }

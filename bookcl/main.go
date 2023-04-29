@@ -7,7 +7,7 @@ import (
 
 func main() {
 
-	bookscl, err := loadBookCl("testdata/bookcl.json")
+	bookscl, err := loadBookReades("testdata/bookcl.json")
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load bookcl %s\n", err)
