@@ -27,6 +27,7 @@ const (
 
 type Task struct {
 	ID            uuid.UUID
+	ContainerID   string
 	Name          string
 	State         State
 	Image         string
@@ -50,6 +51,14 @@ type Docker struct {
 	Client      *client.Client
 	Config      Config
 	ContainerId string
+}
+
+func NewDocker() *Docker {
+	return &Docker{}
+}
+
+func NewConifg(c *Task) *Task {
+	return c
 }
 
 type DockerResult struct {
