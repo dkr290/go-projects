@@ -7,7 +7,7 @@ COPY . /app
 WORKDIR /app
 
 
-RUN CGO_ENABLED=0 go build -o brokerApp  ./cmr/api/*.go
+RUN CGO_ENABLED=0 go build -o brokerApp  ./cmd/api/*.go
 
 RUN chmod +x /app/brokerApp
 
