@@ -20,4 +20,4 @@ RUN mkdir /app
 COPY --from=builder /app/brokerApp /app
 
 
-CMD ["/app/BrokerApp"]
+CMD ["/app/brokerApp"]
