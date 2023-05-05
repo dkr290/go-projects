@@ -59,7 +59,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	//call the service
 
-	request, err := http.NewRequest("POST", "http://authentication-service/authenticate:8080", bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", "http://authentication-service/authenticate:8081", bytes.NewBuffer(jsonData))
 
 	if err != nil {
 

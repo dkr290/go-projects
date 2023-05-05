@@ -14,7 +14,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-const webPort = "8080"
+const webPort = "8081"
 
 var counts int64
 
