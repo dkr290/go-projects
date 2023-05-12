@@ -1,0 +1,14 @@
+version: '3'
+
+
+services:
+  front:
+    build: 
+      context: ./../front
+      dockerfile: ./../front/front.dockerfile
+    restart: always
+    ports: 
+      - "8090:5000"
+    deploy:
+      mode: replicated
+      replicas: 1
