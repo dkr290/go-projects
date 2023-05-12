@@ -61,4 +61,15 @@ services:
     volumes:
       - ./db-data/mongo/:/data/db
 
+  front-end:
+    build: 
+      context: ./../front-end
+      dockerfile: ./../front-end/front-end.dockerfile
+    restart: always
+    ports: 
+      - "8090:8090"
+    deploy:
+      mode: replicated
+      replicas: 1
+
 

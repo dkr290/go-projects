@@ -17,6 +17,7 @@ up_build: build_broker build_auth build_logger
 	docker compose up --build -d
 	@echo "Docker images built and started!"
 
+
 ## down: stop docker compose
 down:
 	@echo "Stopping docker compose..."
