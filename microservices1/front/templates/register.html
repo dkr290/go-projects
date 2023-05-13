@@ -31,7 +31,7 @@
     <input type="password" class="form-control" id="password" placeholder="Password">
   </div>
 
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <button onclick="sendJSON()" type="submit" class="btn btn-primary">Submit</button>
 </form>
 
     <!-- Optional JavaScript -->
@@ -44,7 +44,7 @@
      function sendJSON(){
               
 
-            
+            let result = document.querySelector('.result');
             let email = document.querySelector('#email');
             let firstname = document.querySelector('#firstname');
             let lastname = document.querySelector('#lastname');
@@ -65,7 +65,8 @@
                 if (xhr.readyState === 4 && xhr.status === 200) {
  
                     // Print received data from server
-                    result.innerHTML = "form submit sucessfully";
+                    
+                    result.innerHTML = this.responseText;
  
                 }
             };
