@@ -16,16 +16,15 @@ type AuthPayload struct {
 
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 
+	log.Println("log from register handler")
 	var ap AuthPayload
 	jsonData, _ := json.MarshalIndent(ap, "", "\t")
-	registerServiceURl := "http://register"
+	registerServiceURl := "http://192.168.122.186:8081"
 	request, err := http.NewRequest("POST", registerServiceURl, bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println("log from register handler")
 
 	request.Header.Set("Content-Type", "application/json")
 
