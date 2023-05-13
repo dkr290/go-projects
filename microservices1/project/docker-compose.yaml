@@ -12,3 +12,24 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+  broker:
+    build: 
+      context: ./../broker
+      dockerfile: ./../broker/broker.dockerfile
+    restart: always
+    ports: 
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+  register: 
+    build:
+      context: ./../register
+      dockerfile: ./../register/register.dockerfile
+    restart: always
+    ports: 
+      - "8081:80"
+    deploy:
+      mode: replicated
+      replicas: 1 
+  
