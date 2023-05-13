@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -23,6 +24,8 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Println("log from register handler")
 
 	request.Header.Set("Content-Type", "application/json")
 
