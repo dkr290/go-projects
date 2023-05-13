@@ -16,7 +16,6 @@ type AuthPayload struct {
 
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("log from register handler")
 	var ap AuthPayload
 	jsonData, _ := json.MarshalIndent(ap, "", "\t")
 	registerServiceURl := "http://192.168.122.186:8081"
