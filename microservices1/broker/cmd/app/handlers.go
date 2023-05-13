@@ -43,3 +43,7 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
+	log.Println("Authenticate controller")
+}
