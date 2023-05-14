@@ -30,7 +30,7 @@ type User struct {
 	Password  string    `json:"password"`
 	FirstName string    `json:"firstname"`
 	LastName  string    `json:"lastname"`
-	Active    int       `json:"active"`
+	Active    bool      `json:"active"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -62,6 +62,7 @@ func (u *User) Insert(email, password, fisrtname, lastname string) (int, error) 
 	user.Password = password
 	user.FirstName = fisrtname
 	user.LastName = lastname
+	user.Active = true
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	if err != nil {
