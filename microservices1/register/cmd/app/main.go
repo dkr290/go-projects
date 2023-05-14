@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"register/data"
+	"register/helpers"
 	"time"
 
 	_ "github.com/jackc/pgconn"
@@ -19,8 +20,9 @@ const webPort = "80"
 var counts int64
 
 type Config struct {
-	DB     *sql.DB
-	Models data.Models
+	DB      *sql.DB
+	Models  data.Models
+	Helpers *helpers.Helpers
 }
 
 func main() {
@@ -36,8 +38,9 @@ func main() {
 
 	app := Config{
 
-		DB:     conn,
-		Models: data.New(conn),
+		DB:      conn,
+		Models:  data.New(conn),
+		Helpers: helpers.New(),
 	}
 
 	// going to the chi router in routes and then to each handler

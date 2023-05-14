@@ -3,33 +3,27 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
 
-type AuthPayload struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	FirstName string `json:"firstname"`
-	LastName  string `json:"lastname"`
-}
-
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 
-	var ap AuthPayload
-	jsonData, _ := json.MarshalIndent(ap, "", "\t")
-	registerServiceURl := "http://192.168.122.186:8081"
+	log.Println("calling broker")
+	var data any
+	if err := app.Helpers.ReadJsonFromHttp(w, r, &data); err != nil {
+		log.Fatal(errors.New("unable to read json from http request"))
+		return
+	}
+
+	jsonData, _ := json.MarshalIndent(data, "", "\t")
+	registerServiceURl := "http://register"
 	request, err := http.NewRequest("POST", registerServiceURl, bytes.NewBuffer(jsonData))
-
-	log.Println(string(jsonData))
-
-	log.Println(request.Body)
 
 	if err != nil {
 		panic(err)
 	}
-
-	request.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	response, err := client.Do(request)
