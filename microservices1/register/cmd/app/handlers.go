@@ -23,6 +23,7 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	maxBytes := 1048576 //one megabyte
 
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+	log.Println(r.Body)
 
 	dec := json.NewDecoder(r.Body)
 	if err := dec.Decode(&ap); err != nil {

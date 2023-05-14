@@ -1,1 +1,1 @@
-CREATE TABLE users (id  integer PRIMARY KEY , email varchar(255), firstname varchar(255), lastname varchar(255), password varchar(100), active bool, created_at   TIMESTAMP , updated_at  TIMESTAMP);
+CREATE TABLE users (id  serial PRIMARY KEY , email varchar(255), firstname varchar(255), lastname varchar(255), password varchar(100), active bool, created_at   TIMESTAMP , updated_at  TIMESTAMP);

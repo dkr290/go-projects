@@ -21,6 +21,10 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	registerServiceURl := "http://192.168.122.186:8081"
 	request, err := http.NewRequest("POST", registerServiceURl, bytes.NewBuffer(jsonData))
 
+	log.Println(string(jsonData))
+
+	log.Println(request.Body)
+
 	if err != nil {
 		panic(err)
 	}
