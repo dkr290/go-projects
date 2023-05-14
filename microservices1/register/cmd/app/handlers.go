@@ -18,7 +18,7 @@ type authPayload struct {
 var ap authPayload
 
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
-	log.Println("connecter to register")
+	log.Println("connected to register")
 
 	maxBytes := 1048576 //one megabyte
 
