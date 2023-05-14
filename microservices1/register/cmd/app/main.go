@@ -15,12 +15,12 @@ const webPort = "80"
 var counts int64
 
 type Config struct {
+	DB     *sql.DB
 	Models data.Models
 }
 
 func main() {
 
-	app := Config{}
 	log.Printf("Starting register service at port %s", webPort)
 
 	//connect to Database
@@ -28,6 +28,12 @@ func main() {
 	conn := connectToDb()
 	if conn == nil {
 		log.Panic("Can't connect to the postgres")
+	}
+
+	app := Config{
+
+		DB:     conn,
+		Models: data.New(conn),
 	}
 
 	// going to the chi router in routes and then to each handler
