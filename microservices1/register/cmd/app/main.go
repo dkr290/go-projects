@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"register/data"
 )
 
 const webPort = "80"
 
-type Config struct{}
+type Config struct {
+	Models data.Models
+}
 
 func main() {
 
