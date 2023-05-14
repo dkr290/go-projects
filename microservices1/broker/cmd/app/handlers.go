@@ -18,7 +18,7 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 
 	var ap AuthPayload
 	jsonData, _ := json.MarshalIndent(ap, "", "\t")
-	registerServiceURl := "http://192.168.122.186:8081"
+	registerServiceURl := "http://localhost:8081"
 	request, err := http.NewRequest("POST", registerServiceURl, bytes.NewBuffer(jsonData))
 
 	if err != nil {
