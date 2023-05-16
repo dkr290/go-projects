@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -14,6 +15,10 @@ type authPayload struct {
 }
 
 var ap authPayload
+
+type jsonResponse struct {
+	Message string
+}
 
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	log.Println("connected to register")
@@ -32,5 +37,11 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("The user with the id %d\n", userID)
+
+	payload := jsonResponse{
+		Message: fmt.Sprintf("User with email %s and id %d is created", ap.Email, userID),
+	}
+
+	app.Helpers.SendJsonResponse(w, http.StatusAccepted, payload)
 
 }

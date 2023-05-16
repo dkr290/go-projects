@@ -8,6 +8,10 @@ import (
 	"net/http"
 )
 
+type jsonResponse struct {
+	Message string
+}
+
 func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("calling broker")
@@ -37,6 +41,16 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 
 	}
+
+	var jsonFromService jsonResponse
+	err = json.NewDecoder(request.Body).Decode(&jsonFromService)
+	if err != nil {
+
+		log.Fatalln(err)
+		return
+	}
+
+	app.Helpers.SendJsonResponse(w, http.StatusAccepted, jsonFromService)
 
 }
 

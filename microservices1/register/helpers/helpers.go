@@ -8,10 +8,6 @@ import (
 	"net/http"
 )
 
-type jsonResponse struct {
-	Message string
-}
-
 type Helpers struct{}
 
 func New() *Helpers {
@@ -37,4 +33,22 @@ func (h *Helpers) ReadJsonFromHttp(w http.ResponseWriter, r *http.Request, data 
 	}
 
 	return nil
+}
+
+func (h *Helpers) SendJsonResponse(w http.ResponseWriter, status int, data any) error {
+
+	out, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, err = w.Write(out)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
