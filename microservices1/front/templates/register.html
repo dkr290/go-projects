@@ -11,6 +11,9 @@
     <title>Hello, world!</title>
   </head>
   <body>
+    <div id="output" class="mt-5" style="outline: 1px solid silver; padding: 2em;">
+                    <span class="text-muted">Output shows here...</span>
+    </div>
     <form>
   <div class="form-group">
     <label for="email">Email address</label>
@@ -31,7 +34,7 @@
     <input type="password" class="form-control" id="password" placeholder="Password">
   </div>
 
-  <button onclick="sendJSON()" type="submit" class="btn btn-primary">Submit</button>
+  <button href="javascript:void(0);" id="submit" type="submit" class="btn btn-primary">Submit</button>
 </form>
 
     <!-- Optional JavaScript -->
@@ -41,42 +44,59 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   
   <script>
-     function sendJSON(){
+   
               
 
-            let result = document.querySelector('.result');
-            let email = document.querySelector('#email');
-            let firstname = document.querySelector('#firstname');
-            let lastname = document.querySelector('#lastname');
-            let password = document.querySelector('#password');
+     
+            var email = document.getElementById('email');
+            var firstname = document.getElementById('firstname');
+            var lastname = document.getElementById('lastname');
+            var password = document.getElementById('password');
+             var submit = document.getElementById('submit');
+
+             submit.addEventListener("click", function(){
               
-            // Creating a XHR object
-            let xhr = new XMLHttpRequest();
-            let url = "http://192.168.122.186:8080/register";
-       
-            // open a connection
-            xhr.open("POST", url, true);
- 
-            // Set the request header i.e. which type of content you are sending
-            xhr.setRequestHeader("Content-Type", "application/json");
- 
-            // Create a state change callback
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
- 
-                    // Print received data from server
-                    
-                    result.innerHTML = this.responseText;
- 
+                const payload = {
+
+               email: email.value,
+               firstname: firstname.value,
+               lastname: lastname.value,
+               password: password.value
+             
+               }
+
+              const headers = new Headers();
+                 headers.append("Content-Type","application/json");
+              const body = {
+                 method: "POST",
+                 body: JSON.stringify(payload),
+                 headers: headers,
+
+             }
+
+             fetch("http:\/\/192.168.122.186/register",body)
+            .then((response) => response.json())
+            .then((data) => { 
+                send.innerHTML = JSON.stringify(payload, undefined, 4);
+                received.innerHTML = JSON.stringify(data,undefined,4);
+
+                if (data.error) {
+
+                    output.innerHTML += `<br><strong>Error:</strong> ${data.message}`;
+                } else {
+                          output.innerHTML += `<br>Registration Sucess</strong>: ${data.message}`;
                 }
-            };
- 
-            // Converting JSON data to string
-            var data = JSON.stringify({ "email": email.value, "firstname": firstname.value, "lastname": lastname.value, "password": password.value });
- 
-            // Sending data with the request
-            xhr.send(data);
-        }
+            })
+            .catch((error) => {
+                  output.innerHTML += "<br><br>Error: " + error
+            })
+        })
+
+
+
+
+           
+     
   
 
 
