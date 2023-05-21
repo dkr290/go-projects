@@ -43,7 +43,7 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var jsonFromService jsonResponse
-	err = json.NewDecoder(request.Body).Decode(&jsonFromService)
+	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
 
 		log.Fatalln(err)

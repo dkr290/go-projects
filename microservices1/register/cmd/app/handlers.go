@@ -28,20 +28,31 @@ func (app *Config) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//insert user
-
-	userID, err := app.Models.User.Insert(ap.Email, ap.Password, ap.FirstName, ap.LastName)
+	//check if the user email exists before registering it
+	userEmail, err := app.Models.User.GetByEmail(ap.Email)
+	log.Println(userEmail.Email)
 	if err != nil {
-		log.Fatal(errors.New("error crating user"))
+		log.Fatal(err)
+		log.Println(userEmail.Email)
 		return
 	}
 
-	log.Printf("The user with the id %d\n", userID)
+	if userEmail.Email == "" {
 
-	payload := jsonResponse{
-		Message: fmt.Sprintf("User with email %s and id %d is created", ap.Email, userID),
+		//insert user
+
+		userID, err := app.Models.User.Insert(ap.Email, ap.Password, ap.FirstName, ap.LastName)
+		if err != nil {
+			log.Fatal(errors.New("error crating user"))
+			return
+		}
+
+		log.Printf("The user with the id %d\n", userID)
+
+		payload := jsonResponse{
+			Message: fmt.Sprintf("User with email %s and id %d is created", ap.Email, userID),
+		}
+
+		app.Helpers.SendJsonResponse(w, http.StatusAccepted, payload)
 	}
-
-	app.Helpers.SendJsonResponse(w, http.StatusAccepted, payload)
-
 }

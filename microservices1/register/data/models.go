@@ -41,9 +41,32 @@ func (u *User) GetAll([]*User, error) {
 
 // GetByEmail returns one user by email
 
-// func (u *User) GetByEmail(email string) (*User, error) {
+func (u *User) GetByEmail(email string) (*User, error) {
 
-// }
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+	query := `select id, email,  password, firstname, lastname, active, created_at, updated_at from users where email = $1`
+
+	var user User
+	row := db.QueryRowContext(ctx, query, email)
+
+	err := row.Scan(
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
+		&user.Password,
+		&user.Active,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+
+}
 
 // GetOne returns one user by id
 
