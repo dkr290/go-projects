@@ -81,8 +81,8 @@ func main() {
 
 func connectToMongo() (*mongo.Client, error) {
 	// create connection options
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().ApplyURI(mongoURL).SetServerAPIOptions(serverAPI)
+
+	clientOptions := options.Client().ApplyURI(mongoURL)
 	clientOptions.SetAuth(options.Credential{
 		Username: "admin",
 		Password: "password",

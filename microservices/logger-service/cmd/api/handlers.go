@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log-service/data"
+	"log"
 	"net/http"
 )
 
@@ -19,12 +19,13 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 
 	//insert the data
 
-	event := data.LogEntry{
-		Name: requestPayload.Name,
-		Data: requestPayload.Data,
-	}
+	// event := data.LogEntry{
+	// 	Name: requestPayload.Name,
+	// 	Data: requestPayload.Data,
+	// }
+	log.Println("this is from logger")
 
-	err := app.Models.LogEntry.InsertMongo(event)
+	err := app.Models.LogEntry.InsertMongo(requestPayload.Name, requestPayload.Data)
 	if err != nil {
 		app.errorJSON(w, err)
 		return
