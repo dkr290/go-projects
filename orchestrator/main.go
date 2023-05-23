@@ -114,7 +114,7 @@ func createContainer() (*task.Container, *task.ContainerResult) {
 
 func containerStop(d *task.Container) *task.ContainerResult {
 
-	result := d.Stop()
+	result := d.Stop(d.ContainerId)
 	if result.Error != nil {
 		fmt.Printf("%v\n", result.Error)
 		return nil
