@@ -1,5 +1,6 @@
 package main
 
+<<<<<<< HEAD
 import (
 	"fmt"
 	"log"
@@ -124,4 +125,8 @@ func containerStop(d *task.Container) *task.ContainerResult {
 		"Container %s has been stopped and removed\n", result.ContainerId)
 	return &result
 
+=======
+func main() {
+
+>>>>>>> bad74e0 (ds)
 }

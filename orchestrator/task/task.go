@@ -1,17 +1,16 @@
 package task
 
 import (
+<<<<<<< HEAD
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
+=======
+>>>>>>> bad74e0 (ds)
 	"time"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
 )
@@ -30,7 +29,10 @@ const (
 
 type Task struct {
 	ID            uuid.UUID
+<<<<<<< HEAD
 	ContainerId   string
+=======
+>>>>>>> bad74e0 (ds)
 	Name          string
 	State         State
 	Image         string
@@ -42,6 +44,7 @@ type Task struct {
 	StartTime     time.Time
 	FinishTime    time.Time
 }
+<<<<<<< HEAD
 
 type TaskEvent struct {
 	ID        uuid.UUID
@@ -188,3 +191,5 @@ func (c *Container) Stop(ContainerId string) ContainerResult {
 	}
 
 }
+=======
+>>>>>>> bad74e0 (ds)
