@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/dkr290/go-projects/orchestrator/manager"
@@ -70,12 +71,25 @@ func main() {
 
 	fmt.Printf("node: %v\n", n)
 
+	fmt.Printf("Create test container\n")
+
+	containerTask, containerResult := createContainer()
+	if containerResult.Error != nil {
+		fmt.Println(containerResult.Error)
+		os.Exit(1)
+	}
+
+	time.Sleep(time.Second * 5)
+
+	fmt.Printf("Stopping container %s\n", containerResult.ContainerId)
+	_ = containerStop(containerTask)
+
 }
 
 func createContainer() (*task.Container, *task.ContainerResult) {
 	c := task.Config{
 		Name:  "test-container-1",
-		Image: "postgres:14",
+		Image: "postgres:13",
 		Env:   []string{"POSTGRES_USER=user", "POSTGRES_PASSWORD=password1"},
 	}
 
@@ -95,5 +109,19 @@ func createContainer() (*task.Container, *task.ContainerResult) {
 	fmt.Printf("Container %s is running with config %v\n", result.ContainerId, c)
 
 	return &d, &result
+
+}
+
+func containerStop(d *task.Container) *task.ContainerResult {
+
+	result := d.Stop()
+	if result.Error != nil {
+		fmt.Printf("%v\n", result.Error)
+		return nil
+	}
+
+	fmt.Printf(
+		"Container %s has been stopped and removed\n", result.ContainerId)
+	return &result
 
 }

@@ -152,15 +152,15 @@ func (c *Container) Run() ContainerResult {
 
 }
 
-func (c *Container) Stop(containrtID string) ContainerResult {
+func (c *Container) Stop() ContainerResult {
 	ctx := context.Background()
 	log.Println("Attempting to stop the container with id", c.ContainerId)
-	err := containerclient.ContainerStop(ctx, containrtID, container.StopOptions{})
+	err := containerclient.ContainerStop(ctx, c.ContainerId, container.StopOptions{})
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
-	err = containerclient.ContainerRemove(ctx, containrtID, types.ContainerRemoveOptions{
+	err = containerclient.ContainerRemove(ctx, c.ContainerId, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		RemoveLinks:   false,
 		Force:         false,
@@ -171,7 +171,7 @@ func (c *Container) Stop(containrtID string) ContainerResult {
 
 	return ContainerResult{
 		Action:      "stop",
-		ContainerId: containrtID,
+		ContainerId: c.ContainerId,
 		Error:       nil,
 		Result:      "success",
 	}
