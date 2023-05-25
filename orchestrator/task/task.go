@@ -28,14 +28,6 @@ const (
 	Failed
 )
 
-var stateTransitionMap = map[State][]State{
-	Pending:   {Scheduled},
-	Scheduled: {Scheduled, Running, Failed},
-	Running:   {Running, Completed, Failed},
-	Completed: {},
-	Failed:    {},
-}
-
 type Task struct {
 	ID            uuid.UUID
 	ContainerId   string

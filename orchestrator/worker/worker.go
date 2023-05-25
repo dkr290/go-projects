@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -18,8 +19,37 @@ type Worker struct {
 	TaskCount int
 }
 
-func (w *Worker) RunTask(t task.Task) {
-	w.Queue.Enqueue(t)
+func (w *Worker) RunTask() task.ContainerResult {
+	t := w.Queue.Dequeue()
+	if t == nil {
+		log.Println("No tasks in the queue")
+		return task.ContainerResult{Error: nil}
+	}
+
+	taskQueued := t.(task.Task)
+	taskPersisted := w.Db[taskQueued.ID]
+	if taskPersisted == nil {
+		taskPersisted = &taskQueued
+		w.Db[taskQueued.ID] = &taskQueued
+	}
+
+	var result task.ContainerResult
+	if task.ValidStateTransition(
+		taskPersisted.State, taskQueued.State) {
+		switch taskQueued.State {
+		case task.Scheduled:
+			result = w.StartTask(taskQueued)
+		case task.Completed:
+			result = w.StopTask(taskQueued)
+		default:
+			result.Error = errors.New("we should not get here")
+		}
+	} else {
+		err := fmt.Errorf("invalid transition from %v to %v", taskPersisted.State, taskQueued.State)
+		result.Error = err
+	}
+
+	return result
 }
 
 func (w *Worker) CollectStats() {
