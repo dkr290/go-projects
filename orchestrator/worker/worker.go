@@ -18,8 +18,8 @@ type Worker struct {
 	TaskCount int
 }
 
-func (w *Worker) RunTask() {
-	fmt.Println("Running the task")
+func (w *Worker) RunTask(t task.Task) {
+	w.Queue.Enqueue(t)
 }
 
 func (w *Worker) CollectStats() {
