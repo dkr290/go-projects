@@ -57,7 +57,7 @@ type Config struct {
 	AttachStderr          bool
 	Image                 string
 	Memory                int64
-	Disk                  int
+	Disk                  int64
 	Env                   []string
 	RestartPolicy         string
 	RestartPolicyMaxRetry int
@@ -88,7 +88,7 @@ func NewConfig(t *Task) Config {
 		Name:          t.Name,
 		Image:         t.Image,
 		Memory:        int64(t.Memory),
-		Disk:          t.Disk,
+		Disk:          int64(t.Disk),
 		RestartPolicy: t.RestartPolicy,
 	}
 }
