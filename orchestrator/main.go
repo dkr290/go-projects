@@ -39,7 +39,7 @@ func main() {
 	w := worker.Worker{
 		Name:  "Worker1",
 		Queue: *queue.New(),
-		Db:    make(map[uuid.UUID]task.Task),
+		Db:    make(map[uuid.UUID]*task.Task),
 	}
 
 	fmt.Printf("worker: %v\n", w)
