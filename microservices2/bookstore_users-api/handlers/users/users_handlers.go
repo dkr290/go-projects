@@ -5,12 +5,29 @@ import (
 	"bookstore_users-api/helpers/customerr"
 	"bookstore_users-api/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me")
+
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 10)
+	if userErr != nil {
+		err := customerr.NewBadRequestErr("invalid user id")
+		c.JSON(err.Status, err)
+		return
+
+	}
+
+	result, err := services.GetUser(userId)
+
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 
 }
 func CreateUser(c *gin.Context) {
