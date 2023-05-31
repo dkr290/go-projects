@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "bookstora_items-api"
+		},
+		{
+			"path": "projects"
 		}
 	],
 	"settings": {}

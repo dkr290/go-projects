@@ -1,0 +1,43 @@
+version: '3'
+
+
+services:
+  bookstore_users-api:
+    build:
+      context: ./../bookstore_users-api
+      dockerfile: ./../bookstore_users-api/bookstore_users-api.dockerfile
+    restart: always
+    ports: 
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+
+  mysql:
+    image: 'mysql:5.7.42'
+    ports:
+      - "3306:3306"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MYSQL_ROOT_PASSWORD: pass1234
+      MYSQL_DATABASE: users
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpass#
+    volumes:
+      - ./db-data/mysql/:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8090:80
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_PASSWORD: pass1234
+  
+  
