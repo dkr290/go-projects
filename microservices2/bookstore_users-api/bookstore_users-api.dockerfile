@@ -19,6 +19,7 @@ RUN addgroup -S pipeline && adduser -S  k8s-pipeline --uid 1500 -G pipeline -h /
 
 WORKDIR /home/k8s-pipeline
 COPY --from=builder /build/bookstore-usersapi .
+COPY .env . 
 
 RUN ls -l
 

@@ -12,6 +12,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+  
 
 
   mysql:
@@ -29,6 +30,7 @@ services:
       MYSQL_PASSWORD: adminpass#
     volumes:
       - ./db-data/mysql/:/var/lib/mysql
+   
 
   phpmyadmin:
     image: phpmyadmin
