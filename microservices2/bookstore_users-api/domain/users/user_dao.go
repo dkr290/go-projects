@@ -10,11 +10,9 @@ import (
 
 const (
 	queryInsertUser = "INSERT INTO users(first_name, last_name,email,date_created) VALUES(?,?,?,?);"
+	queryGetUser    = "SELECT id,first_name,last_name,email,date_created from users WHERE id=?"
 )
 
-var (
-	usersDB = make(map[int64]*User)
-)
 var dbClient = usersdatabase.New()
 
 func (user *User) Get() *customerr.RestError {
@@ -23,16 +21,25 @@ func (user *User) Get() *customerr.RestError {
 		panic(err)
 	}
 
-	result := usersDB[user.Id]
-	if result == nil {
-		return customerr.NewNotFoundErr(fmt.Sprintf("user %d not found", user.Id))
+	stmt, err := dbClient.Prepare(queryGetUser)
+	if err != nil {
+		return customerr.NewInternalServerError(err.Error())
+
+	}
+	defer stmt.Close()
+
+	result := stmt.QueryRow(user.Id)
+	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			fmt.Println(err)
+			return customerr.NewNotFoundErr(
+				fmt.Sprintf("user with id %d not found", user.Id))
+		}
+
+		return customerr.NewInternalServerError(
+			fmt.Sprintf("error when trying to get user %d  %s", user.Id, err.Error()))
 	}
 
-	user.Id = result.Id
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
 	return nil
 
 }

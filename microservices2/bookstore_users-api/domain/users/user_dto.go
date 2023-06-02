@@ -13,6 +13,10 @@ type User struct {
 	DateCreated string `json:"date_created"`
 }
 
+func New() *User {
+	return &User{}
+}
+
 func (u *User) Validate() *customerr.RestError {
 	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
 

@@ -5,15 +5,18 @@ import (
 	"bookstore_users-api/helpers/customerr"
 )
 
+var u = users.New()
+
 func GetUser(userId int64) (*users.User, *customerr.RestError) {
 
-	result := &users.User{
-		Id: userId,
-	}
-	if err := result.Get(); err != nil {
+	u.Id = userId
+	// result := &users.User{
+	// 	Id: userId,
+	// }
+	if err := u.Get(); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return u, nil
 
 }
 
