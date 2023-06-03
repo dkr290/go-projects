@@ -4,8 +4,7 @@ import (
 	usersdatabase "bookstore_users-api/datasources/mysql/users_database"
 	"bookstore_users-api/helpers/customerr"
 	"bookstore_users-api/helpers/datehelpers"
-	"fmt"
-	"strings"
+	"bookstore_users-api/helpers/mysqlhelpers"
 )
 
 const (
@@ -29,15 +28,9 @@ func (user *User) Get() *customerr.RestError {
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.Id)
-	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
-			fmt.Println(err)
-			return customerr.NewNotFoundErr(
-				fmt.Sprintf("user with id %d not found", user.Id))
-		}
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
 
-		return customerr.NewInternalServerError(
-			fmt.Sprintf("error when trying to get user %d  %s", user.Id, err.Error()))
+		return mysqlhelpers.ParseError(getErr)
 	}
 
 	return nil
@@ -54,19 +47,14 @@ func (user *User) Save() *customerr.RestError {
 	defer stmt.Close()
 
 	user.DateCreated = datehelpers.GetNowString()
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			return customerr.NewBadRequestErr(fmt.Sprintf("email %s already exists", user.Email))
-		}
-		return customerr.NewInternalServerError(
-			fmt.Sprintf("error trying to save the user  %s", err.Error()))
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if saveErr != nil {
+		return mysqlhelpers.ParseError(saveErr)
 	}
 
 	userID, err := insertResult.LastInsertId()
 	if err != nil {
-		return customerr.NewInternalServerError(
-			fmt.Sprintf("error trying to save the user  %s", err.Error()))
+		return mysqlhelpers.ParseError(saveErr)
 	}
 
 	user.Id = userID
