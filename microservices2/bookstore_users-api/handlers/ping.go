@@ -1,4 +1,4 @@
-package ping
+package handlers
 
 import (
 	"net/http"

@@ -1,14 +1,14 @@
 package app
 
 import (
-	"bookstore_users-api/handlers/ping"
-	"bookstore_users-api/handlers/users"
+	"bookstore_users-api/handlers"
 )
 
 func mapURLs() {
-	router.GET("/ping", ping.Ping)
-	router.POST("/users", users.CreateUser)
-	router.GET("/users/:user_id", users.GetUser)
-	router.GET("/users/search", users.FindUser)
+	router.GET("/ping", handlers.Ping)
+	router.POST("/users", handlers.CreateUser)
+	router.GET("/users/:user_id", handlers.GetUser)
+	router.PUT("/users/:user_id", handlers.UpdateUser)
+	router.GET("/users/search", handlers.FindUser)
 
 }
