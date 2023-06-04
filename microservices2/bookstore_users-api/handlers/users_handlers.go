@@ -12,7 +12,7 @@ import (
 
 func GetUser(c *gin.Context) {
 
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 32)
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 10)
 	if userErr != nil {
 		err := customerr.NewBadRequestErr("invalid user id")
 		c.JSON(err.Status, err)
@@ -66,7 +66,7 @@ func CreateUser(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 32)
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if userErr != nil {
 		err := customerr.NewBadRequestErr("invalid user id")
 		c.JSON(err.Status, err)
