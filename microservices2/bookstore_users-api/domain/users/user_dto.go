@@ -18,6 +18,8 @@ func New() *User {
 }
 
 func (u *User) Validate() *customerr.RestError {
+	u.FirstName = strings.TrimSpace(u.FirstName)
+	u.LastName = strings.TrimSpace(u.LastName)
 	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
 
 	if u.Email == "" {

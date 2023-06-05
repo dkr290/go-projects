@@ -3,7 +3,6 @@ package services
 import (
 	"bookstore_users-api/domain/users"
 	"bookstore_users-api/helpers/customerr"
-	"log"
 )
 
 func GetUser(userId int64) (*users.User, *customerr.RestError) {
@@ -31,18 +30,31 @@ func CreateUser(user users.User) (*users.User, *customerr.RestError) {
 	return &user, nil
 }
 
-func UpdateUser(user users.User) (*users.User, *customerr.RestError) {
+func UpdateUser(isPartial bool, user users.User) (*users.User, *customerr.RestError) {
 
 	current, err := GetUser(user.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	current.FirstName = user.FirstName
-	current.LastName = user.LastName
-	current.Email = user.Email
+	if isPartial {
+		if user.FirstName != "" {
+			current.FirstName = user.FirstName
+		}
+		if user.LastName != "" {
+			current.LastName = user.LastName
+		}
 
-	log.Println(current, current.FirstName, current.LastName, current.Id)
+		if user.Email != "" {
+			current.Email = user.Email
+		}
+
+	} else {
+		current.FirstName = user.FirstName
+		current.LastName = user.LastName
+		current.Email = user.Email
+
+	}
 
 	if err := current.Update(); err != nil {
 
