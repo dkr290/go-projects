@@ -5,14 +5,16 @@ import (
 	"bookstore_users-api/helpers/customerr"
 	"bookstore_users-api/helpers/datehelpers"
 	"bookstore_users-api/helpers/mysqlhelpers"
+	"fmt"
 	"log"
 )
 
 const (
-	queryInsertUser = "INSERT INTO users(first_name, last_name,email,date_created) VALUES(?,?,?,?);"
-	queryGetUser    = "SELECT id,first_name,last_name,email,date_created from users WHERE id=?;"
-	QueryUpdateUser = "UPDATE users SET first_name=?,last_name=?,email=? WHERE id=?;"
-	QueryDeleteUser = "DELETE from users where id=?;"
+	queryInsertUser       = "INSERT INTO users(first_name, last_name,email,date_created) VALUES(?,?,?,?);"
+	queryGetUser          = "SELECT id,first_name,last_name,email,date_created from users WHERE id=?;"
+	QueryUpdateUser       = "UPDATE users SET first_name=?,last_name=?,email=? WHERE id=?;"
+	QueryDeleteUser       = "DELETE from users where id=?;"
+	QueryFindUserByStatus = "SELECT id,first_name,last_name,email,date_created,status FROM users WHERE  status=?"
 )
 
 var dbClient = usersdatabase.New()
@@ -97,5 +99,40 @@ func (user *User) Delete() *customerr.RestError {
 	}
 
 	return nil
+
+}
+
+func (user *User) FindByStatus(status string) ([]User, *customerr.RestError) {
+
+	stmt, err := dbClient.Prepare(QueryFindUserByStatus)
+	if err != nil {
+		return nil, customerr.NewInternalServerError(err.Error())
+
+	}
+
+	stmt.Close()
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, customerr.NewInternalServerError(err.Error())
+	}
+
+	defer rows.Close()
+
+	results := make([]User, 0)
+	for rows.Next() {
+		//var user User
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
+			return nil, mysqlhelpers.ParseError(err)
+
+		}
+		results = append(results, *user)
+	}
+
+	if len(results) == 0 {
+		return nil, customerr.NewNotFoundErr(fmt.Sprintf("no user matching status %s", status))
+	}
+
+	return results, nil
 
 }
