@@ -90,7 +90,7 @@ func main() {
 		User:            username,
 		Auth:            []ssh.AuthMethod{auth},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         6000 * time.Second,
+		Timeout:         5 * time.Hour,
 	}
 
 	for _, h := range newhosts {

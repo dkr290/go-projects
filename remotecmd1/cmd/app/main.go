@@ -93,8 +93,8 @@ func main() {
 	}
 
 	for _, h := range newhosts {
-		log.Println(h)
 
+		fmt.Printf("host: %s\n", h)
 		remotecmd.Connect("tcp", h, cmd, config)
 
 	}

@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	promptRE = regexp.MustCompile("\\$")
-	timeout  = 10 * time.Minute
+	promptRE = regexp.MustCompile(`\$ `)
+	timeout  = 10 * time.Hour
 )
 
 func Connect(protocol string, host string, cmd string, config *ssh.ClientConfig) {
@@ -35,10 +35,9 @@ func Connect(protocol string, host string, cmd string, config *ssh.ClientConfig)
 	e.Expect(promptRE, timeout)
 	e.Send(cmd + "\n")
 	result, _, _ := e.Expect(promptRE, timeout)
-	e.Send("exit\n")
 
 	fmt.Println(term.Greenf("Done!\n"))
-	fmt.Printf("host: %s\n", host)
-	fmt.Printf("%s: result:\n %s\n\n", cmd, result, host)
+
+	fmt.Printf("%s: result:\n %s\n\n", cmd, result)
 
 }

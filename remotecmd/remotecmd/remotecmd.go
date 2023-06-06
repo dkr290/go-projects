@@ -24,11 +24,6 @@ func Connect(protocol string, host string, cmd string, config *ssh.ClientConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	// if err := installExpect(conn); err != nil {
-	// 	fmt.Println("Error: ", err)
-	// 	os.Exit(1)
-	// }
-
 	out, err := combinedOutput(ctx, conn, cmd)
 	if err != nil {
 		log.Println("command error: ", err)
