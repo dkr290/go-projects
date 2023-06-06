@@ -35,7 +35,7 @@ func installExpect(conn *ssh.Client) (err error) {
 		}
 	}()
 
-	e, _, err := expect.SpawnSSH(conn, 5*time.Second, expect.Tee(w))
+	e, _, err := expect.SpawnSSH(conn, 20*time.Second, expect.Tee(w))
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func installExpect(conn *ssh.Client) (err error) {
 		return fmt.Errorf("did not get shell prompt")
 	}
 
-	if err := e.Send("sudo apt-get install expect\n"); err != nil {
+	if err := e.Send("sudo apt-get -y install expect\n"); err != nil {
 		return fmt.Errorf("error on send command: %s", err)
 	}
 

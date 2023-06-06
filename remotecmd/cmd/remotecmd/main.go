@@ -22,7 +22,7 @@ var (
 	host     string
 	cmd      string
 	err      error
-	timeout  = time.After(5 * time.Second)
+	timeout  = time.After(100 * time.Second)
 )
 
 var auth ssh.AuthMethod
@@ -90,7 +90,7 @@ func main() {
 		User:            username,
 		Auth:            []ssh.AuthMethod{auth},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         5 * time.Second,
+		Timeout:         6000 * time.Second,
 	}
 
 	for _, h := range newhosts {

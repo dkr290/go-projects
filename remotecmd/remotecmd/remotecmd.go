@@ -2,9 +2,7 @@ package remotecmd
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -23,15 +21,13 @@ func Connect(protocol string, host string, cmd string, config *ssh.ClientConfig)
 	}
 	defer conn.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	fmt.Println("Installing Expect on remote system")
-
-	if err := installExpect(conn); err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
+	// if err := installExpect(conn); err != nil {
+	// 	fmt.Println("Error: ", err)
+	// 	os.Exit(1)
+	// }
 
 	out, err := combinedOutput(ctx, conn, cmd)
 	if err != nil {
