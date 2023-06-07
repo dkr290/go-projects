@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	StatusActive = "active"
+)
+
 type User struct {
 	Id          int64  `json:"id"`
 	FirstName   string `json:"first_name"`
@@ -12,7 +16,7 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
-	Password    string `json:"-"`
+	Password    string `json:"password"`
 }
 
 func New() *User {
@@ -26,6 +30,11 @@ func (u *User) Validate() *customerr.RestError {
 
 	if u.Email == "" {
 		return customerr.NewBadRequestErr("invalid email address")
+	}
+
+	u.Password = strings.TrimSpace(u.Password)
+	if u.Password == "" {
+		return customerr.NewBadRequestErr("invalid password")
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package services
 import (
 	"bookstore_users-api/domain/users"
 	"bookstore_users-api/helpers/customerr"
+	"bookstore_users-api/helpers/datehelpers"
 )
 
 func GetUser(userId int64) (*users.User, *customerr.RestError) {
@@ -22,6 +23,9 @@ func CreateUser(user users.User) (*users.User, *customerr.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+
+	user.DateCreated = datehelpers.GetNowDbFormat()
+	user.Status = users.StatusActive
 
 	if err := user.Save(); err != nil {
 		return nil, err
@@ -72,6 +76,10 @@ func DeleteUser(userID int64) *customerr.RestError {
 
 	return currUser.Delete()
 }
-func FindUser() {
+func Search(status string) ([]users.User, *customerr.RestError) {
+
+	dao := &users.User{}
+
+	return dao.FindByStatus(status)
 
 }
