@@ -2,6 +2,7 @@ package services
 
 import (
 	"bookstore_users-api/domain/users"
+	"bookstore_users-api/helpers/cryptohelpers"
 	"bookstore_users-api/helpers/customerr"
 	"bookstore_users-api/helpers/datehelpers"
 )
@@ -26,6 +27,7 @@ func CreateUser(user users.User) (*users.User, *customerr.RestError) {
 
 	user.DateCreated = datehelpers.GetNowDbFormat()
 	user.Status = users.StatusActive
+	user.Password = cryptohelpers.GetMd5(user.Password)
 
 	if err := user.Save(); err != nil {
 		return nil, err
@@ -76,7 +78,7 @@ func DeleteUser(userID int64) *customerr.RestError {
 
 	return currUser.Delete()
 }
-func Search(status string) ([]users.User, *customerr.RestError) {
+func Search(status string) (users.Users, *customerr.RestError) {
 
 	dao := &users.User{}
 
