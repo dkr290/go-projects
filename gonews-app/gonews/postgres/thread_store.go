@@ -9,12 +9,12 @@ import (
 )
 
 type ThreadStore struct {
-	DB *sqlx.DB
+	*sqlx.DB
 }
 
 func (s *ThreadStore) Thread(id uuid.UUID) (gonews.Thread, error) {
 	var t gonews.Thread
-	if err := s.DB.Get(&t, `SELECT * FROM threads WHERE id = $1`, id); err != nil {
+	if err := s.Get(&t, `SELECT * FROM threads WHERE id = $1`, id); err != nil {
 		return gonews.Thread{}, fmt.Errorf("error getting thread: %w", err)
 	}
 
@@ -22,15 +22,15 @@ func (s *ThreadStore) Thread(id uuid.UUID) (gonews.Thread, error) {
 }
 
 func (s *ThreadStore) Threads() ([]gonews.Thread, error) {
-	var threads []gonews.Thread
-	if err := s.DB.Select(&threads, `SELECT * FROM threads`); err != nil {
+	var tt []gonews.Thread
+	if err := s.Select(&tt, `SELECT * FROM threads`); err != nil {
 		return []gonews.Thread{}, fmt.Errorf("error getting many threads in select all %w", err)
 	}
-	return threads, nil
+	return tt, nil
 }
 
 func (s *ThreadStore) CreateThread(t *gonews.Thread) error {
-	if err := s.DB.Get(t, `INSEART INTO threads VALUES($1,$2,$3) RETURNING *`,
+	if err := s.Get(t, `INSERT INTO threads VALUES($1,$2,$3) RETURNING *`,
 		t.ID,
 		t.Title,
 		t.Description); err != nil {
@@ -42,7 +42,7 @@ func (s *ThreadStore) CreateThread(t *gonews.Thread) error {
 }
 
 func (s *ThreadStore) UpdateThread(t *gonews.Thread) error {
-	if err := s.DB.Get(t, `UPDATE threads SET title = $1, description = $2 WHERE id = $3 RETURNING *`,
+	if err := s.Get(t, `UPDATE threads SET title = $1, description = $2 WHERE id = $3 RETURNING *`,
 		t.Title,
 		t.Description,
 		t.ID); err != nil {
@@ -52,7 +52,7 @@ func (s *ThreadStore) UpdateThread(t *gonews.Thread) error {
 }
 
 func (s *ThreadStore) DeleteThread(id uuid.UUID) error {
-	if _, err := s.DB.Exec(`DELETE FROM threads WHERE id = $1`, id); err != nil {
+	if _, err := s.Exec(`DELETE FROM threads WHERE id = $1`, id); err != nil {
 		return fmt.Errorf("error deleting thread %w", err)
 	}
 	return nil
