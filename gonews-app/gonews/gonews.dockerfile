@@ -19,6 +19,7 @@ RUN addgroup -S pipeline && adduser -S  k8s-pipeline --uid 1500 -G pipeline -h /
 
 WORKDIR /home/k8s-pipeline
 COPY --from=builder /build/gonews .
+COPY --from=builder /build/templates ./templates
 
 
 RUN ls -l
