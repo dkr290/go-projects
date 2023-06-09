@@ -1,0 +1,46 @@
+version: '3'
+
+
+services:
+  gonews:
+    build:
+      context: ./../gonews
+      dockerfile: ./../gonews/gonews.dockerfile
+    restart: always
+    ports: 
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+
+
+  postgres:
+    image: 'postgres:15.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: news
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+   
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    ports: 
+      - "8091:80"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "dani@abv.bg" 
+      PGADMIN_DEFAULT_PASSWORD: "password"
+      
+    
