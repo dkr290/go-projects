@@ -22,12 +22,17 @@ func NewHandler(store gonews.Store) *Handler {
 	}
 
 	h.Use(middleware.Logger)
+	h.Get("/", h.Home)
 	h.Route("/threads", func(r chi.Router) {
 
 		r.Get("/", h.ThreadsList())
 		r.Get("/new", h.ThreadsCreate)
 		r.Post("/", h.ThreadsStore)
+		r.Get("/{id}", h.ThreadsShow)
 		r.Post("/{id}/delete", h.ThreadsDelete)
+		r.Get("/{id}/new", h.PostsCreate)
+		r.Post("/{id}", h.PostsStore)
+		r.Get("/{threadID}/{postID}", h.PostsShow)
 
 	})
 
@@ -65,28 +70,17 @@ func NewHandler(store gonews.Store) *Handler {
 
 // }
 
-const threadsListHTML = `
-<h1>Threads</h1>
-<dl>
-{{range .Threads}}
-    <dt><strong>{{.Title}}</strong></dt>
-    <dd>{{.Description}}</dd>
-	<dd>
-     <form action="/threads/{{.ID}}/delete" method="POST">
-	 <button type="submit">Delete</button>
-	 </form>
-	</dd>
-{{end}}
+func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 
-<a href="/threads/new">Create thread</a>
-</dl>
-`
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/home.html"))
+	tmpl.Execute(w, nil)
+}
 
 func (h *Handler) ThreadsList() http.HandlerFunc {
 	type data struct {
 		Threads []gonews.Thread
 	}
-	tmpl := template.Must(template.New("").Parse(threadsListHTML))
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/threads.html"))
 	return func(w http.ResponseWriter, r *http.Request) {
 		thread, err := h.store.Threads()
 		if err != nil {
@@ -98,32 +92,37 @@ func (h *Handler) ThreadsList() http.HandlerFunc {
 	}
 }
 
-const threadCreateHTML = `
-<h1>New Thread</h1>
-<form action="/threads" method="POST">
-   <table>
-       <tr>
-                <td>Title</td>
-				<td><input type="text" name="title" /></td>
-
-	   </tr>
-
-	   <tr>
-                <td>Description</td>
-				<td><input type="text" name="description" /></td>
-				
-	   </tr>
-
-   </table>
-   <button type="submit"> Create  Thread</button>
-
-</form>
-`
-
 func (h *Handler) ThreadsCreate(w http.ResponseWriter, r *http.Request) {
 
-	tmpl := template.Must(template.New("").Parse(threadCreateHTML))
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/thread_create.html"))
 	tmpl.Execute(w, nil)
+}
+
+func (h *Handler) ThreadsShow(w http.ResponseWriter, r *http.Request) {
+
+	type data struct {
+		Thread gonews.Thread
+		Posts  []gonews.Post
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/thread.html"))
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	//query the threads by its id
+	thred, err := h.store.Thread(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	pp, err := h.store.PostsByThread(thred.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	tmpl.Execute(w, data{Thread: thred, Posts: pp})
 }
 
 func (h *Handler) ThreadsStore(w http.ResponseWriter, r *http.Request) {
@@ -158,4 +157,101 @@ func (h *Handler) ThreadsDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/threads", http.StatusFound)
+}
+
+func (h *Handler) PostsCreate(w http.ResponseWriter, r *http.Request) {
+
+	type data struct {
+		Thread gonews.Thread
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/post_create.html"))
+
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	t, err := h.store.Thread(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, data{Thread: t})
+}
+
+func (h *Handler) PostsShow(w http.ResponseWriter, r *http.Request) {
+
+	type data struct {
+		Thread gonews.Thread
+		Post   gonews.Post
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/post.html"))
+
+	postIdStr := chi.URLParam(r, "postID")
+
+	postId, err := uuid.Parse(postIdStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	threadIdStr := chi.URLParam(r, "threadID")
+
+	threadId, err := uuid.Parse(threadIdStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	t, err := h.store.Thread(threadId)
+	if err != nil {
+		http.Error(w, "error Getting thread from the database: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p, err := h.store.Post(postId)
+	if err != nil {
+		http.Error(w, "error getting post from the database: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, data{Thread: t, Post: p})
+}
+
+func (h *Handler) PostsStore(w http.ResponseWriter, r *http.Request) {
+
+	title := r.FormValue("title")
+	content := r.FormValue("content")
+
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	t, err := h.store.Thread(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p := &gonews.Post{
+		ID:       uuid.New(),
+		ThreadID: t.ID,
+		Title:    title,
+		Content:  content,
+	}
+
+	if err := h.store.CreatePost(p); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/threads/"+t.ID.String()+"/"+p.ID.String(), http.StatusFound)
+
 }

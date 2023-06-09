@@ -14,7 +14,7 @@ type PostStore struct {
 
 func (p *PostStore) Post(id uuid.UUID) (gonews.Post, error) {
 	var post gonews.Post
-	if err := p.Get(&post, `SELECT * FROM posts WHERE id =$1`, id); err != nil {
+	if err := p.Get(&post, `SELECT * FROM posts WHERE id = $1`, id); err != nil {
 		return gonews.Post{}, fmt.Errorf("error selecting the post %w", err)
 	}
 	return post, nil
