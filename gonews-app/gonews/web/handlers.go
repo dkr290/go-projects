@@ -33,6 +33,7 @@ func NewHandler(store gonews.Store) *Handler {
 		r.Get("/{id}/new", h.PostsCreate)
 		r.Post("/{id}", h.PostsStore)
 		r.Get("/{threadID}/{postID}", h.PostsShow)
+		r.Post("/{threadID}/{postID}", h.CommentsStore)
 
 	})
 
@@ -185,8 +186,9 @@ func (h *Handler) PostsCreate(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) PostsShow(w http.ResponseWriter, r *http.Request) {
 
 	type data struct {
-		Thread gonews.Thread
-		Post   gonews.Post
+		Thread   gonews.Thread
+		Post     gonews.Post
+		Comments []gonews.Comment
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/post.html"))
@@ -219,7 +221,13 @@ func (h *Handler) PostsShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, data{Thread: t, Post: p})
+	cc, err := h.store.CommentsByPost(p.ID)
+	if err != nil {
+		http.Error(w, "error getting comments from the database: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, data{Thread: t, Post: p, Comments: cc})
 }
 
 func (h *Handler) PostsStore(w http.ResponseWriter, r *http.Request) {
@@ -253,5 +261,31 @@ func (h *Handler) PostsStore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/threads/"+t.ID.String()+"/"+p.ID.String(), http.StatusFound)
+
+}
+
+func (h *Handler) CommentsStore(w http.ResponseWriter, r *http.Request) {
+
+	content := r.FormValue("content")
+
+	idStr := chi.URLParam(r, "postID")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	c := &gonews.Comment{
+		ID:      uuid.New(),
+		PostID:  id,
+		Content: content,
+	}
+
+	if err := h.store.CreateComment(c); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
 
 }
