@@ -15,7 +15,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h := web.NewHandler(store)
+	csrfKey := []byte("eQaAy7NR/Ju9mR1+trtn1ojV9S7AKmKIlxknL/LpRY2ugqFAx6C69GlV8hgdy+9p")
+
+	h := web.NewHandler(store, csrfKey)
 
 	http.ListenAndServe(":3000", h)
 
