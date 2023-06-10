@@ -33,9 +33,11 @@ func NewHandler(store gonews.Store) *Handler {
 		r.Get("/{id}/new", h.PostsCreate)
 		r.Post("/{id}", h.PostsStore)
 		r.Get("/{threadID}/{postID}", h.PostsShow)
+		r.Get("/{threadID}/{postID}/vote", h.PostsVote)
 		r.Post("/{threadID}/{postID}", h.CommentsStore)
 
 	})
+	h.Get("/comments/{id}/vote", h.CommentsVote)
 
 	// h.Route("/html", func(r chi.Router) {
 	// 	r.Get("/", h.HtmlGet)
@@ -73,8 +75,18 @@ func NewHandler(store gonews.Store) *Handler {
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 
+	type data struct {
+		Posts []gonews.Post
+	}
+
+	pp, err := h.store.Posts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/home.html"))
-	tmpl.Execute(w, nil)
+	tmpl.Execute(w, data{Posts: pp})
 }
 
 func (h *Handler) ThreadsList() http.HandlerFunc {
@@ -263,6 +275,38 @@ func (h *Handler) PostsStore(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/threads/"+t.ID.String()+"/"+p.ID.String(), http.StatusFound)
 
 }
+func (h *Handler) PostsVote(w http.ResponseWriter, r *http.Request) {
+
+	idStr := chi.URLParam(r, "postID")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	p, err := h.store.Post(id)
+	if err != nil {
+		http.Error(w, "error getting single post from the database: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	dir := r.URL.Query().Get("dir")
+
+	if dir == "up" {
+		p.Votes++
+
+	} else if dir == "down" {
+		p.Votes--
+	}
+
+	if err := h.store.UpdatePost(&p); err != nil {
+
+		http.Error(w, "error updating comment: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
+
+}
 
 func (h *Handler) CommentsStore(w http.ResponseWriter, r *http.Request) {
 
@@ -283,6 +327,39 @@ func (h *Handler) CommentsStore(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.store.CreateComment(c); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
+
+}
+
+func (h *Handler) CommentsVote(w http.ResponseWriter, r *http.Request) {
+
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	c, err := h.store.Comment(id)
+	if err != nil {
+		http.Error(w, "error getting single comment from the database: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	dir := r.URL.Query().Get("dir")
+
+	if dir == "up" {
+		c.Votes++
+
+	} else if dir == "down" {
+		c.Votes--
+	}
+
+	if err := h.store.UpdateComment(&c); err != nil {
+
+		http.Error(w, "error updating comment: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

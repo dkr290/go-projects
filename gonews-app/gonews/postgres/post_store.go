@@ -22,9 +22,35 @@ func (p *PostStore) Post(id uuid.UUID) (gonews.Post, error) {
 
 func (p *PostStore) PostsByThread(threadID uuid.UUID) ([]gonews.Post, error) {
 	var posts []gonews.Post
-	if err := p.Select(&posts, `SELECT * FROM posts WHERE thread_id = $1`, threadID); err != nil {
+	var query = `SELECT
+	               posts.*,
+	               COUNT(comments.*) AS comments_count
+                   FROM posts
+                   LEFT JOIN comments ON comments.post_id = posts.id
+                   WHERE thread_id = $1
+                   GROUP BY posts.id
+                   ORDER BY votes DESC`
+	if err := p.Select(&posts, query, threadID); err != nil {
 		return []gonews.Post{}, fmt.Errorf("error getting many threads in select all %w", err)
 	}
+	return posts, nil
+}
+
+func (p *PostStore) Posts() ([]gonews.Post, error) {
+	var posts []gonews.Post
+	var query = `SELECT
+	               posts.*,
+	               COUNT(comments.*) AS comments_count,
+				   threads.title AS thread_title
+                   FROM posts
+                   LEFT JOIN comments ON comments.post_id = posts.id
+				   LEFT JOIN threads ON threads.id = posts.thread_id
+                   GROUP BY posts.id, threads.title
+                   ORDER BY votes DESC`
+	if err := p.Select(&posts, query); err != nil {
+		return []gonews.Post{}, fmt.Errorf("error getting posts %w", err)
+	}
+
 	return posts, nil
 }
 

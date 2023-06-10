@@ -22,9 +22,10 @@ func (c *CommentStore) Comment(id uuid.UUID) (gonews.Comment, error) {
 
 func (c *CommentStore) CommentsByPost(postID uuid.UUID) ([]gonews.Comment, error) {
 	var comments []gonews.Comment
-	if err := c.Select(&comments, `SELECT FROM comments WHERE post_id = $1`, postID); err != nil {
+	if err := c.Select(&comments, `SELECT * FROM comments WHERE post_id=$1 ORDER BY votes DESC`, postID); err != nil {
 		return []gonews.Comment{}, fmt.Errorf("error getting many comments by post_id %w", err)
 	}
+
 	return comments, nil
 }
 
@@ -40,7 +41,7 @@ func (c *CommentStore) CreateComment(t *gonews.Comment) error {
 }
 
 func (c *CommentStore) UpdateComment(t *gonews.Comment) error {
-	if err := c.Get(t, `UPDATE comments SET post_id = $1, content = $2, votes = $3 WHERE id =$4 RETURNING *`,
+	if err := c.Get(t, `UPDATE comments SET post_id = $1, content=$2, votes=$3 WHERE id=$4 RETURNING *`,
 		t.PostID,
 		t.Content,
 		t.Votes,
@@ -51,7 +52,7 @@ func (c *CommentStore) UpdateComment(t *gonews.Comment) error {
 }
 
 func (c *CommentStore) DeleteComment(id uuid.UUID) error {
-	if _, err := c.Exec(`DELETE FROM comments WHERE id = $1`, id); err != nil {
+	if _, err := c.Exec(`DELETE FROM comments WHERE id=$1`, id); err != nil {
 		return fmt.Errorf("error deleting comment %w", err)
 	}
 	return nil
