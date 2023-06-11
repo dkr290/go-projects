@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/dkr290/go-projects/gonews"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -11,7 +12,8 @@ import (
 )
 
 type PostHandler struct {
-	store gonews.Store
+	store    gonews.Store
+	sessions *scs.SessionManager
 }
 
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {

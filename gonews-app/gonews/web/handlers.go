@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/dkr290/go-projects/gonews"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,20 +14,23 @@ import (
 
 type Handler struct {
 	*chi.Mux
-	store gonews.Store
+	store    gonews.Store
+	sessions *scs.SessionManager
 }
 
-func NewHandler(store gonews.Store, csrfKey []byte) *Handler {
+func NewHandler(store gonews.Store, sessions *scs.SessionManager, csrfKey []byte) *Handler {
 	h := &Handler{
-		Mux:   chi.NewMux(),
-		store: store,
+		Mux:      chi.NewMux(),
+		store:    store,
+		sessions: sessions,
 	}
 
-	var threads = ThreadHandler{store: store}
-	var posts = PostHandler{store: store}
+	var threads = ThreadHandler{store: store, sessions: sessions}
+	var posts = PostHandler{store: store, sessions: sessions}
 
 	h.Use(middleware.Logger)
 	h.Use(csrf.Protect(csrfKey, csrf.Secure(false)))
+	h.Use(sessions.LoadAndSave)
 	h.Get("/", h.Home)
 	h.Route("/threads", func(r chi.Router) {
 

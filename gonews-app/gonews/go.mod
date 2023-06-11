@@ -10,6 +10,8 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/postgresstore v0.0.0-20230327161757-10d4299e3b24 // indirect
+	github.com/alexedwards/scs/v2 v2.5.1 // indirect
 	github.com/gorilla/csrf v1.7.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
