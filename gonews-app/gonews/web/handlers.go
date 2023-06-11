@@ -86,6 +86,7 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 
 	type data struct {
 		Posts []gonews.Post
+		SessionData
 	}
 
 	pp, err := h.store.Posts()
@@ -95,7 +96,8 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/home.html"))
-	tmpl.Execute(w, data{Posts: pp})
+	tmpl.Execute(w, data{Posts: pp,
+		SessionData: GetSessionData(h.sessions, r.Context())})
 }
 
 func (h *Handler) CommentsStore(w http.ResponseWriter, r *http.Request) {
@@ -119,6 +121,7 @@ func (h *Handler) CommentsStore(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	h.sessions.Put(r.Context(), "flash", "the comment has been submitted")
 
 	http.Redirect(w, r, r.Referer(), http.StatusFound)
 

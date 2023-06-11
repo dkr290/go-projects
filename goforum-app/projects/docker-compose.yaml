@@ -1,0 +1,45 @@
+version: '3'
+
+
+services:
+  gonews:
+    build:
+      context: ./../goforum
+      dockerfile: ./../goforum/goforum.dockerfile
+    restart: always
+    ports: 
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+
+
+  postgres:
+    image: 'postgres:15.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: news
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+   
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    deploy:
+      mode: replicated
+      replicas: 1
+
+
+      
+    

@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "goforum"
+		},
+		{
+			"path": "postgresql"
+		},
+		{
+			"path": "projects"
+		}
+	]
+}

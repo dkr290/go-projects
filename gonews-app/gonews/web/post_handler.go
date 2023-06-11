@@ -21,6 +21,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	type data struct {
 		Thread gonews.Thread
 		CSRF   template.HTML
+		SessionData
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/post_create.html"))
@@ -37,7 +38,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, data{Thread: t, CSRF: csrf.TemplateField(r)})
+	tmpl.Execute(w, data{Thread: t, CSRF: csrf.TemplateField(r), SessionData: GetSessionData(h.sessions, r.Context())})
 }
 
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +48,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		Post     gonews.Post
 		Comments []gonews.Comment
 		CSRF     template.HTML
+		SessionData
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/post.html"))
@@ -85,7 +87,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, data{Thread: t, Post: p, Comments: cc, CSRF: csrf.TemplateField(r)})
+	tmpl.Execute(w, data{Thread: t, Post: p, Comments: cc, CSRF: csrf.TemplateField(r), SessionData: GetSessionData(h.sessions, r.Context())})
 }
 
 func (h *PostHandler) Store(w http.ResponseWriter, r *http.Request) {
@@ -117,6 +119,7 @@ func (h *PostHandler) Store(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	h.sessions.Put(r.Context(), "flash", "the new post has been created")
 
 	http.Redirect(w, r, "/threads/"+t.ID.String()+"/"+p.ID.String(), http.StatusFound)
 

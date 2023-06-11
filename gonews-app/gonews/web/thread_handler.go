@@ -19,6 +19,7 @@ type ThreadHandler struct {
 func (h *ThreadHandler) List() http.HandlerFunc {
 	type data struct {
 		Threads []gonews.Thread
+		SessionData
 	}
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/threads.html"))
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +29,7 @@ func (h *ThreadHandler) List() http.HandlerFunc {
 			return
 		}
 
-		tmpl.Execute(w, data{Threads: thread})
+		tmpl.Execute(w, data{Threads: thread, SessionData: GetSessionData(h.sessions, r.Context())})
 	}
 }
 
@@ -36,10 +37,11 @@ func (h *ThreadHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	type data struct {
 		CSRF template.HTML
+		SessionData
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/thread_create.html"))
-	tmpl.Execute(w, data{CSRF: csrf.TemplateField(r)})
+	tmpl.Execute(w, data{CSRF: csrf.TemplateField(r), SessionData: GetSessionData(h.sessions, r.Context())})
 }
 
 func (h *ThreadHandler) Show(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +50,7 @@ func (h *ThreadHandler) Show(w http.ResponseWriter, r *http.Request) {
 		Thread gonews.Thread
 		Posts  []gonews.Post
 		CSRF   template.HTML
+		SessionData
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html", "templates/thread.html"))
@@ -67,7 +70,7 @@ func (h *ThreadHandler) Show(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	tmpl.Execute(w, data{Thread: thred, Posts: pp, CSRF: csrf.TemplateField(r)})
+	tmpl.Execute(w, data{Thread: thred, Posts: pp, CSRF: csrf.TemplateField(r), SessionData: GetSessionData(h.sessions, r.Context())})
 }
 
 func (h *ThreadHandler) Store(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +86,9 @@ func (h *ThreadHandler) Store(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	//addint the sessions
+	h.sessions.Put(r.Context(), "flash", "the new thread has been created")
 
 	http.Redirect(w, r, "/threads", http.StatusFound)
 
@@ -100,6 +106,8 @@ func (h *ThreadHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	h.sessions.Put(r.Context(), "flash", "the thread has been deleted")
 
 	http.Redirect(w, r, "/threads", http.StatusFound)
 }
