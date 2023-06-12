@@ -6,7 +6,7 @@ COPY go.mod ./
 RUN go mod download && go mod tidy
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o goforum cmd/app/main.go
+RUN CGO_ENABLED=0 go build -o goforum cmd/app/*.go
 RUN ls -l
 
 

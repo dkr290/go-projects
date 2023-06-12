@@ -4,15 +4,35 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/goforum-app/goforum/models"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/render"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-
-	render.RenderTemplate(w, "home.html", &models.PageData{})
+type Repository struct {
+	App *config.AppConfig
 }
 
-func AboutHandler(w http.ResponseWriter, r *http.Request) {
+// repository used for the different handlers
+var Repo *Repository
+
+func NewRepo(ac *config.AppConfig) *Repository {
+
+	return &Repository{
+		App: ac,
+	}
+}
+
+func NewHandlers(r *Repository) {
+	Repo = r
+}
+
+func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
+
+	render.RenderTemplate(w, "home.html", &models.PageData{})
+
+}
+
+func (m *Repository) AboutHandler(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 	strMap["title"] = "About us"
