@@ -28,6 +28,8 @@ func NewHandlers(r *Repository) {
 
 func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
+	m.App.Session.Put(r.Context(), "userid", "someuser")
+
 	render.RenderTemplate(w, "home.html", &models.PageData{})
 
 }
@@ -37,6 +39,9 @@ func (m *Repository) AboutHandler(w http.ResponseWriter, r *http.Request) {
 	strMap := make(map[string]string)
 	strMap["title"] = "About us"
 	strMap["intro"] = "This page is where we talk about ourselves this is like that"
+
+	userid := m.App.Session.GetString(r.Context(), "userid")
+	strMap["userid"] = userid
 
 	render.RenderTemplate(w, "about.html", &models.PageData{
 		StrMap: strMap,
