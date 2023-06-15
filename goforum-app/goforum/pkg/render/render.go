@@ -7,12 +7,20 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/goforum-app/goforum/models"
+	"github.com/justinas/nosurf"
 )
 
 // making the template cache
 var templateCache = make(map[string]*template.Template)
 
-func RenderTemplate(w http.ResponseWriter, t string, pageData *models.PageData) {
+func AddCSRFData(pd *models.PageData, r *http.Request) *models.PageData {
+
+	pd.CSRFToken = nosurf.Token(r)
+	return pd
+
+}
+
+func RenderTemplate(w http.ResponseWriter, r *http.Request, t string, pageData *models.PageData) {
 
 	var tmpl *template.Template
 	var err error
@@ -26,10 +34,11 @@ func RenderTemplate(w http.ResponseWriter, t string, pageData *models.PageData) 
 	}
 
 	tmpl = templateCache[t]
-	err = tmpl.Execute(w, pageData)
+	pd := AddCSRFData(pageData, r)
+	err = tmpl.Execute(w, pd)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("error template execution", err)
 	}
 
 }

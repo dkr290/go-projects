@@ -30,7 +30,7 @@ func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	m.App.Session.Put(r.Context(), "userid", "someuser")
 
-	render.RenderTemplate(w, "home.html", &models.PageData{})
+	render.RenderTemplate(w, r, "home.html", &models.PageData{})
 
 }
 
@@ -38,7 +38,7 @@ func (m *Repository) AboutHandler(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 
-	render.RenderTemplate(w, "about.html", &models.PageData{
+	render.RenderTemplate(w, r, "about.html", &models.PageData{
 		StrMap: strMap,
 	})
 }
@@ -47,7 +47,7 @@ func (m *Repository) Login(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 
-	render.RenderTemplate(w, "login.html", &models.PageData{
+	render.RenderTemplate(w, r, "login.html", &models.PageData{
 		StrMap: strMap,
 	})
 }
@@ -56,16 +56,25 @@ func (m *Repository) MakePost(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 
-	render.RenderTemplate(w, "make-post.html", &models.PageData{
+	render.RenderTemplate(w, r, "make-post.html", &models.PageData{
 		StrMap: strMap,
 	})
+}
+
+func (m *Repository) PostMakePost(w http.ResponseWriter, r *http.Request) {
+
+	blog_title := r.Form.Get("blog_title")
+	blog_article := r.Form.Get("blog_article")
+
+	w.Write([]byte(blog_title))
+	w.Write([]byte(blog_article))
 }
 
 func (m *Repository) Page(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 
-	render.RenderTemplate(w, "page.html", &models.PageData{
+	render.RenderTemplate(w, r, "page.html", &models.PageData{
 		StrMap: strMap,
 	})
 }

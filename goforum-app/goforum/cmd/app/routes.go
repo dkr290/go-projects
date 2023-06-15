@@ -26,6 +26,7 @@ func routes(app *config.AppConfig) http.Handler {
 	r.Get("/about", handlers.Repo.AboutHandler)
 	r.Get("/login", handlers.Repo.Login)
 	r.Get("/makepost", handlers.Repo.MakePost)
+	r.Post("/makepost", handlers.Repo.PostMakePost)
 	r.Get("/login", handlers.Repo.Page)
 
 	return r
