@@ -16,14 +16,10 @@ AZURE_SKU="ol91-lvm-gen2"   //example
 AZURE_VERSION="latest"
 
 
-AZURE_ENABLE_IMAGE_GALLERY="true" //enable or disable from shared image gallery
-AZURE_IMAGE_GALLERY="<Shared gallery name>"
-AZURE_IMAGE_GALLERY_RG="<Share gallery RG>"
-AZURE_IMAGE_NAME="Image in the gallery the name of the image which will be used for the vm deployment"
-AZURE_IMAGE_PLAN_NAME="Image plan for the image in the image gallery"
-AZURE_IMAGE_PLAN_PUBLISHER="publisher field in the image "
-AZURE_IMAGE_PLAN_PRODUCT="product field that is used when creating image"
-
+AZURE_ENABLE_IMAGE_GALLERY="true"
+AZURE_IMAGE_GALLERY="image gallery name"
+AZURE_IMAGE_GALLERY_RG="image gallery resource group"
+AZURE_IMAGE_NAME="imagename/versions/0.0.1" //example needs this path to exact verion otherwise if omit will be to the latest
 
 AZURE_VM_DISKSIZE="64"  //example disk size
 AZURE_VM_DISKSUFF="disk-01"  //suffix for the disk

@@ -101,7 +101,7 @@ func LaunchInstance(ctx context.Context, pp *Parameters) error {
 		log.Fatalf("the virtual machine already exists in azure : %s  in resource group %s", pp.VmName, pp.RG)
 	}
 
-	fmt.Println("Creating the vm" + pp.VmName)
+	fmt.Println("Creating the vm " + pp.VmName)
 
 	var imageRef *armcompute.ImageReference
 	var parameters armcompute.VirtualMachine
@@ -172,11 +172,7 @@ func LaunchInstance(ctx context.Context, pp *Parameters) error {
 		}
 
 		parameters = armcompute.VirtualMachine{
-			Plan: &armcompute.Plan{
-				Name:      to.Ptr(pp.PlanName),
-				Publisher: to.Ptr(pp.PlanPublisher),
-				Product:   to.Ptr(pp.PlanProduct),
-			},
+
 			Location: to.Ptr(pp.Location),
 			Identity: &armcompute.VirtualMachineIdentity{
 				Type: to.Ptr(armcompute.ResourceIdentityTypeNone),

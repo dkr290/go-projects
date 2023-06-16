@@ -35,9 +35,6 @@ type VmParametersGallery struct {
 	VmGalleryName      string
 	VmGalleryRG        string
 	VmGalleryImageName string
-	PlanName           string
-	PlanPublisher      string
-	PlanProduct        string
 	Enabled            string
 }
 
@@ -89,9 +86,6 @@ func GetEnvs() *Parameters {
 	pp.VmParametersGallery.VmGalleryName = os.Getenv("AZURE_IMAGE_GALLERY")
 	pp.VmParametersGallery.VmGalleryImageName = os.Getenv("AZURE_IMAGE_NAME")
 	pp.VmParametersGallery.VmGalleryRG = os.Getenv("AZURE_IMAGE_GALLERY_RG")
-	pp.VmParametersGallery.PlanName = os.Getenv("AZURE_IMAGE_PLAN_NAME")
-	pp.VmParametersGallery.PlanProduct = os.Getenv("AZURE_IMAGE_PLAN_PRODUCT")
-	pp.VmParametersGallery.PlanPublisher = os.Getenv("AZURE_IMAGE_PLAN_PUBLISHER")
 
 	if len(pp.Location) == 0 {
 		log.Fatal("You must set your 'AZURE_LOCATION' environmental variable. See\n\t https://pkg.go.dev/os#Getenv")
@@ -141,15 +135,7 @@ func GetEnvs() *Parameters {
 		if len(pp.VmParametersGallery.VmGalleryRG) == 0 {
 			log.Fatal("You must set your 'AZURE_IMAGE_GALLERY_RG' environmental variable.  See\n\t https://pkg.go.dev/os#Getenv")
 		}
-		if len(pp.VmParametersGallery.PlanName) == 0 {
-			log.Fatal("You must set your 'AZURE_IMAGE_PLAN_NAME' environmental variable.  See\n\t https://pkg.go.dev/os#Getenv")
-		}
-		if len(pp.VmParametersGallery.PlanProduct) == 0 {
-			log.Fatal("You must set your 'AZURE_IMAGE_PLAN_PRODUCT' environmental variable.  See\n\t https://pkg.go.dev/os#Getenv")
-		}
-		if len(pp.VmParametersGallery.PlanPublisher) == 0 {
-			log.Fatal("You must set your 'AZURE_IMAGE_PLAN_PUBLISHER' environmental variable.  See\n\t https://pkg.go.dev/os#Getenv")
-		}
+
 	} else {
 		log.Fatal("Marketplace image should be enabled and Galerry image disabled or vice versa but not both disabled or enabled")
 	}
