@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dkr290/go-projects/goforum-app/goforum/models"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/forms"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/render"
 )
 
@@ -54,20 +57,44 @@ func (m *Repository) Login(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) MakePost(w http.ResponseWriter, r *http.Request) {
 
-	strMap := make(map[string]string)
-
 	render.RenderTemplate(w, r, "make-post.html", &models.PageData{
-		StrMap: strMap,
+		Form: forms.New(nil),
 	})
 }
 
 func (m *Repository) PostMakePost(w http.ResponseWriter, r *http.Request) {
 
-	blog_title := r.Form.Get("blog_title")
-	blog_article := r.Form.Get("blog_article")
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	w.Write([]byte(blog_title))
-	w.Write([]byte(blog_article))
+	article := models.Article{
+		BlogTitle:   r.Form.Get("blog_title"),
+		BlogArticle: r.Form.Get("blog_article"),
+	}
+
+	form := forms.New(r.PostForm)
+
+	if article.BlogTitle == "" {
+		form.FormNoValueError("blog_title")
+	}
+
+	article.BlogArticle = strings.TrimSpace(article.BlogArticle)
+	if len(article.BlogArticle) == 0 {
+		form.FormNoValueError("blog_article")
+	}
+	if !form.Valid() {
+		data := make(map[string]any)
+		data["article"] = article
+		render.RenderTemplate(w, r, "make-post.html", &models.PageData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
+
 }
 
 func (m *Repository) Page(w http.ResponseWriter, r *http.Request) {
