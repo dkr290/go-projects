@@ -31,14 +31,26 @@ services:
       - ./db-data/postgres/:/var/lib/postgresql/data/
    
 
-  adminer:
-    image: adminer
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8082:8080
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+
+  dbeaver:
+    image: dbeaver/cloudbeaver:latest
     restart: always
     ports:
-      - 8082:8080
+    - 8090:8978
     deploy:
       mode: replicated
       replicas: 1
+    volumes:
+      - ./db-data/dbeaver/:/opt/cloudbeaver/workspace
+
 
 
       

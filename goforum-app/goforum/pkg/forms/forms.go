@@ -1,7 +1,10 @@
 package forms
 
 import (
+	"fmt"
 	"net/url"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type Form struct {
@@ -27,4 +30,11 @@ func (f *Form) Valid() bool {
 
 	return len(f.Errors) == 0
 
+}
+
+func (f *Form) MinLenght(tagId string, lenght string) {
+	if !govalidator.MinStringLength(f.Get(tagId), lenght) {
+		f.Errors.Add(tagId, fmt.Sprintf("Fild has minimum lenght of %s", lenght))
+
+	}
 }

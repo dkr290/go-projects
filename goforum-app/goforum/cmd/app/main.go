@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/dkr290/go-projects/goforum-app/goforum/models"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/handlers"
 )
@@ -17,6 +19,8 @@ var sm *scs.SessionManager
 var app config.AppConfig
 
 func main() {
+
+	gob.Register(models.Article{})
 
 	sm = scs.New()
 	sm.Lifetime = 24 * time.Hour
