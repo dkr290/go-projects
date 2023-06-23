@@ -14,12 +14,6 @@ import (
 // allow us to connect to multiply databases
 var conn *pgx.Conn
 
-const (
-	maxOpenDbConnections = 20
-	maxIdleDbConnections = 10
-	maxDBLifeTime        = 5 * time.Minute
-)
-
 func ConnectDatabase(dsn string) *pgx.Conn {
 	count := 0
 	var err error
@@ -40,9 +34,6 @@ func ConnectDatabase(dsn string) *pgx.Conn {
 		}
 
 	}
-	conn.Config().ConnectTimeout = maxDBLifeTime
-
-	defer conn.Close(context.Background())
 
 	return conn
 }

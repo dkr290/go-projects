@@ -45,6 +45,11 @@ func main() {
 func run() (*pgx.Conn, error) {
 	gob.Register(models.Article{})
 
+	// add table models in session
+
+	gob.Register(models.User{})
+	gob.Register(models.Post{})
+
 	sm = scs.New()
 	sm.Lifetime = 24 * time.Hour
 	sm.Cookie.Persist = true

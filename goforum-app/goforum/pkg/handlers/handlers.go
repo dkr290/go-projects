@@ -80,22 +80,23 @@ func (m *Repository) PostMakePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	article := models.Article{
-		BlogTitle:   r.Form.Get("blog_title"),
-		BlogArticle: r.Form.Get("blog_article"),
+	article := models.Post{
+		Title:   r.Form.Get("blog_title"),
+		Content: r.Form.Get("blog_article"),
+		UserID:  3,
 	}
 
 	form := forms.New(r.PostForm)
 
-	if article.BlogTitle == "" {
+	if article.Title == "" {
 		form.FormNoValueError("blog_title")
 
 	} else {
 		form.MinLenght("blog_title", "4")
 	}
 
-	article.BlogArticle = strings.TrimSpace(article.BlogArticle)
-	if len(article.BlogArticle) == 0 {
+	article.Content = strings.TrimSpace(article.Content)
+	if len(article.Content) == 0 {
 		form.FormNoValueError("blog_article")
 
 	} else {
@@ -110,6 +111,13 @@ func (m *Repository) PostMakePost(w http.ResponseWriter, r *http.Request) {
 			Data: data,
 		})
 		return
+	}
+
+	// write to the database
+	log.Println("about ot insert to db")
+	err = Repo.DB.InsertPost(article)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	m.App.Session.Put(r.Context(), "article", article)
