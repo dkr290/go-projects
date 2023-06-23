@@ -9,19 +9,24 @@ import (
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/forms"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/render"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/repository"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/repository/dbrepo"
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // repository used for the different handlers
 var Repo *Repository
 
-func NewRepo(ac *config.AppConfig) *Repository {
+func NewRepo(ac *config.AppConfig, db *pgx.Conn) *Repository {
 
 	return &Repository{
 		App: ac,
+		DB:  dbrepo.NewPostgresRepo(db, ac),
 	}
 }
 

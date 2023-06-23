@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/gob"
 	"fmt"
 	"log"
@@ -10,7 +11,9 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/dkr290/go-projects/goforum-app/goforum/models"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/dbdriver"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/handlers"
+	"github.com/jackc/pgx/v5"
 )
 
 const webPort = "8080"
@@ -18,20 +21,15 @@ const webPort = "8080"
 var sm *scs.SessionManager
 var app config.AppConfig
 
+const connString = "postgres://postgres:password@postgres:5432/blog_db"
+
 func main() {
 
-	gob.Register(models.Article{})
-
-	sm = scs.New()
-	sm.Lifetime = 24 * time.Hour
-	sm.Cookie.Persist = true
-	sm.Cookie.Secure = false
-	sm.Cookie.SameSite = http.SameSiteLaxMode
-	//save in the config
-	app.Session = sm
-
-	repo := handlers.NewRepo(&app)
-	handlers.NewHandlers(repo)
+	db, err := run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close(context.Background())
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
@@ -42,4 +40,22 @@ func main() {
 		log.Fatal(err)
 	}
 
+}
+
+func run() (*pgx.Conn, error) {
+	gob.Register(models.Article{})
+
+	sm = scs.New()
+	sm.Lifetime = 24 * time.Hour
+	sm.Cookie.Persist = true
+	sm.Cookie.Secure = false
+	sm.Cookie.SameSite = http.SameSiteLaxMode
+	//save in the config
+	app.Session = sm
+
+	dbconn := dbdriver.ConnectDatabase(connString)
+
+	repo := handlers.NewRepo(&app, dbconn)
+	handlers.NewHandlers(repo)
+	return dbconn, nil
 }
