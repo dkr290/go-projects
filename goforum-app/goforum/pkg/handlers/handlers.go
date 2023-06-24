@@ -153,3 +153,46 @@ func (m *Repository) Page(w http.ResponseWriter, r *http.Request) {
 		StrMap: strMap,
 	})
 }
+
+func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
+
+	_ = m.App.Session.RenewToken(r.Context())
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	form := forms.New(r.PostForm)
+	if len(email) == 0 {
+		form.FormNoValueError("email")
+	}
+	if len(password) == 0 {
+		form.FormNoValueError("password")
+	}
+	form.ValidateEmail(email)
+
+	if !form.Valid() {
+
+		render.RenderTemplate(w, r, "login.html", &models.PageData{
+			Form: form,
+		})
+
+		return
+	}
+
+	id, _, err := m.DB.AuthenticateUser(email, password)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "invalid email or password")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Valid Login")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+}

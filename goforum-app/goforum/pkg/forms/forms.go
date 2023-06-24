@@ -38,3 +38,9 @@ func (f *Form) MinLenght(tagId string, lenght string) {
 
 	}
 }
+
+func (f *Form) ValidateEmail(email string) {
+	if !govalidator.IsEmail(email) {
+		f.Errors.Add(email, fmt.Sprintf("Not a valid email %s", email))
+	}
+}
