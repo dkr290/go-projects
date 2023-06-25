@@ -28,10 +28,11 @@ func routes(app *config.AppConfig) http.Handler {
 	r.Get("/makepost", handlers.Repo.MakePost)
 	r.Post("/makepost", handlers.Repo.PostMakePost)
 	r.Post("/login", handlers.Repo.PostLogin)
+	r.Get("/logout", handlers.Repo.LogOutHandler)
 
 	r.Get("/article-received", handlers.Repo.ArticleReceived)
 
-	r.Get("/login", handlers.Repo.Page)
+	r.Get("/page", handlers.Repo.Page)
 
 	fileServer := http.FileServer(http.Dir("./static"))
 

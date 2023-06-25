@@ -55,6 +55,8 @@ func (m *Repository) Login(w http.ResponseWriter, r *http.Request) {
 
 	strMap := make(map[string]string)
 
+	log.Println("test")
+
 	render.RenderTemplate(w, r, "login.html", &models.PageData{
 		StrMap: strMap,
 	})
@@ -157,7 +159,7 @@ func (m *Repository) Page(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	_ = m.App.Session.RenewToken(r.Context())
-
+	log.Println("from post Login")
 	err := r.ParseForm()
 	if err != nil {
 		log.Fatal(err)
@@ -195,4 +197,13 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "flash", "Valid Login")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
+}
+
+func (m *Repository) LogOutHandler(w http.ResponseWriter, r *http.Request) {
+
+	_ = m.App.Session.Destroy(r.Context())
+
+	_ = m.App.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

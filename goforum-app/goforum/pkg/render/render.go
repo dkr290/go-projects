@@ -7,15 +7,26 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/goforum-app/goforum/models"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 	"github.com/justinas/nosurf"
 )
 
 // making the template cache
 var templateCache = make(map[string]*template.Template)
 
+var app *config.AppConfig
+
+func NewAppConfig(a *config.AppConfig) {
+	app = a
+}
+
 func AddCSRFData(pd *models.PageData, r *http.Request) *models.PageData {
 
 	pd.CSRFToken = nosurf.Token(r)
+
+	if app.Session.Exists(r.Context(), "user_id") {
+		pd.IsAuthenticated = 1
+	}
 	return pd
 
 }

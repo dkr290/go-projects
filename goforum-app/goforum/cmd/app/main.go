@@ -13,6 +13,7 @@ import (
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/dbdriver"
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/handlers"
+	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/render"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -62,5 +63,7 @@ func run() (*pgx.Conn, error) {
 
 	repo := handlers.NewRepo(&app, dbconn)
 	handlers.NewHandlers(repo)
+
+	render.NewAppConfig(&app)
 	return dbconn, nil
 }
