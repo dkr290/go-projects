@@ -8,4 +8,5 @@ type DatabaseRepo interface {
 	UpdateUser(u models.User) error
 	AuthenticateUser(email, password string) (int, string, error)
 	GetOneArticle() (int, int, string, string, error)
+	GetThreeArticles() (models.ArticleList, error)
 }

@@ -127,3 +127,40 @@ func (m *PostgresDBRepo) GetOneArticle() (int, int, string, string, error) {
 
 	return id, uID, aTitle, aCcount, nil
 }
+
+func (m *PostgresDBRepo) GetThreeArticles() (models.ArticleList, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var artList models.ArticleList
+
+	rows, err := m.DBConn.Query(ctx, "SELECT id, user_id, title, content FROM posts ORDER BY id DESC LIMIT $1", 3)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, uID int
+		var title, content string
+		err := rows.Scan(&id, &uID, &title, &content)
+		if err != nil {
+			panic(err)
+		}
+		artList.ID = append(artList.ID, id)
+		artList.UserID = append(artList.UserID, uID)
+		artList.Title = append(artList.Title, title)
+		artList.Content = append(artList.Content, content)
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return artList, nil
+
+}

@@ -37,20 +37,27 @@ func NewHandlers(r *Repository) {
 
 func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
-	id, uId, title, content, err := m.DB.GetOneArticle()
+	var artList models.ArticleList
+
+	artList, err := m.DB.GetThreeArticles()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	fmt.Println("ID : ", id)
-	fmt.Println("uID : ", uId)
-	fmt.Println("Title : ", title)
-	fmt.Println("Content : ", content)
+	for i := range artList.Content {
+		fmt.Println(artList.Content[i])
+	}
 
 	m.App.Session.Put(r.Context(), "user_id", "someuser")
+	data := make(map[string]any)
+	data["artList"] = artList
 
-	render.RenderTemplate(w, r, "home.html", &models.PageData{})
+	log.Println(data)
+
+	render.RenderTemplate(w, r, "home.html", &models.PageData{
+		Data: data,
+	})
 
 }
 
