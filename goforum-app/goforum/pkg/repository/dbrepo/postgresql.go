@@ -108,3 +108,22 @@ func (m *PostgresDBRepo) AuthenticateUser(email, password string) (int, string, 
 	return id, hashedPW, nil
 
 }
+
+func (m *PostgresDBRepo) GetOneArticle() (int, int, string, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var id, uID int
+	var aTitle, aCcount string
+
+	query := `SELECT id, user_id, title,content FROM posts LIMIT 1`
+
+	row := m.DBConn.QueryRow(ctx, query)
+
+	err := row.Scan(&id, &uID, &aTitle, &aCcount)
+	if err != nil {
+		return id, uID, "", "", err
+	}
+
+	return id, uID, aTitle, aCcount, nil
+}

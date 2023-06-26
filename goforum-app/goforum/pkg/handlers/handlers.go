@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -36,7 +37,18 @@ func NewHandlers(r *Repository) {
 
 func (m *Repository) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
-	m.App.Session.Put(r.Context(), "userid", "someuser")
+	id, uId, title, content, err := m.DB.GetOneArticle()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println("ID : ", id)
+	fmt.Println("uID : ", uId)
+	fmt.Println("Title : ", title)
+	fmt.Println("Content : ", content)
+
+	m.App.Session.Put(r.Context(), "user_id", "someuser")
 
 	render.RenderTemplate(w, r, "home.html", &models.PageData{})
 
@@ -64,6 +76,11 @@ func (m *Repository) Login(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) MakePost(w http.ResponseWriter, r *http.Request) {
 
+	// if user is not logged in redirect to the login
+	if !m.App.Session.Exists(r.Context(), "user_id") {
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+	}
+
 	var emptyArticle models.Article
 	data := make(map[string]any)
 	data["article"] = emptyArticle
@@ -82,10 +99,12 @@ func (m *Repository) PostMakePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uID := (m.App.Session.Get(r.Context(), "user_id")).(int)
+
 	article := models.Post{
 		Title:   r.Form.Get("blog_title"),
 		Content: r.Form.Get("blog_article"),
-		UserID:  3,
+		UserID:  uID,
 	}
 
 	form := forms.New(r.PostForm)
