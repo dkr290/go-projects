@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,4 +18,5 @@ func main() {
 	}
 
 	fmt.Println(string(hPassword))
+	fmt.Println(time.Now())
 }

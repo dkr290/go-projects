@@ -25,6 +25,7 @@ func AddCSRFData(pd *models.PageData, r *http.Request) *models.PageData {
 	pd.CSRFToken = nosurf.Token(r)
 
 	if app.Session.Exists(r.Context(), "user_id") {
+		log.Println("session exists")
 		pd.IsAuthenticated = 1
 	}
 	return pd

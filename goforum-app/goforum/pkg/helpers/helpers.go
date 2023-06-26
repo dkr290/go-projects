@@ -7,7 +7,7 @@ import (
 	"github.com/dkr290/go-projects/goforum-app/goforum/pkg/config"
 )
 
-var app config.AppConfig
+var app *config.AppConfig
 
 func ErrCheck(err error) {
 	if err != nil {

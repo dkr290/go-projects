@@ -179,8 +179,13 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 
+		data := make(map[string]any)
+
+		data["email"] = email
+		data["password"] = password
 		render.RenderTemplate(w, r, "login.html", &models.PageData{
 			Form: form,
+			Data: data,
 		})
 
 		return
