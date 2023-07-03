@@ -1,3 +1,9 @@
+##
+##ENVS
+#KUBERNETES_NAMEPSACE
+#KUBERNETES_MAXTIME
+#GOCRON_SCHEDULE
+
 FROM golang:1.19.2-alpine3.15 as builder
 
 WORKDIR /build

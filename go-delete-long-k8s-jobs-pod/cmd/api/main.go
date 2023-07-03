@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	clientset *kubernetes.Clientset
-	namespace string
-	maxtime   int
+	clientset             *kubernetes.Clientset
+	namespace             string
+	maxtime               int
+	schedilerEveryMinutes int
 )
 
 func init() {
@@ -31,8 +32,14 @@ func init() {
 	}
 	namespace = os.Getenv("KUBERNETES_NAMEPSACE")
 	maxtime, err = strconv.Atoi(os.Getenv("KUBERNETES_MAXTIME"))
+
 	if err != nil {
 		log.Println("Something get wrong by conversion to maxtime please ensure KUBERNETES_MAXTIME variable is number (minutes like for example 10 min is  10)")
+		log.Fatalln(err)
+	}
+	schedilerEveryMinutes, err = strconv.Atoi(os.Getenv("GOCRON_SCHEDULE"))
+	if err != nil {
+		log.Println("Something get wrong by conversion to maxtime please ensure GOCRON_SCHEDULE variable is number (minutes like for example 10 min is  10)")
 		log.Fatalln(err)
 	}
 
@@ -57,7 +64,7 @@ func main() {
 
 	s := gocron.NewScheduler()
 
-	s.Every(20).Minutes().Do(task.Task)
+	s.Every(uint64(schedilerEveryMinutes)).Minutes().Do(task.Task)
 
 	<-s.Start()
 }
