@@ -19,6 +19,15 @@ const (
 	userColl = "users"
 )
 
+var config = fiber.Config{
+	// Override default error handler
+	ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+
+		// Return from handler
+		return ctx.JSON(map[string]string{"error": err.Error()})
+	},
+}
+
 func main() {
 
 	listenAddr := flag.String("listenAddr", ":5000", "Listen address of the API server")
@@ -31,7 +40,7 @@ func main() {
 
 	// handlers initializations
 	userHandler := handlers.NewUserHandler(db.NewMongoUserStore(client))
-	app := fiber.New()
+	app := fiber.New(config)
 	apiv1 := app.Group("api/v1")
 
 	apiv1.Get("/user", userHandler.HandleGetUsers)

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/dkr290/go-projects/hotel-reservation/ctypes"
 	"github.com/dkr290/go-projects/hotel-reservation/db"
 	"github.com/gofiber/fiber/v2"
@@ -17,9 +19,12 @@ func NewUserHandler(uSt db.UserStore) *UserHandler {
 }
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
+	var (
+		id  = c.Params("id")
+		ctx = context.Background()
+	)
 
-	id := c.Params("id")
-	user, err := h.userStore.GetUserById(id)
+	user, err := h.userStore.GetUserById(ctx, id)
 	if err != nil {
 		return err
 	}
