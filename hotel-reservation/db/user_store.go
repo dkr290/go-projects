@@ -5,6 +5,7 @@ import (
 
 	"github.com/dkr290/go-projects/hotel-reservation/ctypes"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -15,6 +16,9 @@ const (
 
 type UserStore interface {
 	GetUserById(context.Context, string) (*ctypes.User, error)
+	GetUsers(context.Context) ([]*ctypes.User, error)
+	CreateUser(context.Context, *ctypes.User) (*ctypes.User, error)
+	DeleteUser(context.Context, string) error
 }
 
 // this is the implementations, for different databases
@@ -30,6 +34,22 @@ func NewMongoUserStore(m *mongo.Client) *MongoUserStore {
 		client: m,
 		coll:   coll,
 	}
+
+}
+
+func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*ctypes.User, error) {
+	var users []*ctypes.User
+
+	cur, err := s.coll.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cur.All(ctx, &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 
 }
 
@@ -50,4 +70,28 @@ func (s *MongoUserStore) GetUserById(ctx context.Context, id string) (*ctypes.Us
 
 	return &user, nil
 
+}
+
+func (s *MongoUserStore) CreateUser(ctx context.Context, user *ctypes.User) (*ctypes.User, error) {
+	res, err := s.coll.InsertOne(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	user.ID = res.InsertedID.(primitive.ObjectID)
+
+	return user, nil
+}
+
+func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
+
+	oid, err := ConvertObjectID(id)
+	if err != nil {
+		return err
+	}
+	//TODO to handle if we did not delete any user , something to log maybe somehow
+	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return err
+	}
+	return nil
 }
