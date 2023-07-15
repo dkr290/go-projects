@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/dkr290/go-projects/hotel-reservation/ctypes"
 	"github.com/dkr290/go-projects/hotel-reservation/db"
@@ -82,7 +81,7 @@ func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 
 	var (
-		update bson.M
+		params ctypes.UpdateUserParams
 		userID = c.Params("id")
 	)
 
@@ -91,12 +90,12 @@ func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 		return nil
 	}
 
-	if err := c.BodyParser(&update); err != nil {
+	if err := c.BodyParser(&params); err != nil {
 		return err
 	}
-	fmt.Println(update)
+
 	filter := bson.M{"_id": oid}
-	if err := h.userStore.UpdateUser(c.Context(), filter, update); err != nil {
+	if err := h.userStore.UpdateUser(c.Context(), filter, params); err != nil {
 		return err
 	}
 	return c.JSON(map[string]string{"updated": userID})

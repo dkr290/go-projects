@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,6 +16,18 @@ const (
 type UpdateUserParams struct {
 	FirstName string `json:"firstName"`
 	LastName  string `bjson:"lastName"`
+}
+
+func (p *UpdateUserParams) ToBSN() bson.M {
+
+	m := bson.M{}
+	if len(p.FirstName) > 0 {
+		m["firstName"] = p.FirstName
+	}
+	if len(p.LastName) > 0 {
+		m["lastName"] = p.LastName
+	}
+	return m
 }
 
 type CreateUserParams struct {
