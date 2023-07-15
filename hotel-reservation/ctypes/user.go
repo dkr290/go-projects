@@ -12,6 +12,11 @@ const (
 	bcryptCost = 12
 )
 
+type UpdateUserParams struct {
+	FirstName string `json:"firstName"`
+	LastName  string `bjson:"lastName"`
+}
+
 type CreateUserParams struct {
 	FirstName string `json:"firstName"`
 	LastName  string `bjson:"lastName"`
