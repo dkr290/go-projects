@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dkr290/go-projects/hotel-reservation/ctypes"
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,9 +11,12 @@ import (
 )
 
 const (
-	DBNAME   = "reservations"
 	userColl = "users"
 )
+
+type Dropper interface {
+	Drop(context.Context) error
+}
 
 type UserStore interface {
 	GetUserById(context.Context, string) (*ctypes.User, error)
@@ -20,6 +24,7 @@ type UserStore interface {
 	CreateUser(context.Context, *ctypes.User) (*ctypes.User, error)
 	DeleteUser(context.Context, string) error
 	UpdateUser(ctx context.Context, filter bson.M, params ctypes.UpdateUserParams) error
+	Dropper
 }
 
 // this is the implementations, for different databases
@@ -29,8 +34,8 @@ type MongoUserStore struct {
 }
 
 // type PostgresuserStore struct{}
-func NewMongoUserStore(m *mongo.Client) *MongoUserStore {
-	coll := m.Database(DBNAME).Collection(userColl)
+func NewMongoUserStore(m *mongo.Client, dbname string) *MongoUserStore {
+	coll := m.Database(dbname).Collection(userColl)
 	return &MongoUserStore{
 		client: m,
 		coll:   coll,
@@ -111,4 +116,9 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params c
 	}
 
 	return nil
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Println("--- dropping user collection")
+	return s.coll.Drop(ctx)
 }
