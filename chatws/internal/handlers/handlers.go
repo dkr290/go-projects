@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -20,6 +21,9 @@ var (
 		WriteBufferSize: 1024,
 		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
+
+	wsChan  = make(chan WsJsonPayload)
+	clients = make(map[WebSocketConnection]string)
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -61,11 +65,63 @@ func WsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	resp.Message = `<em><small>Connected to the server</small></em>`
 
+	conn := WebSocketConnection{
+		Conn: ws,
+	}
+
+	clients[conn] = ""
+
 	err = ws.WriteJSON(resp)
 	if err != nil {
 		log.Println(err)
 	}
 
+	go ListenForWs(&conn)
+
+}
+
+func ListenForWs(conn *WebSocketConnection) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Error", fmt.Sprintf("%v", r))
+		}
+	}()
+
+	var payload WsJsonPayload
+
+	for {
+		err := conn.ReadJSON(&payload)
+		if err != nil {
+			//do nothing
+		} else {
+			payload.Conn = *conn
+			wsChan <- payload
+		}
+	}
+}
+
+func ListenToWsChannel() {
+	var response WsJsonResponse
+	for {
+
+		e := <-wsChan
+		response.Action = "Go here"
+		response.Message = fmt.Sprintf("Some message, and action was %s", e.Action)
+	}
+
+}
+
+func BroadcastToAll(response WsJsonResponse) {
+	for client := range clients {
+		err := client.WriteJSON(response)
+		if err != nil {
+			log.Println("websocker error")
+			_ = client.Close()
+			delete(clients, client)
+		}
+
+	}
 }
 
 func renderPage(w http.ResponseWriter, tmpl string, data jet.VarMap) error {
