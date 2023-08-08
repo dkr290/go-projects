@@ -24,7 +24,15 @@ down:
 	docker compose down
 	@echo "Done!"
 
+stop:
+	@echo "Stopping docker compose..."
+	docker compose stop
+	@echo "Done!"
 
+start:
+	@echo "Starting docker compose..."
+	docker compose start
+	@echo "Done!"
 
 # ## build_broker: builds the broker binary as a linux executable
 # build_broker:
