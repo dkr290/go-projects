@@ -23,6 +23,10 @@ func main() {
 	app.Use(handlers.WithAuthenticatedUser)
 	app.Get("/", handlers.HandleGetHome)
 
+	// toto protected routes
+
+	app.Get("/dashboard", handlers.HandleGetDashboard)
+
 	log.Fatal(app.Listen(os.Getenv("HTTP_LISTEN_ADDR")))
 
 }

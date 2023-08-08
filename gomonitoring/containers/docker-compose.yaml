@@ -1,0 +1,41 @@
+version: '3'
+
+
+services:
+  postgres:
+    image: 'postgres:15.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: monitoring
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+  
+
+  # front-end:
+  #   build: 
+  #     context: ./../front-end
+  #     dockerfile: ./../front-end/front-end.dockerfile
+  #   restart: always
+  #   ports: 
+  #     - "8090:8090"
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    ports: 
+      - "8091:8978"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ./db-data/cloudbeaver/workspace:/opt/cloudbeaver/workspace
