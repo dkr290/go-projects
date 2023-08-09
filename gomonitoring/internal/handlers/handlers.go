@@ -2,21 +2,22 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/CloudyKit/jet/v6"
-	"github.com/go-chi/chi"
-	"github.com/tsawler/vigilate/internal/config"
-	"github.com/tsawler/vigilate/internal/driver"
-	"github.com/tsawler/vigilate/internal/helpers"
-	"github.com/tsawler/vigilate/internal/models"
-	"github.com/tsawler/vigilate/internal/repository"
-	"github.com/tsawler/vigilate/internal/repository/dbrepo"
 	"log"
 	"net/http"
 	"runtime/debug"
 	"strconv"
+
+	"github.com/CloudyKit/jet/v6"
+	"github.com/dkr290/go-projects/gomonitoring/internal/config"
+	"github.com/dkr290/go-projects/gomonitoring/internal/driver"
+	"github.com/dkr290/go-projects/gomonitoring/internal/helpers"
+	"github.com/dkr290/go-projects/gomonitoring/internal/models"
+	"github.com/dkr290/go-projects/gomonitoring/internal/repository"
+	"github.com/dkr290/go-projects/gomonitoring/internal/repository/dbrepo"
+	"github.com/go-chi/chi"
 )
 
-//Repo is the repository
+// Repo is the repository
 var Repo *DBRepo
 var app *config.AppConfig
 

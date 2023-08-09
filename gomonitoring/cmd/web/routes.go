@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/tsawler/vigilate/internal/handlers"
 	"net/http"
+
+	"github.com/dkr290/go-projects/gomonitoring/internal/handlers"
+	"github.com/go-chi/chi"
 )
 
 func routes() http.Handler {

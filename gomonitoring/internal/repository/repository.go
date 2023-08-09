@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/tsawler/vigilate/internal/models"
+import "github.com/dkr290/go-projects/gomonitoring/internal/models"
 
 // DatabaseRepo is the database repository
 type DatabaseRepo interface {

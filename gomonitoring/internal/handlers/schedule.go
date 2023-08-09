@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/tsawler/vigilate/internal/helpers"
 	"net/http"
+
+	"github.com/dkr290/go-projects/gomonitoring/internal/helpers"
 )
 
 // ListEntries lists schedule entries

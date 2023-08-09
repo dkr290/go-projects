@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/dkr290/go-projects/gomonitoring/internal/config"
+	"github.com/dkr290/go-projects/gomonitoring/internal/handlers"
+	"github.com/dkr290/go-projects/gomonitoring/internal/models"
 	"github.com/pusher/pusher-http-go"
-	"github.com/tsawler/vigilate/internal/config"
-	"github.com/tsawler/vigilate/internal/handlers"
-	"github.com/tsawler/vigilate/internal/models"
 )
 
 var app config.AppConfig
@@ -21,7 +21,7 @@ var session *scs.SessionManager
 var preferenceMap map[string]string
 var wsClient pusher.Client
 
-const vigilateVersion = "1.0.0"
+const gomonitoringVersion = "1.0.0"
 const maxWorkerPoolSize = 5
 const maxJobMaxWorkers = 5
 
@@ -44,7 +44,7 @@ func main() {
 
 	// print info
 	log.Printf("******************************************")
-	log.Printf("** %sVigilate%s v%s built in %s", "\033[31m", "\033[0m", vigilateVersion, runtime.Version())
+	log.Printf("** %sVigilate%s v%s built in %s", "\033[31m", "\033[0m", gomonitoringVersion, runtime.Version())
 	log.Printf("**----------------------------------------")
 	log.Printf("** Running with %d Processors", runtime.NumCPU())
 	log.Printf("** Running on %s", runtime.GOOS)

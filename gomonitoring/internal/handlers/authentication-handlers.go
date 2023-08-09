@@ -4,12 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"github.com/tsawler/vigilate/internal/helpers"
-	"github.com/tsawler/vigilate/internal/models"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dkr290/go-projects/gomonitoring/internal/helpers"
+	"github.com/dkr290/go-projects/gomonitoring/internal/models"
 )
 
 // LoginScreen shows the home (login) screen
