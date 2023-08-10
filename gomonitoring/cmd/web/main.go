@@ -26,6 +26,7 @@ const maxWorkerPoolSize = 5
 const maxJobMaxWorkers = 5
 
 func init() {
+	//store this data type in the session- thats why it is registered
 	gob.Register(models.User{})
 	_ = os.Setenv("LU", "Europe/Luxembourg")
 }
@@ -44,7 +45,7 @@ func main() {
 
 	// print info
 	log.Printf("******************************************")
-	log.Printf("** %sVigilate%s v%s built in %s", "\033[31m", "\033[0m", gomonitoringVersion, runtime.Version())
+	log.Printf("** %sGomonitoring%s v%s built in %s", "\033[31m", "\033[0m", gomonitoringVersion, runtime.Version())
 	log.Printf("**----------------------------------------")
 	log.Printf("** Running with %d Processors", runtime.NumCPU())
 	log.Printf("** Running on %s", runtime.GOOS)

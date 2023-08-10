@@ -71,7 +71,7 @@ func setupApp() (*string, error) {
 		log.Fatal("Cannot connect to database!", err)
 	}
 
-	// session
+	// session - start the session
 	log.Printf("Initializing session manager....")
 	session = scs.New()
 	session.Store = postgresstore.New(db.SQL)
