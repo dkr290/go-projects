@@ -15,11 +15,12 @@ func Start() {
 
 	router := mux.NewRouter()
 
-	ch := CustomerHandlers{service: service.NewCustomerService(domain.NewCustomerRepoStub())}
+	//ch := CustomerHandlers{service: service.NewCustomerService(domain.NewCustomerRepoStub())}
+	ch := CustomerHandlers{service: service.NewCustomerService(domain.NewCustomerRepoDb())}
 
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
 
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":4000", router); err != nil {
 
 		log.Fatal(err)
 
