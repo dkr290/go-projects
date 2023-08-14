@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dkr290/go-projects/banking-api/service"
 	"github.com/gorilla/mux"
 )
 
@@ -15,16 +16,13 @@ type Customer struct {
 	ZipCode string `json:"zip_code" xml:"zipcode"`
 }
 
-func HandleGreet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello world")
-
+type CustomerHandlers struct {
+	service service.CustomerService
 }
 
-func GetAllCustomers(w http.ResponseWriter, r *http.Request) {
-	customers := []Customer{
-		{Name: "Danail", City: "Sofia", ZipCode: "100023432"},
-		{Name: "Rob", City: "Paris", ZipCode: "32323232"},
-	}
+func (ch *CustomerHandlers) GetAllCustomers(w http.ResponseWriter, r *http.Request) {
+
+	customers, _ := ch.service.GetAllCustomers()
 
 	if r.Header.Get("Content-Type") == "application/xml" {
 		w.Header().Add("Content-Type", "application/xml")

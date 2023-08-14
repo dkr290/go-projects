@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dkr290/go-projects/banking-api/domain"
+	"github.com/dkr290/go-projects/banking-api/service"
 	"github.com/gorilla/mux"
 )
 
@@ -13,10 +15,9 @@ func Start() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/greet", HandleGreet).Methods(http.MethodGet)
-	router.HandleFunc("/customers", GetAllCustomers).Methods(http.MethodGet)
-	router.HandleFunc("/customers", CreateCustomer).Methods(http.MethodPost)
-	router.HandleFunc("/customers/{cust_id:[0-9]+}", HandleGetCustemer)
+	ch := CustomerHandlers{service: service.NewCustomerService(domain.NewCustomerRepoStub())}
+
+	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
 
