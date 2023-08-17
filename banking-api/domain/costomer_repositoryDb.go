@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -45,7 +46,7 @@ func (c *CustomerRepoDb) FindAll() ([]Customer, error) {
 
 }
 
-func (c *CustomerRepoDb) ById(id string) (*Customer, error) {
+func (c *CustomerRepoDb) ById(id string) (*Customer, *customeerrors.AppError) {
 	SQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
 			FROM customers where customer_id = ?;`
 
@@ -60,8 +61,12 @@ func (c *CustomerRepoDb) ById(id string) (*Customer, error) {
 		&cus.Zipcode,
 		&cus.Status,
 	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, customeerrors.NewNotFoundError("customer not found")
+		}
 		log.Println("Error when scanning the customer", err)
-		return nil, err
+		return nil, customeerrors.NewUnexpectedError("unexpected database error")
+
 	}
 
 	return &cus, nil

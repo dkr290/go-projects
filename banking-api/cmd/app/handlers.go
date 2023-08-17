@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/dkr290/go-projects/banking-api/service"
@@ -40,13 +41,18 @@ func (ch *CustomerHandlers) GetCustomer(w http.ResponseWriter, r *http.Request) 
 	id := cust["customer_id"]
 	customer, err := ch.service.GetCustomer(id)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, err.Error())
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(err.Code)
+		err := json.NewEncoder(w).Encode(err.ReturnMessage())
+		if err != nil {
+			log.Print("Error encoding to json", err.Error())
+		}
 	} else {
 		w.Header().Add("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(customer)
 		if err != nil {
-			fmt.Fprint(w, "Error encoding to json", err.Error())
+			log.Print("Error encoding to json", err.Error())
 		}
 	}
 }

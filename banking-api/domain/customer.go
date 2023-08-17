@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
+
 type Customer struct {
 	Id          string
 	Name        string
@@ -12,5 +14,5 @@ type Customer struct {
 // repository for the customers
 type CustomerRepo interface {
 	FindAll() ([]Customer, error)
-	ById(id string) (*Customer, error)
+	ById(id string) (*Customer, *customeerrors.AppError)
 }
