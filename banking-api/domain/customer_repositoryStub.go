@@ -1,10 +1,12 @@
 package domain
 
+import "github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
+
 type CustomerRepoStub struct {
 	customers []Customer
 }
 
-func (s *CustomerRepoStub) FindAll() ([]Customer, error) {
+func (s *CustomerRepoStub) FindAll() ([]Customer, *customeerrors.AppError) {
 	return s.customers, nil
 }
 
