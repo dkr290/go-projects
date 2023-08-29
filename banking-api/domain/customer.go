@@ -13,6 +13,7 @@ type Customer struct {
 
 // repository for the customers
 type CustomerRepo interface {
-	FindAll() ([]Customer, *customeerrors.AppError)
+	// status == 1 active status == 0 inactive status == ""
+	FindAll(status string) ([]Customer, *customeerrors.AppError)
 	ById(id string) (*Customer, *customeerrors.AppError)
 }

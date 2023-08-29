@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
+	"github.com/dkr290/go-projects/banking-api/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -13,11 +14,21 @@ type CustomerRepoDb struct {
 	client *sql.DB
 }
 
-func (c *CustomerRepoDb) FindAll() ([]Customer, *customeerrors.AppError) {
+func (c *CustomerRepoDb) FindAll(status string) ([]Customer, *customeerrors.AppError) {
+	var rows *sql.Rows
+	var err error
 
-	findAllSQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
+	if status == "" {
+		findAllSQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
 				   FROM customers;`
-	rows, err := c.client.Query(findAllSQL)
+		rows, err = c.client.Query(findAllSQL)
+
+	} else {
+		findAllSQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
+				   FROM customers where status = ?;`
+		rows, err = c.client.Query(findAllSQL, status)
+	}
+
 	if err != nil {
 		return nil, customeerrors.NewUnexpectedError("Error while quering customer table")
 	}
@@ -62,7 +73,7 @@ func (c *CustomerRepoDb) ById(id string) (*Customer, *customeerrors.AppError) {
 		if err == sql.ErrNoRows {
 			return nil, customeerrors.NewNotFoundError("customer not found")
 		}
-		log.Println("Error when scanning the customer", err)
+		logger.Error("Error when scanning the customer" + err.Error())
 		return nil, customeerrors.NewUnexpectedError("unexpected database error")
 
 	}
@@ -97,18 +108,18 @@ func testDb(client *sql.DB) error {
 	for {
 		err := client.Ping()
 		if err != nil {
-			log.Println("Mysql server is not yet ready")
+			logger.Error("Mysql server is not yet ready")
 			counts++
 		} else {
-			log.Println("*** Pinged database successfully! ***")
+			logger.Info("*** Pinged database successfully! ***")
 			return nil
 		}
 		if counts > 10 {
-			log.Println("Error connection to the database", err)
+			logger.Error("Error connection to the database" + err.Error())
 			return err
 		}
 
-		log.Println("Backing off for two seconds...")
+		logger.Info("Backing off for two seconds...")
 		time.Sleep(2 * time.Second)
 		continue
 	}
