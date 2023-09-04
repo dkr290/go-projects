@@ -2,54 +2,65 @@ package domain
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
 	"github.com/dkr290/go-projects/banking-api/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 type CustomerRepoDb struct {
-	client *sql.DB
+	client *sqlx.DB
 }
 
 func (c *CustomerRepoDb) FindAll(status string) ([]Customer, *customeerrors.AppError) {
-	var rows *sql.Rows
+	//var rows *sql.Rows
 	var err error
+	customers := make([]Customer, 0)
 
 	if status == "" {
 		findAllSQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
 				   FROM customers;`
-		rows, err = c.client.Query(findAllSQL)
+
+		err = c.client.Select(&customers, findAllSQL)
+		//rows, err = c.client.Query(findAllSQL) ## because of sqlx
 
 	} else {
 		findAllSQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
 				   FROM customers where status = ?;`
-		rows, err = c.client.Query(findAllSQL, status)
+
+		err = c.client.Select(&customers, findAllSQL, status)
+		//rows, err = c.client.Query(findAllSQL, status)
 	}
 
 	if err != nil {
+		logger.Error("Error quering customers table " + err.Error())
 		return nil, customeerrors.NewUnexpectedError("Error while quering customer table")
 	}
 
-	customers := make([]Customer, 0)
-	for rows.Next() {
-		var c Customer
-		if err := rows.Scan(
-			&c.Id,
-			&c.Name,
-			&c.DateOfBirth,
-			&c.City,
-			&c.Zipcode,
-			&c.Status,
-		); err != nil {
-			return nil, customeerrors.NewUnexpectedError("Error scanning the customers")
-		}
+	// err = sqlx.StructScan(rows, &customers)
+	// if err != nil {
+	// 	logger.Error("Error while scanning customers " + err.Error())
+	// 	return nil, customeerrors.NewUnexpectedError("Unexpected database error")
+	// }
+	// for rows.Next() {
+	// 	var c Customer
+	// 	if err := rows.Scan(
+	// 		&c.Id,
+	// 		&c.Name,
+	// 		&c.DateOfBirth,
+	// 		&c.City,
+	// 		&c.Zipcode,
+	// 		&c.Status,
+	// 	); err != nil {
+	// 		return nil, customeerrors.NewUnexpectedError("Error scanning the customers")
+	// 	}
 
-		customers = append(customers, c)
-
-	}
+	//	customers = append(customers, c)
 
 	return customers, nil
 
@@ -59,30 +70,47 @@ func (c *CustomerRepoDb) ById(id string) (*Customer, *customeerrors.AppError) {
 	SQL := `SELECT customer_id, name, date_of_birth, city, zipcode, status
 			FROM customers where customer_id = ?;`
 
-	row := c.client.QueryRow(SQL, id)
+	//row := c.client.QueryRow(SQL, id) old way of doing it without sqlx
 	var cus Customer
 
-	if err := row.Scan(
-		&cus.Id,
-		&cus.Name,
-		&cus.DateOfBirth,
-		&cus.City,
-		&cus.Zipcode,
-		&cus.Status,
-	); err != nil {
+	err := c.client.Get(&cus, SQL, id)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, customeerrors.NewNotFoundError("customer not found")
+		} else {
+			logger.Error("Error when scanning the customer" + err.Error())
+			return nil, customeerrors.NewUnexpectedError("unexpected database error")
 		}
-		logger.Error("Error when scanning the customer" + err.Error())
-		return nil, customeerrors.NewUnexpectedError("unexpected database error")
-
 	}
+
+	// if err := row.Scan(
+	// 	&cus.Id,
+	// 	&cus.Name,
+	// 	&cus.DateOfBirth,
+	// 	&cus.City,
+	// 	&cus.Zipcode,
+	// 	&cus.Status,
+	// ); err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		return nil, customeerrors.NewNotFoundError("customer not found")
+	// 	}
+	// 	logger.Error("Error when scanning the customer" + err.Error())
+	// 	return nil, customeerrors.NewUnexpectedError("unexpected database error")
+
+	// }
 
 	return &cus, nil
 }
 
 func NewCustomerRepoDb() *CustomerRepoDb {
-	client, err := sql.Open("mysql", "root:password@tcp(localhost:3306)/banking")
+	db_User := os.Getenv("DB_USER")
+	db_Pass := os.Getenv("DB_PASS")
+	db_Addr := os.Getenv("DB_ADDR")
+	db_Port := os.Getenv("DB_PORT")
+	db_Name := os.Getenv("DB_NAME")
+
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", db_User, db_Pass, db_Addr, db_Port, db_Name)
+	client, err := sqlx.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +130,7 @@ func NewCustomerRepoDb() *CustomerRepoDb {
 	}
 }
 
-func testDb(client *sql.DB) error {
+func testDb(client *sqlx.DB) error {
 	counts := 0
 
 	for {
