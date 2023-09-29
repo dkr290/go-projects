@@ -20,6 +20,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      CB_ADMIN_NAME: cbadmin
+      CB_ADMIN_PASSWORD: Password123
     volumes:
       - cloudbeaverdata:/opt/cloudbeaver/workspace
 
