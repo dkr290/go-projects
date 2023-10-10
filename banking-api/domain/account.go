@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
+import (
+	"github.com/dkr290/go-projects/banking-api/pkg/customeerrors"
+	"github.com/dkr290/go-projects/banking-api/pkg/dto"
+)
 
 type Account struct {
 	AccountId   string
@@ -13,4 +16,10 @@ type Account struct {
 
 type AccountRepo interface {
 	Save(account Account) (*Account, *customeerrors.AppError)
+}
+
+func (a *Account) ToNewAccountResponseDto() dto.NewAccountResponse {
+	return dto.NewAccountResponse{
+		AccountId: a.AccountId,
+	}
 }
