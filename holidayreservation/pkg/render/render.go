@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/dkr290/go-projects/holidayapplication/pkg/config"
 	"github.com/flosch/pongo2"
 )
 
@@ -83,25 +84,28 @@ import (
 
 ///////////////////////////////////////////////////////////
 
+var app *config.AppConfig
+
+// newtemplate will set the configuration
+func NewTemplate(a *config.AppConfig) {
+	app = a
+}
+
 // better cache version
 func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
-
-	//create template cache
-
-	tc, err := createTemplateCache()
-	if err != nil {
-
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println("error create template cache")
-		return
-
+	var tc map[string]*pongo2.Template
+	if app.UseCache {
+		//get the template cache from the app config
+		tc = app.TempleteCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
 
 	//this is to check if it is in the map
 	t, ok := tc[tpml]
 	if !ok {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatalln("template not in cache for some reason", err)
+		http.Error(w, "template is not in the cache for some resaon", http.StatusInternalServerError)
+		log.Fatalln("template not in cache for some reason", ok)
 
 	}
 
@@ -112,7 +116,7 @@ func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
 	}
 	//then we execute the template and if there is no error we have a valid template
 	// we are checking that whatever is stored it is executable as template because it might be not valid
-	_, err = t.Execute(context)
+	_, err := t.Execute(context)
 	if err != nil {
 
 		log.Println("error execute pongo template", err) // if the template is not valid show why it is not valid
@@ -128,7 +132,7 @@ func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
 
 }
 
-func createTemplateCache() (map[string]*pongo2.Template, error) {
+func CreateTemplateCache() (map[string]*pongo2.Template, error) {
 
 	cache := map[string]*pongo2.Template{}
 	pages, err := filepath.Glob("./templates/*-page.html")
