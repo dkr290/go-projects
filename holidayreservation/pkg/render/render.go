@@ -1,6 +1,7 @@
 package render
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -88,8 +89,39 @@ func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
 	//create template cache
 
 	tc, err := createTemplateCache()
+	if err != nil {
 
-	err = parsedTemplate.ExecuteWriter(pongo2.Context{"Data": data}, w)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("error create template cache")
+		return
+
+	}
+
+	//this is to check if it is in the map
+	t, ok := tc[tpml]
+	if !ok {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatalln("template not in cache for some reason", err)
+
+	}
+
+	// we will store the reesult of t and docble check if it is valid template
+	// we create pongo context with some data
+	context := pongo2.Context{
+		"Title": "Sample title",
+	}
+	//then we execute the template and if there is no error we have a valid template
+	// we are checking that whatever is stored it is executable as template because it might be not valid
+	_, err = t.Execute(context)
+	if err != nil {
+
+		log.Println("error execute pongo template", err) // if the template is not valid show why it is not valid
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	//render the template
+
+	err = t.ExecuteWriter(pongo2.Context{"Data": data}, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -107,8 +139,8 @@ func createTemplateCache() (map[string]*pongo2.Template, error) {
 	// range through a slice of the pages
 
 	for _, page := range pages {
-		name := filepath.Base(page)                  // this is the template itself like just the html file name without path
-		parsedTemplate, err := pongo2.FromFile(page) // in this case we have parsed template for the full path
+		name := filepath.Base(page)                         // this is the template itself like just the html file name without path
+		parsedTemplate, err := pongo2.FromFile("./" + page) // in this case we have parsed template for the full path
 		if err != nil {
 			return cache, err
 		}
