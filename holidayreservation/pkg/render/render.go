@@ -7,6 +7,7 @@ import (
 	"github.com/flosch/pongo2"
 )
 
+//////////////////////////////////////////
 // func RenderTemplateNooCache(w http.ResponseWriter, tpml string, data any) {
 
 // 	//parsedTemplate, _ := template.ParseFiles("./templates/" + tpml)
@@ -27,6 +28,8 @@ import (
 // 	// }
 
 // }
+
+//////////////////////////////
 
 // render tempplate  with a cache but not ideal like  if we have a a lot of tempplates
 // this can be used but ther e is better cache version
