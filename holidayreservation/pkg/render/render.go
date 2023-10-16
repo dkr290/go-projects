@@ -7,7 +7,7 @@ import (
 	"github.com/flosch/pongo2"
 )
 
-// func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
+// func RenderTemplateNooCache(w http.ResponseWriter, tpml string, data any) {
 
 // 	//parsedTemplate, _ := template.ParseFiles("./templates/" + tpml)
 // 	parsedTemplate, err := pongo2.FromFile("./templates/" + tpml)
@@ -28,6 +28,10 @@ import (
 
 // }
 
+// render tempplate  with a cache but not ideal like  if we have a a lot of tempplates
+// this can be used but ther e is better cache version
+
+// /////////////////////////////////
 var tc = make(map[string]*pongo2.Template)
 
 func RenderTemplate(w http.ResponseWriter, t string, data any) {
@@ -72,3 +76,5 @@ func createTemplateCache(t string) error {
 	tc[t] = parsedTemplate
 	return nil
 }
+
+///////////////////////////////////////////////////////////
