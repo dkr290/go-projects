@@ -1,8 +1,8 @@
 package render
 
 import (
-	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/flosch/pongo2"
 )
@@ -35,49 +35,88 @@ import (
 // this can be used but ther e is better cache version
 
 // /////////////////////////////////
-var tc = make(map[string]*pongo2.Template)
+// var tc = make(map[string]*pongo2.Template)
 
-func RenderTemplate(w http.ResponseWriter, t string, data any) {
+// func RenderTemplate(w http.ResponseWriter, t string, data any) {
 
-	var tmpl *pongo2.Template
-	var err error
+// 	var tmpl *pongo2.Template
+// 	var err error
 
-	// check if we already have in the cache
-	_, inMap := tc[t]
+// 	// check if we already have in the cache
+// 	_, inMap := tc[t]
 
-	if !inMap {
-		// needs to create the template
-		err := createTemplateCache(t)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		log.Println("create template and adding to the the cache")
+// 	if !inMap {
+// 		// needs to create the template
+// 		err := createTemplateCache(t)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		log.Println("create template and adding to the the cache")
 
-	} else {
-		// the template is in the cache
-		log.Println("using cached template")
-	}
+// 	} else {
+// 		// the template is in the cache
+// 		log.Println("using cached template")
+// 	}
 
-	tmpl = tc[t]
-	err = tmpl.ExecuteWriter(pongo2.Context{"Data": data}, w)
+// 	tmpl = tc[t]
+// 	err = tmpl.ExecuteWriter(pongo2.Context{"Data": data}, w)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 	}
+
+// }
+
+// func createTemplateCache(t string) error {
+
+// 	//parse the template
+// 	parsedTemplate, err := pongo2.FromFile("./templates/" + t)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// add tmp to the cache map
+// 	tc[t] = parsedTemplate
+// 	return nil
+// }
+
+///////////////////////////////////////////////////////////
+
+// better cache version
+func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
+
+	//create template cache
+
+	tc, err := createTemplateCache()
+
+	err = parsedTemplate.ExecuteWriter(pongo2.Context{"Data": data}, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 }
 
-func createTemplateCache(t string) error {
+func createTemplateCache() (map[string]*pongo2.Template, error) {
 
-	//parse the template
-	parsedTemplate, err := pongo2.FromFile("./templates/" + t)
+	cache := map[string]*pongo2.Template{}
+	pages, err := filepath.Glob("./templates/*-page.html")
 	if err != nil {
-		return err
+		return cache, err
 	}
 
-	// add tmp to the cache map
-	tc[t] = parsedTemplate
-	return nil
-}
+	// range through a slice of the pages
 
-///////////////////////////////////////////////////////////
+	for _, page := range pages {
+		name := filepath.Base(page)                  // this is the template itself like just the html file name without path
+		parsedTemplate, err := pongo2.FromFile(page) // in this case we have parsed template for the full path
+		if err != nil {
+			return cache, err
+		}
+
+		cache[name] = parsedTemplate // the map cache[home-page.html] = parsedTemplate type
+
+	}
+
+	return cache, nil
+
+}
