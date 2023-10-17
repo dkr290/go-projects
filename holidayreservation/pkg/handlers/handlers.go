@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/holidayapplication/pkg/config"
+	"github.com/dkr290/go-projects/holidayapplication/pkg/models"
 	"github.com/dkr290/go-projects/holidayapplication/pkg/render"
 )
 
@@ -54,9 +55,9 @@ func (m *Repository) HandleAbout(w http.ResponseWriter, r *http.Request) {
 	pageData["Title"] = "About page"
 	pageData["Description"] = "This is about page"
 
-	m.App.StringMap = pageData
-
-	render.RenderTemplate(w, "about-page.html", m.App)
+	render.RenderTemplate(w, "about-page.html", &models.TemplateData{
+		StringMap: pageData,
+	})
 
 }
 
@@ -67,6 +68,7 @@ func (m *Repository) HandleHome(w http.ResponseWriter, r *http.Request) {
 	pageData["Title"] = "Home page"
 	pageData["Description"] = "This is home page"
 
-	m.App.StringMap = pageData
-	render.RenderTemplate(w, "home-page.html", m.App)
+	render.RenderTemplate(w, "home-page.html", &models.TemplateData{
+		StringMap: pageData,
+	})
 }

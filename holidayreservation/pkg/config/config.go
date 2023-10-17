@@ -11,18 +11,6 @@ type AppConfig struct {
 	TempleteCache map[string]*pongo2.Template
 	UseCache      bool
 	InfoLog       *log.Logger
-	TemplateData
-}
-
-type TemplateData struct {
-	StringMap map[string]string
-	IntMap    map[string]string
-	FlotMap   map[string]string
-	Data      map[string]any
-	CSRFToken string
-	Flash     string
-	Warning   string
-	Error     string
 }
 
 // the new appconfig fuction just to create new appconfig and initialize the template

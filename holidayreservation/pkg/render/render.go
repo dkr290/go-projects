@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/dkr290/go-projects/holidayapplication/pkg/config"
+	"github.com/dkr290/go-projects/holidayapplication/pkg/models"
 	"github.com/flosch/pongo2"
 )
 
@@ -92,7 +93,7 @@ func NewTemplate(a *config.AppConfig) {
 }
 
 // better cache version
-func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
+func RenderTemplate(w http.ResponseWriter, tpml string, data *models.TemplateData) {
 	var tc map[string]*pongo2.Template
 	if app.UseCache {
 		//get the template cache from the app config
@@ -122,6 +123,9 @@ func RenderTemplate(w http.ResponseWriter, tpml string, data any) {
 		log.Println("error execute pongo template", err) // if the template is not valid show why it is not valid
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	// default data in the templates
+	data = AddDefaultData(data)
 
 	//render the template
 
@@ -155,4 +159,11 @@ func CreateTemplateCache() (map[string]*pongo2.Template, error) {
 
 	return cache, nil
 
+}
+
+// something that  will be added to all pages in this case
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+
+	return td
 }
