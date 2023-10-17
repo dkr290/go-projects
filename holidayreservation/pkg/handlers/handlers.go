@@ -49,8 +49,12 @@ func NewHandlers(a *config.AppConfig) *Repository {
 
 // this is the about functions
 func (m *Repository) HandleAbout(w http.ResponseWriter, r *http.Request) {
-	m.App.Data.Title = "About Page"
-	m.App.Description = "This is the About page"
+
+	pageData := make(map[string]string)
+	pageData["Title"] = "About page"
+	pageData["Description"] = "This is about page"
+
+	m.App.StringMap = pageData
 
 	render.RenderTemplate(w, "about-page.html", m.App)
 
@@ -58,8 +62,11 @@ func (m *Repository) HandleAbout(w http.ResponseWriter, r *http.Request) {
 
 // this is the about page
 func (m *Repository) HandleHome(w http.ResponseWriter, r *http.Request) {
-	m.App.Title = "Home Page"
-	m.App.Description = "This is the Home Page"
 
+	pageData := make(map[string]string)
+	pageData["Title"] = "Home page"
+	pageData["Description"] = "This is home page"
+
+	m.App.StringMap = pageData
 	render.RenderTemplate(w, "home-page.html", m.App)
 }
