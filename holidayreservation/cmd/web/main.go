@@ -28,13 +28,20 @@ func main() {
 	// passinf tc to NewConfig mean TempleteCache =  tc
 	//Newtemplate gets app (Appconfig) and the global variable app which is AppConfig = app from here
 	// we create also repo in the main with newrepo and appconfig and then newhandlers passing the repo back
+
+	///////////////////repository pattern
+	// app := config.NewConfig(tc, UseCache) // second argument is to use cache or not
+	// repo := handlers.NewRepo(app)
+	// handlers.NewHandlers(repo)
+	// render.NewTemplate(app)
+
+	/////////////////////interfaces
 	app := config.NewConfig(tc, UseCache) // second argument is to use cache or not
-	repo := handlers.NewRepo(app)
-	handlers.NewHandlers(repo)
+	h := handlers.NewHandlers(app)
 	render.NewTemplate(app)
 
-	http.HandleFunc("/", handlers.Repo.HandleHome)
-	http.HandleFunc("/about", handlers.Repo.HandleAbout)
+	http.HandleFunc("/", h.HandleHome)
+	http.HandleFunc("/about", h.HandleAbout)
 
 	fmt.Printf("Starting the application on port %s\n", portNumber)
 	if err := http.ListenAndServe(portNumber, nil); err != nil {
