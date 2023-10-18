@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/dkr290/go-projects/holidayapplication/pkg/config"
 	"github.com/dkr290/go-projects/holidayapplication/pkg/render"
 )
@@ -12,7 +14,10 @@ import (
 var (
 	portNumber = ":8081"
 
-	UseCache = true
+	UseCache     = true
+	InProduction = false
+	app          *config.AppConfig
+	session      *scs.SessionManager
 )
 
 func main() {
@@ -36,6 +41,12 @@ func main() {
 
 	// http.HandleFunc("/", h.HandleHome)
 	// http.HandleFunc("/about", h.HandleAbout)
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = false
+	session.Cookie.Secure = InProduction
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
@@ -44,7 +55,7 @@ func main() {
 
 	}
 
-	app := config.NewConfig(tc, UseCache) // second argument is to use cache or not
+	app = config.NewConfig(tc, UseCache, InProduction, session) // second argument is to use cache or not
 
 	fmt.Printf("Starting the application on port %s\n", portNumber)
 	srv := &http.Server{
