@@ -6,24 +6,17 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-projects/holidayapplication/pkg/config"
-	"github.com/dkr290/go-projects/holidayapplication/pkg/handlers"
 	"github.com/dkr290/go-projects/holidayapplication/pkg/render"
 )
 
-var portNumber = ":8080"
+var (
+	portNumber = ":8081"
+
+	UseCache = true
+)
 
 func main() {
 
-	var (
-		UseCache = true
-	)
-
-	tc, err := render.CreateTemplateCache()
-	if err != nil {
-
-		log.Fatalln("error create template cache")
-
-	}
 	// app is of type appconfig so this way with the NEW fuction we have app as type appConfig and also passing tc so the cache Appconfig.TempLateCache = tc
 	// passinf tc to NewConfig mean TempleteCache =  tc
 	//Newtemplate gets app (Appconfig) and the global variable app which is AppConfig = app from here
@@ -36,15 +29,31 @@ func main() {
 	// render.NewTemplate(app)
 
 	/////////////////////interfaces
-	app := config.NewConfig(tc, UseCache) // second argument is to use cache or not
-	h := handlers.NewHandlers(app)
-	render.NewTemplate(app)
+	//this is going to routes
+	// app = config.NewConfig(tc, UseCache) // second argument is to use cache or not
+	// h := handlers.NewHandlers(app)
+	// render.NewTemplate(app)
 
-	http.HandleFunc("/", h.HandleHome)
-	http.HandleFunc("/about", h.HandleAbout)
+	// http.HandleFunc("/", h.HandleHome)
+	// http.HandleFunc("/about", h.HandleAbout)
+
+	tc, err := render.CreateTemplateCache()
+	if err != nil {
+
+		log.Fatalln("error create template cache")
+
+	}
+
+	app := config.NewConfig(tc, UseCache) // second argument is to use cache or not
 
 	fmt.Printf("Starting the application on port %s\n", portNumber)
-	if err := http.ListenAndServe(portNumber, nil); err != nil {
+	srv := &http.Server{
+
+		Addr:    portNumber,
+		Handler: routes(app),
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		panic(err)
 	}
 
