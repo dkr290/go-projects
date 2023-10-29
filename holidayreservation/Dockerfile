@@ -4,11 +4,13 @@ WORKDIR /tmp/app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go test -v
-RUN GO build -o ./out/holidayreservation ./cmd/app/*.go 
+RUN go build -o ./out/holidayreservation ./cmd/web/*.go 
 
 
 FROM alpine:3.18.0
 RUN apk add ca-certificates
+WORKDIR /app
 COPY --from=build /tmp/app/out/holidayreservation /app/holidayreservation
-CMD [ "/app/holudayreservation" ]
+COPY --from=build /tmp/app/templates /app/templates
+RUN ls -lR /app
+CMD [ "./holidayreservation" ]
