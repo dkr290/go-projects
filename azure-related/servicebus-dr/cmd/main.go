@@ -15,13 +15,13 @@ func main() {
 
 	// using standard library "flag" package
 	//Thoose concern only from primary to secondary new to weu for example
-	flag.Bool("fail-over-primary-secondary", false, "Failing over for example Primary is North Europe, Secondary is West Europe")
+	flag.Bool("fail-over-primary-secondary", false, "Failing over for example Primary to Secondary ")
 	flag.Bool("clean-topics-primary", false, "Clean topics from previous primary to prepare it for replication")
-	flag.Bool("replicate-secondary-primary", false, "Enable replication from secondary example West Europe and Primary North Europe")
+	flag.Bool("replicate-secondary-primary", false, "Enable replication from secondary example Secondary and to Primary ")
 	//This will be opposite steps
-	flag.Bool("fail-over-secondary-primary", false, "Failing over for example Primary is West Europe, Secondary is North Europe")
+	flag.Bool("fail-over-secondary-primary", false, "Failing over for example Secondary , Primary")
 	flag.Bool("clean-topics-secondary", false, "Clean topics from previous primary to prepare it for replication")
-	flag.Bool("replicate-primary-secondary", false, "Enable replication from primary example North Europe and Secondary West Europe")
+	flag.Bool("replicate-primary-secondary", false, "Enable replication from original Primary and to Secondary")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
