@@ -9,7 +9,7 @@ RUN go build -o ./out/holidayreservation ./cmd/web/*.go
 ## very secure docker file
 FROM alpine:3.18.0
 RUN addgroup -S k8sgroup && adduser -S k8suser -G k8sgroup -h /home/k8suser
-WORKDIr /home/k8suser
+WORKDIR /home/k8suser
 COPY --from=build /tmp/app/out/holidayreservation /home/k8suser/holidayreservation
 COPY --from=build /tmp/app/templates /home/k8suser/templates
 RUN chmod a-w /etc && rm -rf /bin/*
