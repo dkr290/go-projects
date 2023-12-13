@@ -5,18 +5,18 @@ import "testing"
 func TestParse(t *testing.T) {
 
 	const rawurl = "https://foo.com"
+	//const rawurl = "foo.com"
 	var u *URL
 	var err error
 
 	if u, err = Parse(rawurl); err != nil {
-		t.Logf("Parse %q err = %q, want nil", rawurl, err)
-		t.Fail()
+		t.Fatalf("Parse %q err = %q, want nil", rawurl, err)
+
 	}
 	want := "https"
-	got := u.Scheme
 
-	if got != want {
-		t.Logf("Parsing (%q).Scheme = %q; want %q", rawurl, got, want)
-		t.Fail()
+	if got := u.Scheme; got != want {
+		t.Errorf("Parsing (%q).Scheme = %q; want %q", rawurl, got, want)
+
 	}
 }
