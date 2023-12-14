@@ -4,7 +4,7 @@ import "testing"
 
 func TestParse(t *testing.T) {
 
-	const rawurl = "https://foo.com"
+	const rawurl = "https://foo.com/go"
 	//const rawurl = "foo.com"
 	var u *URL
 	var err error
@@ -18,5 +18,13 @@ func TestParse(t *testing.T) {
 	if got := u.Scheme; got != want {
 		t.Errorf("Parsing (%q).Scheme = %q; want %q", rawurl, got, want)
 
+	}
+
+	if got, want := u.Host, "foo.com"; got != want {
+		t.Errorf("Parsing (%q).Host = %q; want %q", rawurl, got, want)
+	}
+
+	if got, want := u.Path, "go"; got != want {
+		t.Errorf("Parsing (%q) got Path = %q; want %q", rawurl, got, want)
 	}
 }
