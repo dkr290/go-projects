@@ -30,3 +30,7 @@ func Parse(url string) (*URL, error) {
 	}, nil
 
 }
+
+func (u *URL) Port() string {
+	return ""
+}
