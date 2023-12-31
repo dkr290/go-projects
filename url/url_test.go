@@ -104,65 +104,104 @@ func TestParse(t *testing.T) {
 //			}
 //		}
 //	}
+// func TestURLPort(t *testing.T) {
+
+// 	//helper function
+
+// 	testPort := func(inpt, wantPort string) {
+
+// 		t.Helper()
+// 		u := &URL{Host: inpt}
+// 		if got := u.Port(); got != wantPort {
+// 			t.Errorf("for host %s, got %s, want %s", inpt, got, wantPort)
+// 		}
+
+// 	}
+
+// 	t.Run("with port", func(t *testing.T) {
+
+// 		testPort("foo.com:80", "80")
+
+// 	})
+
+// 	t.Run("empty port", func(t *testing.T) {
+
+// 		testPort("foo.com:", "")
+
+// 	})
+
+// 	t.Run("without port", func(t *testing.T) {
+
+// 		testPort("foo.com", "")
+
+// 	})
+
+// 	t.Run("ip with port", func(t *testing.T) {
+
+// 		testPort("1.2.3.4:90", "90")
+
+// 	})
+
+// 	t.Run("ip without port", func(t *testing.T) {
+
+// 		testPort("1.2.3.4", "")
+
+// 	})
+
+// }
+// another way but is a bit more complex
+
+// func TestURLPort(t *testing.T) {
+
+// 	//helper function
+
+// 	testPort := func(inpt, wantPort string) func(*testing.T) {
+
+// 		return func(t *testing.T) {
+
+// 			t.Helper()
+// 			u := &URL{Host: inpt}
+// 			if got := u.Port(); got != wantPort {
+// 				t.Errorf("for host %s, got %s, want %s", inpt, got, wantPort)
+// 			}
+
+// 		}
+
+// 	}
+
+// 	t.Run("with port", testPort("foo.com:80", "80"))
+// 	t.Run("empty port", testPort("foo.com:", ""))
+
+// 	t.Run("without port", testPort("foo.com", ""))
+
+// 	t.Run("ip with port", testPort("1.2.3.4:90", "90"))
+
+// 	t.Run("ip without port", testPort("1.2.3.4", ""))
+
+// }
+
+//combine table driven tests with subtests
+
 func TestURLPort(t *testing.T) {
-	t.Run("with port", func(t *testing.T) {
+	tests := map[string]struct {
+		inpt string //URL.host field
+		port string
+	}{
+		"with port":       {inpt: "foo.com:80", port: "80"},
+		"empty port":      {inpt: "foo.com:", port: ""},
+		"without port":    {inpt: "foo.com", port: ""},
+		"ip with port":    {inpt: "1.2.3.4:90", port: "90"},
+		"ip without port": {inpt: "1.2.3.4", port: ""},
+	}
 
-		const inpt = "foo.com:80"
+	for name, tt := range tests {
 
-		u := &URL{Host: inpt}
-
-		if got, want := u.Port(), "80"; got != want {
-			t.Errorf("for host %s, got %s, want %s", u.Host, got, want)
-		}
-
-	})
-
-	t.Run("empty port", func(t *testing.T) {
-
-		const inpt = "foo.com:"
-
-		u := &URL{Host: inpt}
-
-		if got, want := u.Port(), ""; got != want {
-			t.Errorf("for host %s, got %s, want %s", u.Host, got, want)
-		}
-
-	})
-
-	t.Run("without port", func(t *testing.T) {
-
-		const inpt = "foo.com"
-
-		u := &URL{Host: inpt}
-
-		if got, want := u.Port(), ""; got != want {
-			t.Errorf("for host %s, got %s, want %s", u.Host, got, want)
-		}
-
-	})
-
-	t.Run("ip with port", func(t *testing.T) {
-
-		const inpt = "1.2.3.4:90"
-
-		u := &URL{Host: inpt}
-
-		if got, want := u.Port(), "90"; got != want {
-			t.Errorf("for host %s, got %s, want %s", u.Host, got, want)
-		}
-
-	})
-
-	t.Run("ip without port", func(t *testing.T) {
-
-		const inpt = "1.2.3.4"
-
-		u := &URL{Host: inpt}
-
-		if got, want := u.Port(), ""; got != want {
-			t.Errorf("for host %s, got %s, want %s", u.Host, got, want)
-		}
-
-	})
+		t.Run(name, func(t *testing.T) {
+			u := &URL{Host: tt.inpt}
+			if got, want := u.Port(), tt.port; got != want {
+				t.Errorf("for host %s, got %s, want %s", tt.inpt, got, want)
+			}
+		})
+	}
 
 }
