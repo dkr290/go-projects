@@ -224,3 +224,19 @@ func TestURLPort(t *testing.T) {
 	}
 
 }
+
+func TestURLString(t *testing.T) {
+
+	u := &URL{
+		Scheme: "https",
+		Host:   "foo.com",
+		Path:   "python",
+	}
+
+	got, want := u.String(), "https://foo.com/python"
+
+	if got != want {
+		t.Errorf("%#v\ngot   %q\nwant %q", u, got, want)
+	}
+
+}

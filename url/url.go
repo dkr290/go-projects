@@ -2,6 +2,7 @@ package url
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -49,4 +50,8 @@ func (u *URL) HostName() string {
 	}
 
 	return u.Host[:i]
+}
+
+func (u *URL) String() string {
+	return fmt.Sprintf("%s://%s/%s", u.Scheme, u.Host, u.Path)
 }

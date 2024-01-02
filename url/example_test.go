@@ -7,17 +7,35 @@ import (
 	"github.com/dkr290/go-projects/url"
 )
 
-func ExampleUrl() {
+func ExampleURL() {
 
-	u, err := url.Parse("http://foo.com/python")
+	u, err := url.Parse("https://foo.com/python")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	u.Scheme = "https"
 	fmt.Println(u)
 
 	//Output:
-	//&{https foo.com python}
+	//https://foo.com/python
+}
+
+func ExampleURL_fields() {
+
+	u, err := url.Parse("https://foo.com/python")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(u.Scheme)
+	fmt.Println(u.Host)
+	fmt.Println(u.Path)
+	fmt.Println(u)
+
+	//Output:
+	//https
+	//foo.com
+	//python
+	//https://foo.com/python
 }
