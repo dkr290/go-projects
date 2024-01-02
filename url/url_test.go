@@ -1,6 +1,9 @@
 package url
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
 
@@ -182,24 +185,40 @@ func TestParse(t *testing.T) {
 
 //combine table driven tests with subtests
 
-func TestURLPort(t *testing.T) {
-	tests := map[string]struct {
-		inpt string //URL.host field
-		port string
-	}{
-		"with port":       {inpt: "foo.com:80", port: "80"},
-		"empty port":      {inpt: "foo.com:", port: ""},
-		"without port":    {inpt: "foo.com", port: ""},
-		"ip with port":    {inpt: "1.2.3.4:90", port: "90"},
-		"ip without port": {inpt: "1.2.3.4", port: ""},
+var tests = map[string]struct {
+	inpt     string //URL.host field
+	hostname string
+	port     string
+}{
+	"with port":       {inpt: "foo.com:80", hostname: "foo.com", port: "80"},
+	"empty port":      {inpt: "foo.com", hostname: "foo.com", port: ""},
+	"without port":    {inpt: "foo.com:", hostname: "foo.com", port: ""},
+	"ip with port":    {inpt: "1.2.3.4:90", hostname: "1.2.3.4", port: "90"},
+	"ip without port": {inpt: "1.2.3.4", hostname: "1.2.3.4", port: ""},
+}
+
+func TestURLHostname(t *testing.T) {
+
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s/%s", name, tt.inpt), func(t *testing.T) {
+
+			u := &URL{Host: tt.inpt}
+
+			if got, want := u.HostName(), tt.hostname; got != want {
+				t.Errorf("got %q; want %q", got, want)
+			}
+		})
 	}
+}
+
+func TestURLPort(t *testing.T) {
 
 	for name, tt := range tests {
 
-		t.Run(name, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s/%s", name, tt.inpt), func(t *testing.T) {
 			u := &URL{Host: tt.inpt}
 			if got, want := u.Port(), tt.port; got != want {
-				t.Errorf("for host %s, got %s, want %s", tt.inpt, got, want)
+				t.Errorf("got %s, want %s", got, want)
 			}
 		})
 	}

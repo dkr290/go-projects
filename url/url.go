@@ -32,5 +32,21 @@ func Parse(url string) (*URL, error) {
 }
 
 func (u *URL) Port() string {
-	return ""
+	i := strings.Index(u.Host, ":")
+	if i < 0 {
+		return ""
+	}
+	return u.Host[i+1:]
+}
+
+// Hostname returns u.Host, stripping any port number if present.
+
+func (u *URL) HostName() string {
+	i := strings.Index(u.Host, ":")
+
+	if i < 0 {
+		return u.Host
+	}
+
+	return u.Host[:i]
 }
