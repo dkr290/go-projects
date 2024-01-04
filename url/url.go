@@ -15,7 +15,7 @@ type URL struct {
 func Parse(url string) (*URL, error) {
 
 	i := strings.Index(url, "://")
-	if i < 0 {
+	if i < 1 {
 		return nil, errors.New("missing scheme")
 	}
 	scheme, rest := url[:i], url[i+3:]

@@ -240,3 +240,18 @@ func TestURLString(t *testing.T) {
 	}
 
 }
+
+func TestParseInvalidURLs(t *testing.T) {
+
+	tests := map[string]string{
+		"missing scheme": "://foo.com",
+	}
+
+	for name, inpt := range tests {
+		t.Run(fmt.Sprintf("%s/%s", name, inpt), func(t *testing.T) {
+			if _, err := Parse(inpt); err == nil {
+				t.Errorf("Parse %q=nil; want error", inpt)
+			}
+		})
+	}
+}
