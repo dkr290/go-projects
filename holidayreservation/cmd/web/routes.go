@@ -33,5 +33,8 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/", http.HandlerFunc(h.HandleHome))
 	mux.Get("/about", http.HandlerFunc(h.HandleAbout))
 
+	fileServer := http.FileServer(http.Dir("./static/"))
+	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
 	return mux
 }
