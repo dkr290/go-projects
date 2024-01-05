@@ -227,16 +227,30 @@ func TestURLPort(t *testing.T) {
 
 func TestURLString(t *testing.T) {
 
-	u := &URL{
-		Scheme: "https",
-		Host:   "foo.com",
-		Path:   "python",
+	tests := map[string]struct {
+		url  *URL
+		want string
+	}{
+		"nil url":   {url: nil, want: ""},
+		"empty url": {url: &URL{}, want: ""},
+		"scheme":    {url: &URL{Scheme: "https"}, want: "https://"},
+		"host": {
+			url:  &URL{Scheme: "https", Host: "foo.com"},
+			want: "https://foo.com",
+		},
+		"path": {
+			url:  &URL{Scheme: "https", Host: "foo.com", Path: "python"},
+			want: "https://foo.com/python",
+		},
 	}
 
-	got, want := u.String(), "https://foo.com/python"
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			if g, w := tt.url, tt.want; g.String() != w {
+				t.Errorf("url: %#v\ngot: %q\nwant: %q", g, g, w)
 
-	if got != want {
-		t.Errorf("%#v\ngot   %q\nwant %q", u, got, want)
+			}
+		})
 	}
 
 }
@@ -253,5 +267,14 @@ func TestParseInvalidURLs(t *testing.T) {
 				t.Errorf("Parse %q=nil; want error", inpt)
 			}
 		})
+	}
+}
+
+func BenchmarkURLString(b *testing.B) {
+	b.Logf("loop %d times\n", b.N)
+	b.ReportAllocs()
+	u := &URL{Scheme: "https", Host: "foo.com", Path: "go"}
+	for i := 0; i < b.N; i++ {
+		u.String()
 	}
 }
