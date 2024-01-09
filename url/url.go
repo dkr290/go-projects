@@ -13,21 +13,38 @@ type URL struct {
 
 func Parse(url string) (*URL, error) {
 
-	i := strings.Index(url, "://")
-	if i < 1 {
+	scheme, rest, ok := parseScheme(url)
+	if !ok {
 		return nil, errors.New("missing scheme")
 	}
-	scheme, rest := url[:i], url[i+3:]
-	host, path := rest, ""
-	if i := strings.Index(rest, "/"); i > 0 {
-		host, path = rest[:i], rest[i+1:]
-	}
+
+	host, path := parseHost(rest)
 
 	return &URL{
 		Scheme: scheme,
 		Host:   host,
 		Path:   path,
 	}, nil
+
+}
+func parseScheme(rawurl string) (scheme, rest string, ok bool) {
+
+	i := strings.Index(rawurl, "://")
+	if i < 1 {
+		return "", "", false
+	}
+
+	return rawurl[:i], rawurl[i+3:], true
+
+}
+
+func parseHost(rest string) (host, path string) {
+
+	if i := strings.Index(rest, "/"); i > 0 {
+		host, path = rest[:i], rest[i+1:]
+	}
+
+	return host, path
 
 }
 
