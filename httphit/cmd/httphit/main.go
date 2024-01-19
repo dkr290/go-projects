@@ -2,25 +2,19 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"runtime"
 )
 
-const usageText = `
-		  -url
-		  		HTTP server URL to make requests (required)
-		  -n
-		  		Number of requests to make
-		  -c
-		 		 Concurrency level`
-
-func usage() string { return usageText[1:] }
 func main() {
 
-	var f flags
+	f := &flags{
+		n: 100,
+		c: runtime.NumCPU(),
+	}
 
 	if err := f.parse(); err != nil {
-		fmt.Println(usage())
-		log.Fatal(err)
+		os.Exit(1)
 
 	}
 	fmt.Printf("Making %d requests to %s with a concurrency level of %d.\n",
