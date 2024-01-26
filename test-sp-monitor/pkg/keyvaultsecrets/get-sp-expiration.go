@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	vaultBaseURL = "https://aa-key-vault-dt-dev.vault.azure.net/"
+	vaultBaseURL = "https://kv.vault.azure.net/"
 )
 
 func getSecretClient() *azsecrets.Client {
