@@ -1,33 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 )
-
-var (
-	client *redis.Client
-)
-
-func init() {
-	// Initialize the Redis client
-	client = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Change this to your Redis server address
-		Password: "",               // No password by default
-		DB:       0,                // Default DB
-	})
-
-	// Check if Redis is reachable
-	pong, err := client.Ping().Result()
-	if err != nil {
-		fmt.Println("Error connecting to Redis:", err)
-	} else {
-		fmt.Println("Connected to Redis:", pong)
-	}
-}
 
 // PageData represents the data structure for the HTML template
 type PageData struct {
@@ -35,12 +13,14 @@ type PageData struct {
 }
 
 type Handlers struct {
-	r *gin.Engine
+	r      *gin.Engine
+	client *redis.Client
 }
 
-func NewHandlers(r *gin.Engine) *Handlers {
+func NewHandlers(r *gin.Engine, redis *redis.Client) *Handlers {
 	return &Handlers{
-		r: r,
+		r:      r,
+		client: redis,
 	}
 }
 
@@ -48,7 +28,7 @@ func NewHandlers(r *gin.Engine) *Handlers {
 func (h *Handlers) GetHandler(c *gin.Context) {
 
 	// Retrieve all key-value pairs from the cache
-	keyValues, err := client.HGetAll("myCache").Result()
+	keyValues, err := h.client.HGetAll("myCache").Result()
 	if err != nil && err != redis.Nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,7 +49,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	value := c.PostForm("value")
 
 	// Add the key-value pair to the cache
-	err := client.HSet("myCache", key, value).Err()
+	err := h.client.HSet("myCache", key, value).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -86,7 +66,7 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 	key := c.PostForm("key")
 
 	// Delete the key from the cache
-	err := client.HDel("myCache", key).Err()
+	err := h.client.HDel("myCache", key).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"test-sp-monitor/database"
 	"test-sp-monitor/handlers"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,11 @@ import (
 func main() {
 
 	r := gin.Default()
-	hand := handlers.NewHandlers(r)
+	redisCache := &database.RedisCache{}
+	redisCache.RedisConnect("localhost", "6379", "")
+	redisClient := redisCache.GetRedisClient()
+
+	hand := handlers.NewHandlers(r, redisClient)
 	// Load HTML template
 	r.SetHTMLTemplate(template.Must(template.ParseFiles("templates/index.html")))
 	r.GET("/", hand.GetHandler)
