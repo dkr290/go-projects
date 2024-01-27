@@ -31,11 +31,11 @@
                     </tr>
                 </thead>
                 <tbody id="keyValueTable">
-                    {{range $key, $value := .KeyValues}}
+                    {{range .PageData.Albums }}
                         <tr>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
-                            <td>"Expiry static 1978-08-08"</td>
+                            <td>{{.Key}}</td>
+                            <td>{{.Value}}</td>
+                            <td>{{.Thirdvalue}}</td>
                         </tr>
                     {{end}}
                 </tbody>

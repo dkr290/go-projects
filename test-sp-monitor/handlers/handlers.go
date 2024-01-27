@@ -1,15 +1,26 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 )
 
 // PageData represents the data structure for the HTML template
+type KVKey struct {
+	Key        string    `json:"key" redis:"key"`
+	Value      string    `json:"value" redis:"value"`
+	ThirdValue time.Time `json:"thirdvalue" redis:"thirdvalue"`
+}
+
 type PageData struct {
-	KeyValues map[string]string
+	Albums []KVKey
 }
 
 type Handlers struct {
@@ -27,36 +38,85 @@ func NewHandlers(r *gin.Engine, redis *redis.Client) *Handlers {
 // Define routes
 func (h *Handlers) GetHandler(c *gin.Context) {
 
-	// Retrieve all key-value pairs from the cache
-	keyValues, err := h.client.HGetAll("myCache").Result()
-	if err != nil && err != redis.Nil {
+	// Fetch all keys from the Redis cache
+	keys, err := h.client.Keys("KvKeys:*").Result()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Render HTML template with key-value pairs
-	pageData := PageData{
-		KeyValues: keyValues,
+	// Create a slice to store albums
+	var kvkeys []KVKey
+
+	// Fetch albums for each key
+	for _, key := range keys {
+		kvkeysJSON, err := h.client.Get(key).Result()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var kvkey KVKey
+		err = json.Unmarshal([]byte(kvkeysJSON), &kvkey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		kvkeys = append(kvkeys, kvkey)
 	}
-	c.HTML(http.StatusOK, "index.html", pageData)
+
+	// Create a PageData struct
+	pageData := PageData{
+		Albums: kvkeys,
+	}
+
+	// Render the HTML page with the PageData struct
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"PageData": pageData,
+	})
 
 }
 
 func (h *Handlers) AddHandler(c *gin.Context) {
 
 	// Get key and value from the form
-	key := c.PostForm("key")
-	value := c.PostForm("value")
+	//key := c.PostForm("key")
+	key := "test1"
+	//value := c.PostForm("value")
+	value := "test2"
+	//we generate dummy data value
+	thirdValue := randate()
 
-	// Add the key-value pair to the cache
-	err := h.client.HSet("myCache", key, value).Err()
+	kvkey := KVKey{
+		Key:        key,
+		Value:      value,
+		ThirdValue: thirdValue,
+	}
+	// Convert the Album struct to JSON
+	albumJSON, err := json.Marshal(kvkey)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Redirect to the home page after adding the key-value pair
-	c.Redirect(http.StatusSeeOther, "/")
+	// Generate a unique key for the album
+	newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(key), strings.ToLower(value))
+
+	// Log the key and JSON data for debugging
+	c.Request.Header.Add("X-Debug-Key", newkey)
+	c.Request.Header.Add("X-Debug-Key1", key)
+	c.Request.Header.Add("X-Debug-JSON", string(albumJSON))
+
+	// Add the album to the Redis cache
+	err = h.client.Set(newkey, albumJSON, 0).Err()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Redirect to the main page after adding the album
+	c.Redirect(http.StatusPermanentRedirect, "/")
 
 }
 
@@ -75,4 +135,14 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 	// Redirect to the home page after deleting the key
 	c.Redirect(http.StatusSeeOther, "/")
 
+}
+
+// just for testing
+func randate() time.Time {
+	min := time.Date(1970, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	max := time.Date(2070, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	delta := max - min
+
+	sec := rand.Int63n(delta) + min
+	return time.Unix(sec, 0)
 }
