@@ -12,6 +12,31 @@ import (
 	"github.com/go-redis/redis"
 )
 
+// var (
+// 	client        *redis.Client
+// 	redisHost     = "localhost"
+// 	redisPort     = "6379"
+// 	redisPassword = ""
+// )
+
+// func init() {
+// 	// Initialize the Redis client
+// 	client = redis.NewClient(&redis.Options{
+// 		Addr:     redisHost + ":" + redisPort,
+// 		Password: redisPassword,
+// 		DB:       0,
+// 	})
+
+// 	// Check if Redis is reachable
+// 	pong, err := connectToDb(client)
+
+// 	if err != nil {
+// 		fmt.Println("Error connecting to Redis:", err)
+// 	} else {
+// 		fmt.Println("Connected to Redis:", pong)
+// 	}
+// }
+
 // PageData represents the data structure for the HTML template
 type KVKey struct {
 	Key        string    `json:"key" redis:"key"`
@@ -28,10 +53,10 @@ type Handlers struct {
 	client *redis.Client
 }
 
-func NewHandlers(r *gin.Engine, redis *redis.Client) *Handlers {
+func NewHandlers(r *gin.Engine, rc *redis.Client) *Handlers {
 	return &Handlers{
 		r:      r,
-		client: redis,
+		client: rc,
 	}
 }
 
@@ -81,10 +106,8 @@ func (h *Handlers) GetHandler(c *gin.Context) {
 func (h *Handlers) AddHandler(c *gin.Context) {
 
 	// Get key and value from the form
-	//key := c.PostForm("key")
-	key := "test1"
-	//value := c.PostForm("value")
-	value := "test2"
+	key := c.PostForm("key")
+	value := c.PostForm("value")
 	//we generate dummy data value
 	thirdValue := randate()
 
@@ -101,7 +124,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	}
 
 	// Generate a unique key for the album
-	newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(key), strings.ToLower(value))
+	newkey := fmt.Sprintf("KvKeys:%s", strings.ToLower(key))
 
 	// Log the key and JSON data for debugging
 	c.Request.Header.Add("X-Debug-Key", newkey)
@@ -116,7 +139,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	}
 
 	// Redirect to the main page after adding the album
-	c.Redirect(http.StatusPermanentRedirect, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 
 }
 
@@ -125,8 +148,13 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 	// Get key to delete from the form
 	key := c.PostForm("key")
 
+	// Generate the key for the album
+	newkey := fmt.Sprintf("KvKeys:%s", strings.ToLower(key))
+
 	// Delete the key from the cache
-	err := h.client.HDel("myCache", key).Err()
+
+	// Delete the album from the Redis cache
+	err := h.client.Del(newkey).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -146,3 +174,29 @@ func randate() time.Time {
 	sec := rand.Int63n(delta) + min
 	return time.Unix(sec, 0)
 }
+
+// func connectToDb(r *redis.Client) (string, error) {
+// 	var counts int64
+
+// 	for {
+// 		// Check if Redis is reachable
+// 		pong, err := r.Ping().Result()
+// 		if err != nil {
+// 			log.Println("Redis server is not yet ready")
+// 			counts++
+// 		} else {
+// 			return pong, nil
+
+// 		}
+
+// 		if counts > 10 {
+// 			log.Println(err)
+// 			return "", errors.New("could not connect to the redis")
+// 		}
+
+// 		log.Println("Backing off for two seconds...")
+// 		time.Sleep(2 * time.Second)
+// 		continue
+
+// 	}
+// }
