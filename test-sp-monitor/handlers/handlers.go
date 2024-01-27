@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"test-sp-monitor/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -13,14 +14,14 @@ type PageData struct {
 }
 
 type Handlers struct {
-	r      *gin.Engine
-	client *redis.Client
+	r  *gin.Engine
+	db *database.RedisCache
 }
 
-func NewHandlers(r *gin.Engine, redis *redis.Client) *Handlers {
+func NewHandlers(r *gin.Engine, redis *database.RedisCache) *Handlers {
 	return &Handlers{
-		r:      r,
-		client: redis,
+		r:  r,
+		db: redis,
 	}
 }
 
@@ -28,7 +29,7 @@ func NewHandlers(r *gin.Engine, redis *redis.Client) *Handlers {
 func (h *Handlers) GetHandler(c *gin.Context) {
 
 	// Retrieve all key-value pairs from the cache
-	keyValues, err := h.client.HGetAll("myCache").Result()
+	keyValues, err := h.db.Client.HGetAll("myCache").Result()
 	if err != nil && err != redis.Nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -49,7 +50,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	value := c.PostForm("value")
 
 	// Add the key-value pair to the cache
-	err := h.client.HSet("myCache", key, value).Err()
+	err := h.db.Client.HSet("myCache", key, value).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -66,7 +67,7 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 	key := c.PostForm("key")
 
 	// Delete the key from the cache
-	err := h.client.HDel("myCache", key).Err()
+	err := h.db.Client.HDel("myCache", key).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

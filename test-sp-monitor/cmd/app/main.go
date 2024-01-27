@@ -12,8 +12,7 @@ func main() {
 
 	r := gin.Default()
 	redisCache := &database.RedisCache{}
-	redisCache.RedisConnect("localhost", "6379", "")
-	redisClient := redisCache.GetRedisClient()
+	redisClient := redisCache.RedisConnect("localhost", "6379", "")
 
 	hand := handlers.NewHandlers(r, redisClient)
 	// Load HTML template
