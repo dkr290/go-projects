@@ -105,7 +105,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 
 	// Log the key and JSON data for debugging
 	c.Request.Header.Add("X-Debug-Key", newkey)
-	c.Request.Header.Add("X-Debug-Key1", key)
+	c.Request.Header.Add("X-Debug-Key1", thirdValue.Format("2006-01-02 15:04:05"))
 	c.Request.Header.Add("X-Debug-JSON", string(albumJSON))
 
 	// Add the album to the Redis cache

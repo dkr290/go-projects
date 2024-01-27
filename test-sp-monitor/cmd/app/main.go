@@ -13,11 +13,6 @@ import (
 func main() {
 
 	r := gin.Default()
-	redisCache := &database.RedisCache{}
-	redisCache.RedisConnect("localhost", "6379", "")
-	redisClient := redisCache.GetRedisClient()
-
-	hand := handlers.NewHandlers(r, redisClient)
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
 			param.ClientIP,
@@ -31,10 +26,17 @@ func main() {
 			param.Request.Header.Get("X-Debug-Key")+" "+param.Request.Header.Get("X-Debug-JSON")+" "+param.Request.Header.Get("X-Debug-Key1"),
 		)
 	}))
+	redisCache := &database.RedisCache{}
+	redisCache.RedisConnect("localhost", "6379", "")
+	redisClient := redisCache.GetRedisClient()
+
+	hand := handlers.NewHandlers(r, redisClient)
+
 	// Load HTML template
 	r.SetHTMLTemplate(template.Must(template.ParseFiles("templates/index.html")))
 	r.GET("/", hand.GetHandler)
 	r.POST("/add", hand.AddHandler)
+
 	r.POST("/delete", hand.DeleteHandler)
 
 	// Run the server
