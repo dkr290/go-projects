@@ -1,19 +1,16 @@
-package keyvaultsecrets
+package handlers
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 )
 
-var (
-	vaultBaseURL = "https://kv.vault.azure.net/"
-)
-
-func getSecretClient() *azsecrets.Client {
+func getSecretClient(vaultBaseURL string) *azsecrets.Client {
 
 	// Create a credential using the NewDefaultAzureCredential type.
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
@@ -29,20 +26,25 @@ func getSecretClient() *azsecrets.Client {
 	return client
 }
 
-func displaySecretExpiration() {
-	secretName := "sp-client-secret"
+func displaySecretExpiration(secretName string, keyvault string) (string, error) {
 
-	client := getSecretClient()
+	client := getSecretClient(keyvault)
 
 	secretBundle, err := client.GetSecret(context.TODO(), secretName, "", &azsecrets.GetSecretOptions{})
 	if err != nil {
-		log.Fatalf("Failed to get secret: %v", err)
+		return "", errors.New("failed to get the secret")
 	}
 	// Check if the secret has an expiration time
 	if secretBundle.Attributes != nil && secretBundle.Attributes.Expires != nil {
 		expirationTime := *secretBundle.Attributes.Expires
-		fmt.Printf("Secret '%s' expiration time: %v\n", secretName, expirationTime)
+		t := formatDate(expirationTime)
+		return t, nil
 	} else {
-		fmt.Printf("Secret '%s' does not have an expiration time.\n", secretName)
+		return "no expiration time set in KV secret", nil
 	}
+}
+
+func formatDate(s time.Time) string {
+	expinString := s.Format("2006-01-02 15:04:05")
+	return expinString
 }

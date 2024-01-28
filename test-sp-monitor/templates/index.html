@@ -8,55 +8,77 @@
     <!-- Bootstrap CSS (you can use a CDN or include locally) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="container mt-5">
-    <h1 class="mb-4">Key-Value Store</h1>
+<body class="container mt-8">
+    <div class="container">
+        <div class="row">
+    <h1 class="mb-4 offset-sm-2">KeyVault secrets expiration monitoring</h1>
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h2>Current Key-Value Pairs</h2>
-            {{range .PageData.Albums }}
+   
+     
+            
+            {{range .PageData.PageDataArray }}
             <div class="row">
                
-                <div class="col">{{.Key}}</div>
-                <div class="col">{{.Value}}</div>
-                <div class="col">{{.ThirdValue}}</div>
+                <div class="col-sm-4" style="background-color:rgb(201, 195, 195)">{{.Secret}}</div>
+                <div class="col-sm-4" style="background-color:rgb(190, 181, 181)">{{.Keyvault}}</div>
+                <div class="col-sm-4" style="background-color:rgb(173, 175, 192)">{{.Expireddate}}</div>
                 
               </div>
               {{end}}
-            <!-- <ul class="list-group">
-                {{range .PageData.Albums }}
-                    <li class="list-group-item">{{.Key}}: {{.Value}}: {{.ThirdValue}} </li>
-                {{end}}
-            </ul> -->
+          
+   
+        
         </div>
-
-        <div class="col-md-6">
-            <h2>Add Key-Value Pair</h2>
-            <form action="/add" method="post">
-                <div class="mb-3">
-                    <label for="key" class="form-label">Key:</label>
-                    <input type="text" name="key" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="value" class="form-label">Value:</label>
-                    <input type="text" name="value" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add</button>
-            </form>
-        </div>
+        
+        <hr>
     </div>
+        <div class="container">
+            <div class="row">
+        
+                <!-- First Form -->
+        <div class="col-sm-16">
 
-    <div class="row">
-        <div class="col-md-6">
-            <h2>Delete Key</h2>
-            <form action="/delete" method="post">
-                <div class="mb-3">
-                    <label for="keyToDelete" class="form-label">Key:</label>
-                    <input type="text" name="key" class="form-control" required>
+            <form class="mb-1 row" action="/add" method="post">
+                <div class="mb-3 row">
+                    <label for="secret" class="col-sm-2 col-form-label">Secret:</label>
+                    <div class="col-sm-4">
+                    <input type="text" name="secret" class="form-control" required>
+                    </div>
                 </div>
+                <div class="mb-3 row">
+                    <label for="keyvault"  class="col-sm-2 col-form-label">Keyvault:</label>
+                    <div class="col-sm-4">
+                    <input type="text" name="keyvault" class="form-control" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        
+                <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                     </div>
+            </form>
+            <hr>
+            </div>
+          
+          
+           
+    
+                 <!-- First Form -->
+        <div class="col-sm-18">
+            <form class="mb-1 row" action="/delete" method="post">
+                <div class="mb-3 row">
+                    <label for="keyToDelete" class="col-sm-2 col-form-label">Secret:</label>
+                    <div class="col-sm-4">
+                    <input type="text" name="secret" class="form-control" required>
+                </div>
+            </div>
+               <div class="col-sm-4">
                 <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
             </form>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap JS (you can use a CDN or include locally) -->
