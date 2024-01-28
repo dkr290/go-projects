@@ -14,29 +14,29 @@ type Cache interface {
 }
 
 type RedisCache struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
-func (r *RedisCache) RedisConnect(redisHost string, redisPort string, redisPassword string) {
+func (r *RedisCache) RedisConnect(redisHost string, redisPort string, redisPassword string) *RedisCache {
 	// Initialize the Redis client
-	r.client = redis.NewClient(&redis.Options{
+	cl := redis.NewClient(&redis.Options{
 		Addr:     redisHost + ":" + redisPort,
 		Password: redisPassword,
 		DB:       0,
 	})
 
 	// Check if Redis is reachable
-	pong, err := connectToDb(r.client)
+	pong, err := connectToDb(cl)
 
 	if err != nil {
 		fmt.Println("Error connecting to Redis:", err)
 	} else {
 		fmt.Println("Connected to Redis:", pong)
 	}
-}
+	return &RedisCache{
+		Client: cl,
+	}
 
-func (r *RedisCache) GetRedisClient() *redis.Client {
-	return r.client
 }
 
 func connectToDb(r *redis.Client) (string, error) {

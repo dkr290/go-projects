@@ -32,6 +32,7 @@ func main() {
 
 	hand := handlers.NewHandlers(r, cl)
 
+
 	// Load HTML template
 	r.SetHTMLTemplate(template.Must(template.ParseFiles("templates/index.html")))
 	r.GET("/", hand.GetHandler)

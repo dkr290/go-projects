@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -22,23 +23,27 @@ type PageData struct {
 }
 
 type Handlers struct {
-	r      *gin.Engine
-	client *redis.Client
+	r  *gin.Engine
+	db *database.RedisCache
 }
+
 
 func NewHandlers(r *gin.Engine, rc *redis.Client) *Handlers {
 	return &Handlers{
 		r:      r,
 		client: rc,
+
 	}
 }
 
 // Define routes
 func (h *Handlers) GetHandler(c *gin.Context) {
 
+
 	// Fetch all keys from the Redis cache
 	keys, err := h.client.Keys("KvKeys:*").Result()
 	if err != nil {
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -91,6 +96,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/")
 		return
 
+
 	}
 
 	kvkey := KVKey{
@@ -136,8 +142,10 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 
 	// Delete the key from the cache
 
-	// Delete the album from the Redis cache
+
+	// Delete the secret from the Redis cache
 	err := h.client.Del(newkey).Err()
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
