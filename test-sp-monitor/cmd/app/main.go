@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"os"
 	"test-sp-monitor/database"
 	"test-sp-monitor/handlers"
 	"time"
@@ -12,9 +13,25 @@ import (
 
 func main() {
 
+	redisHost := os.Getenv("REDIS_HOST")
+
+	if len(redisHost) == 0 {
+		redisHost = "localhost"
+	}
+	redisPort := os.Getenv("REDIS_PORT")
+	if len(redisPort) == 0 {
+		redisPort = "6379"
+	}
+
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
+	if len(redisPassword) == 0 {
+		redisPassword = ""
+	}
+
 	r := gin.Default()
 	rCache := &database.RedisCache{}
-	rCache.RedisConnect("localhost", "6379", "")
+	rCache.RedisConnect(redisHost, redisPort, redisPassword)
 	cl := rCache.GetRedisClient()
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
