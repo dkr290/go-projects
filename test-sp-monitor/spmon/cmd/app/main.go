@@ -24,15 +24,18 @@ func main() {
 	}
 
 	redisPassword := os.Getenv("REDIS_PASSWORD")
-
 	if len(redisPassword) == 0 {
 		redisPassword = ""
 	}
 
+	//initialize gin
 	r := gin.Default()
+	//get database type to be able to use methods related to redis
 	rCache := &database.RedisCache{}
+	//trying to connect to the reidis
 	rCache.RedisConnect(redisHost, redisPort, redisPassword)
 	cl := rCache.GetRedisClient()
+	//some monitoring if we nned as middleware
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
 			param.ClientIP,
@@ -46,7 +49,7 @@ func main() {
 			param.Request.Header.Get("X-Debug-Key")+" "+param.Request.Header.Get("X-Debug-JSON")+" "+param.Request.Header.Get("X-Debug-Key1"),
 		)
 	}))
-
+	// passing the redis cache to the handlers
 	hand := handlers.NewHandlers(r, cl)
 
 	// Load HTML template

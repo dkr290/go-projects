@@ -1,0 +1,35 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "spmon.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "spmon.fullname" . }}-ingress
+  labels:
+    {{- include "spmon.labels" . | trim | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- range .Values.ingress.hosts }}
+  rules:
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- toYaml .paths | nindent 8 }}
+             
+        {{- end }}
+
+{{- if .Values.ingress.tls }}
+   {{- range .Values.ingress.tls }}
+  tls:
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+{{- end }}
+{{- end }}

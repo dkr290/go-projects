@@ -1,0 +1,39 @@
+# Default values for myspecialpod.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+myspecialpod:
+  name: mycsiimagepod
+  labels: mycsiimagepod
+  image: mycsiimagepod
+  volumeMounts:
+  - name: ingress-tls
+    mountPath: "/mnt/secrets-store/ingress-tls"
+    readOnly: true
+  - name: azure-client-secrets
+    mountPath: "/mnt/secrets-store/azure-client-secrets"
+    readOnly: true
+  - name: basic-auth
+    mountPath: "/mnt/secrets-store/basic-auth"
+    readOnly: true
+  volumes:
+  - name: ingress-tls
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: "ingress-tls"
+  - name: azure-client-secrets
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: "azure-client-secrets"
+  - name: basic-auth
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: "basic-auth"
+

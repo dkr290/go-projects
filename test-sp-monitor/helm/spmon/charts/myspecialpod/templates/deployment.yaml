@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.myspecialpod.labels }}
+    {{- include "myspecialpod.labels" . | nindent 4 }}
+  name: {{ .Values.myspecialpod.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.myspecialpod.labels }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.myspecialpod.labels }}
+    spec:
+      containers:
+      - image: {{ .Values.myspecialpod.image }}
+        name: {{ .Values.myspecialpod.name }}
+        resources:
+          requests:
+            memory: "128Mi" # Needs to be dialed in, I dunno how much it actually needs
+            cpu: "128m" #Same here. It's just gonna be running in a single thread to start.
+          limits:
+            memory: "256Mi"
+            cpu: "512m"
+         {{- with .Values.myspecialpod.volumeMounts }}
+        volumeMounts:                            # this should exists because if it does not the secret is not created as an object in the namespace to be used by ENV
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.myspecialpod.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.myspecialpod.volumes }}
+      volumes:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

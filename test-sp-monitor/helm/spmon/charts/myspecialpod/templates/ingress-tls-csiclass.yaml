@@ -1,0 +1,24 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: {{ .Values.ingressclass.name }}
+  labels:
+    {{- include "myspecialpod.labels" . | nindent 4 }}
+spec:
+  provider: azure
+  secretObjects:                                 # [OPTIONAL] SecretObject defines the desired state of synced K8s secret objects
+  - secretName: {{ .Values.ingressclass.secretName }}                 # The kubernetes secret name in kubernetes itself
+    type: {{ .Values.ingressclass.type }}
+    data:
+    {{- range .Values.ingressclass.data }}
+    - objectName: {{ .objectName }}
+      key: {{ .key }}   
+    {{- end }}
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "true"                                     # Set to true for using managed identity
+    userAssignedIdentityID: {{ .Values.ingressclass.userAssignedIdentityID | quote }}   # Set the clientID of the user-assigned managed identity to use
+    keyvaultName: {{ .Values.ingressclass.keyvaultName | quote }}            # the name of the KeyVault
+    objects: |
+     {{- include "objects" . | nindent 6 }}                     
+    tenantId: "new replace with tennant id"             

@@ -12,9 +12,10 @@ import (
 
 // PageData represents the data structure for the HTML template
 type KVKey struct {
-	Secret      string `json:"key" redis:"secret"`
-	Keyvault    string `json:"value" redis:"keyvault"`
-	Expireddate string `json:"thirdvalue" redis:"expireddate"`
+	Secret      string `json:"secret" redis:"secret"`
+	Metadata    string `json:"metadata" redis:"metadata"`
+	Keyvault    string `json:"keyvault" redis:"keyvault"`
+	Expireddate string `json:"expireddate" redis:"expireddate"`
 }
 
 type PageData struct {
@@ -43,10 +44,10 @@ func (h *Handlers) GetHandler(c *gin.Context) {
 		return
 	}
 
-	// Create a slice to store albums
+	// Create a slice to store secrets
 	var kvkeys []KVKey
 
-	// Fetch albums for each key
+	// Fetch secrets for each key
 	for _, key := range keys {
 		kvkeysJSON, err := h.client.Get(key).Result()
 		if err != nil {
@@ -81,6 +82,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	// Get key and value from the form
 	secret := c.PostForm("secret")
 	keyvault := c.PostForm("keyvault")
+	metadata := c.PostForm("metadata")
 	//we generate dummy data value
 	expireddate, err := displaySecretExpiration(secret, keyvault)
 	if err != nil {
@@ -97,6 +99,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 		Secret:      secret,
 		Keyvault:    keyvault,
 		Expireddate: expireddate,
+		Metadata:    metadata,
 	}
 	// Convert the Album struct to JSON
 	albumJSON, err := json.Marshal(kvkey)
@@ -105,8 +108,14 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 		return
 	}
 
+	kvName, err := extractKVName(keyvault)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Generate a unique key for the album
-	newkey := fmt.Sprintf("KvKeys:%s", strings.ToLower(secret))
+	newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(secret), strings.ToLower(kvName))
 
 	// // Log the key and JSON data for debugging
 	// c.Request.Header.Add("X-Debug-Key", newkey)
@@ -130,14 +139,20 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 
 	// Get key to delete from the form
 	secret := c.PostForm("secret")
+	keyvault := c.PostForm("keyvault")
 
 	// Generate the key for the album
-	newkey := fmt.Sprintf("KvKeys:%s", strings.ToLower(secret))
+	kvName, err := extractKVName(keyvault)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(secret), strings.ToLower(kvName))
 
 	// Delete the key from the cache
 
 	// Delete the album from the Redis cache
-	err := h.client.Del(newkey).Err()
+	err = h.client.Del(newkey).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

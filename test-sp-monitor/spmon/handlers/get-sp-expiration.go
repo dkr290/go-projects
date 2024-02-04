@@ -3,13 +3,23 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 )
 
+// getSecretClient(vaultBaseURL string) - connect to azure and obtain credential for service principal with permissions
+/*
+export AZURE_TENANT_ID="<active_directory_tenant_id"
+export AZURE_CLIENT_ID="<service_principal_appid>"
+export AZURE_CLIENT_SECRET="<service_principal_password>"
+
+*/
 func getSecretClient(vaultBaseURL string) *azsecrets.Client {
 
 	// Create a credential using the NewDefaultAzureCredential type.
@@ -26,6 +36,7 @@ func getSecretClient(vaultBaseURL string) *azsecrets.Client {
 	return client
 }
 
+// displaySecretExpiration(secretName string, keyvault string) - connects to the keyvault and return the expiration dates
 func displaySecretExpiration(secretName string, keyvault string) (string, error) {
 
 	client := getSecretClient(keyvault)
@@ -47,4 +58,25 @@ func displaySecretExpiration(secretName string, keyvault string) (string, error)
 func formatDate(s time.Time) string {
 	expinString := s.Format("2006-01-02 15:04:05")
 	return expinString
+}
+
+func extractKVName(urlString string) (string, error) {
+
+	// Parse the URL
+	parsedURL, err := url.Parse(urlString)
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
+		return "", err
+	}
+
+	// Split the host into subdomains
+	subdomains := strings.Split(parsedURL.Hostname(), ".")
+
+	// Extract the desired subdomain
+	var desiredSubdomain string
+	if len(subdomains) > 0 {
+		desiredSubdomain = subdomains[0]
+	}
+
+	return desiredSubdomain, nil
 }

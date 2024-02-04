@@ -1,0 +1,24 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: {{ .Values.basicAuth.name }}
+  labels:
+    {{- include "myspecialpod.labels" . | nindent 4 }}
+spec:
+  provider: azure
+  secretObjects:                                
+  - secretName: {{ .Values.basicAuth.secretName }}                
+    type: {{ .Values.basicAuth.type }}
+    data:
+    {{- range .Values.basicAuth.data }}
+    - objectName: {{ .objectName }}
+      key: {{ .key }}   
+    {{- end }}
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "true"                                     
+    userAssignedIdentityID: {{ .Values.basicAuth.userAssignedIdentityID | quote }}   
+    keyvaultName: {{ .Values.basicAuth.keyvaultName | quote }}            
+    objects: |
+     {{- include "basicauth_objects" . | nindent 6 }}                     
+    tenantId: "replace with tennant id"    

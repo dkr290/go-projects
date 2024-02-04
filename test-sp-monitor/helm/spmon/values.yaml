@@ -1,0 +1,172 @@
+# Default values for spmon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: privrepo/spmon
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: "spmonitor"
+fullnameOverride: "spmonitor"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "spmonitor-sa"
+
+podAnnotations: {}
+
+podSecurityContext: 
+  fsGroup: 2000
+
+securityContext: 
+  runAsNonRoot: true 
+  runAsUser: 1000
+  runAsGroup: 3000
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+  
+
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: 
+     # type of authentication
+    nginx.ingress.kubernetes.io/auth-type: basic
+    # your secret with user credentials
+    nginx.ingress.kubernetes.io/auth-secret: spmon-basic-auth
+    # message to display 
+    nginx.ingress.kubernetes.io/auth-realm: 'Please authenticate first'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: spmonitoring.domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: spmonitor
+              port:
+                number: 8080
+  tls: 
+    - secretName: ingress-tls
+      hosts:
+        - spmonitoring.domain.com
+
+resources: 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+enviroment_vars:
+- name: REDIS_HOST
+  value: redis-svc
+- name: AZURE_CLIENT_ID
+  valueFrom:
+    secretKeyRef:
+      name: azure-client-secrets
+      key: AZURE_CLIENT_ID
+- name: AZURE_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: azure-client-secrets
+      key: AZURE_CLIENT_SECRET
+- name: AZURE_TENANT_ID
+  valueFrom:
+    secretKeyRef:
+      name: azure-client-secrets
+      key: AZURE_TENANT_ID
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+###system stuff like importer of CSI secrets from the keyvault
+myspecialpod: 
+  enabled: true
+  ingressclass:
+    name: ingress-tls
+    secretName: ingress-tls
+    userAssignedIdentityID: xxxxxxx_user_assigned_identity
+    keyvaultName: mykeyvault
+    type: kubernetes.io/tls
+    data:
+    - objectName: cert
+      key: tls.crt 
+    - objectName: key
+      key: tls.key
+    objects:
+    - name: cert_in_kv
+      type: secret
+  azuresecrets:
+    name: azure-client-secrets
+    secretName: azure-client-secrets
+    userAssignedIdentityID: xxxxxxxxxxx_user_assigned_identity
+    keyvaultName: mykeyvault
+    type: Opaque
+    data:
+    - objectName: mysp_id
+      key: AZURE_CLIENT_ID 
+    - objectName: mysp_secret
+      key: AZURE_CLIENT_SECRET
+    - objectName: tenant_id
+      key: AZURE_TENANT_ID 
+    objects:
+    - name: mysp_id
+      type: secret
+    - name: mysp_secret
+      type: secret
+    - name: tenant_id
+      type: secret 
+  basicAuth:
+    name: spmon-basic-auth
+    userAssignedIdentityID: xxxxxxx_user_assigned_identity
+    secretName: spmon-basic-auth
+    keyvaultName: myKV
+    type: Opaque
+    data:
+    - objectName: basic-auth     
+      key: auth
+    objects:
+    - name: basic-auth
+      type: secret 
+    
+
+  
+  imagePullSecrets: {}

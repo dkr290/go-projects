@@ -1,0 +1,102 @@
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  batch: "false"
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - CHANGELOG.md
+
+# Global variables for the pipeline
+variables:
+  - name: "AgentPool-dev"
+    value: ""
+  - name: kubernetes-namespace
+    value: spmonitor
+  - name: registry_user
+    value: ""
+  - name: isTag
+    value: ${{startsWith(variables['Build.SourceBranch'], 'refs/tags')}}
+  - name: isMaster
+    value: ${{eq(variables['Build.SourceBranch'], 'refs/heads/master')}}
+  - name: imagename
+    value: spmon
+
+parameters:
+- name: imagetag # name of the parameter; required
+  type: object # data type of the parameter; required
+  default: '$(Build.SourceVersion)'
+# Stages
+stages:
+  - stage: Build
+    pool: $(AgentPool-dev)
+    variables:
+      - group: ''
+    jobs:
+      - job: BuildSpMonitor
+        displayName: "Build monitoring app"
+        steps:
+          - task: Bash@3
+            displayName: "Building"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Docker login"
+                cd spmon
+                echo $(aabccontainerregistry) | sudo docker login myregistry.azurecr.io -u $(registry_user) --password-stdin 2>&1 
+                sudo docker build -t  myregistry.azurecr.io/$(imagename):${{ parameters.imagetag }} .                                    
+                sudo docker build -t  myregistry.azurecr.io/$(imagename):latest .  
+
+                sudo docker push  myregistry.azurecr.io/$(imagename):${{ parameters.imagetag }}
+                sudo docker push  myrregistry.azurecr.io/$(imagename):latest
+
+  - stage: DEV
+    displayName: "DEV"
+    #condition: and(succeeded(), or(${{variables.isMaster}},${{variables.isTag}}))
+    pool: "$(AgentPool-dev)"
+    variables:
+      - group: ""
+
+    jobs:
+      - deployment: deploy_aks_cluster
+        displayName: "deploy to aks cluster"
+        continueOnError: "false"
+        environment: "dev"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: CopyFiles@2
+                  inputs:
+                    SourceFolder: "$(System.DefaultWorkingDirectory)"
+                    Contents: "**"
+                    TargetFolder: "$(Build.ArtifactStagingDirectory)"
+                    OverWrite: true
+                - task: PublishBuildArtifacts@1
+                  inputs:
+                    PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+                    ArtifactName: "manifests"
+                    publishLocation: "Container"
+
+
+                - task: Kubernetes@1
+                  displayName: Login to the AKS
+                  inputs:
+                    connectionType: "Azure Resource Manager"
+                    azureSubscriptionEndpoint: "mydevaks"
+                    azureResourceGroup: "mydevaksrg"
+                    kubernetesCluster: "mydevakscluster"
+                    namespace: "$(kubernetes-namespace)"
+                    useClusterAdmin: true
+                    command: "login"
+
+                - task: Bash@3
+                  displayName: Deploy models with helm chart
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      helm upgrade --install spmon $(System.ArtifactsDirectory)/helm/spmon  --namespace $(kubernetes-namespace) --set image.tag=${{ parameters.imagetag }} -f $(System.ArtifactsDirectory)/helm/spmon/values.yaml --atomic

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redis.fullname" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "redis.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: {{ .Values.initContainers.name }}
+        image: {{ .Values.initContainers.image }}
+        command: [ "sh", "-c" ]
+        args:
+          - |
+            cp /tmp/redis/redis.conf /etc/redis/redis.conf
+        {{- with .Values.initContainers.volumeMounts }}
+        volumeMounts:                          
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+      - name: {{ .Values.containers.name }}
+        image: {{ .Values.containers.image }}
+        command: ["redis-server"]
+        args: ["/etc/redis/redis.conf"]
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        ports:
+          - containerPort: {{ .Values.service.port }}
+            protocol: TCP
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.containers.volumeMounts }}
+        volumeMounts:                            # this should exists because if it does not the secret is not created as an object in the namespace to be used by ENV
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "redis.fullname" . }}-pvc
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
