@@ -13,6 +13,32 @@ type User struct {
 	createAt  time.Time
 }
 
+type Admin struct {
+	email    string
+	password string
+	User
+}
+
+func NewAdmin(email, password string) Admin {
+	return Admin{
+		email:    email,
+		password: password,
+		User: User{
+			firstName: "ADMIN",
+			lastName:  "ADMIN",
+			birthDate: "---",
+			createAt:  time.Now(),
+		},
+	}
+
+}
+
+func (a *Admin) PrintAll() {
+	fmt.Println("Email:", a.email)
+	fmt.Println("First Name", a.firstName)
+
+}
+
 //we dont need to expose fields because the new function will set them up and not need
 
 func (u *User) OutPutDetails() {

@@ -21,6 +21,10 @@ func main() {
 
 	appUser.OutPutDetails()
 
+	admin := user.NewAdmin("test@example.com", "Password1")
+	admin.PrintAll()
+	admin.OutPutDetails()
+
 }
 
 func getUserData(promptText string) string {
