@@ -1,6 +1,10 @@
 package prices
 
-import "fmt"
+import (
+	"fmt"
+	"pricecalc/conversion"
+	"pricecalc/filemanager"
+)
 
 type TextIncludedPriceJob struct {
 	TaxRate           float64
@@ -8,21 +12,41 @@ type TextIncludedPriceJob struct {
 	TaxIncludedPrices map[string]float64
 }
 
+func (t *TextIncludedPriceJob) LoadData() {
+
+	lines, err := filemanager.ReadLines("prices.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+
+	}
+
+	prices, err := conversion.StringsToFloats(lines)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	t.InpputPrices = prices
+
+}
+
 func NewTaxIncludedPriceJob(taxrate float64) *TextIncludedPriceJob {
 
 	return &TextIncludedPriceJob{
-		InpputPrices: []float64{10.0, 20.0, 30.0},
-		TaxRate:      taxrate,
+
+		TaxRate: taxrate,
 	}
 }
 
-func (t TextIncludedPriceJob) Process() {
+func (t *TextIncludedPriceJob) Process() {
 
-	result := make(map[string]float64)
-
+	t.LoadData()
+	result := make(map[string]string)
 	for _, p := range t.InpputPrices {
 
-		result[fmt.Sprintf("%.2f", p)] = p * (1 + t.TaxRate)
+		taxIncludedPrice := p * (1 + t.TaxRate)
+		result[fmt.Sprintf("%.2f", p)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 
 	}
 	fmt.Println(result)
