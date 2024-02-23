@@ -3,45 +3,49 @@ package prices
 import (
 	"fmt"
 	"pricecalc/conversion"
-	"pricecalc/filemanager"
+	"pricecalc/iomanager"
 )
 
 type TextIncludedPriceJob struct {
-	TaxRate           float64
-	InpputPrices      []float64
-	TaxIncludedPrices map[string]float64
+	TaxRate           float64             `json:"tax_rate"`
+	InpputPrices      []float64           `json:"input_prices"`
+	TaxIncludedPrices map[string]string   `json:"tax_included_prices"`
+	IOManager         iomanager.IOManager `json:"-"`
 }
 
-func (t *TextIncludedPriceJob) LoadData() {
+func (t *TextIncludedPriceJob) LoadData() error {
 
-	lines, err := filemanager.ReadLines("prices.txt")
+	lines, err := t.IOManager.ReadLines()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 
 	}
 
 	prices, err := conversion.StringsToFloats(lines)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return err
 	}
 
 	t.InpputPrices = prices
 
+	return nil
+
 }
 
-func NewTaxIncludedPriceJob(taxrate float64) *TextIncludedPriceJob {
+func NewTaxIncludedPriceJob(iomn iomanager.IOManager, taxrate float64) *TextIncludedPriceJob {
 
 	return &TextIncludedPriceJob{
-
-		TaxRate: taxrate,
+		TaxRate:   taxrate,
+		IOManager: iomn,
 	}
 }
 
-func (t *TextIncludedPriceJob) Process() {
+func (t *TextIncludedPriceJob) Process() error {
 
-	t.LoadData()
+	err := t.LoadData()
+	if err != nil {
+		return err
+	}
 	result := make(map[string]string)
 	for _, p := range t.InpputPrices {
 
@@ -49,6 +53,7 @@ func (t *TextIncludedPriceJob) Process() {
 		result[fmt.Sprintf("%.2f", p)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 
 	}
-	fmt.Println(result)
+	t.TaxIncludedPrices = result
+	return t.IOManager.WriteResult(t)
 
 }
