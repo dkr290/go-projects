@@ -4,23 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
+
+	"sp-monitoring/helpers"
+	"sp-monitoring/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 )
-
-// PageData represents the data structure for the HTML template
-type KVKey struct {
-	Secret      string `json:"secret" redis:"secret"`
-	Metadata    string `json:"metadata" redis:"metadata"`
-	Keyvault    string `json:"keyvault" redis:"keyvault"`
-	Expireddate string `json:"expireddate" redis:"expireddate"`
-}
-
-type PageData struct {
-	PageDataArray []KVKey
-}
 
 type Handlers struct {
 	r      *gin.Engine
@@ -37,6 +29,11 @@ func NewHandlers(r *gin.Engine, rc *redis.Client) *Handlers {
 // Define routes
 func (h *Handlers) GetHandler(c *gin.Context) {
 
+	// Get the current page number from the query parameters
+	pageStr := c.Request.URL.Query().Get("page")
+	// Get the search query from the query parameters
+	searchQuery := c.Request.URL.Query().Get("search")
+
 	// Fetch all keys from the Redis cache
 	keys, err := h.client.Keys("KvKeys:*").Result()
 	if err != nil {
@@ -45,7 +42,7 @@ func (h *Handlers) GetHandler(c *gin.Context) {
 	}
 
 	// Create a slice to store secrets
-	var kvkeys []KVKey
+	var kvkeys []models.DynamicData
 
 	// Fetch secrets for each key
 	for _, key := range keys {
@@ -55,19 +52,59 @@ func (h *Handlers) GetHandler(c *gin.Context) {
 			return
 		}
 
-		var kvkey KVKey
+		var kvkey models.KVKey
 		err = json.Unmarshal([]byte(kvkeysJSON), &kvkey)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		kvkeys = append(kvkeys, kvkey)
-	}
+		duration, err := helpers.CheckTime(kvkey)
+		if err != nil {
+			kvkeys = append(kvkeys, models.DynamicData{WarningMessage: 3, KVKey: kvkey})
+			continue
+		}
+		if duration.Hours() < 30*24 {
+			kvkeys = append(kvkeys, models.DynamicData{WarningMessage: 1, KVKey: kvkey})
 
-	// Create a PageData struct
-	pageData := PageData{
-		PageDataArray: kvkeys,
+		} else if duration.Hours() < 60*24 {
+			kvkeys = append(kvkeys, models.DynamicData{WarningMessage: 2, KVKey: kvkey})
+
+		} else {
+			kvkeys = append(kvkeys, models.DynamicData{WarningMessage: 3, KVKey: kvkey})
+		}
+
+	}
+	// Sort the Pagerdata by Expireddate (as string)
+	sort.Slice(kvkeys, func(i, j int) bool {
+		return kvkeys[i].Expireddate < kvkeys[j].Expireddate
+	})
+
+	totalItems := len(kvkeys)
+	itemsPerPage := 10
+	pagination, CurrentData := FingCurrentPage(pageStr, totalItems, itemsPerPage, kvkeys)
+
+	var pageData models.PageData
+	var searchedOutput []models.DynamicData
+
+	// Get the search query from the query parameters
+	if searchQuery != "" {
+		searchedOutput = SearchPage(searchQuery, kvkeys)
+		// Create a PageData struct
+		pageData = models.PageData{
+			PageDataArray: searchedOutput,
+			Pagination:    pagination,
+			SearchQuery:   searchQuery,
+		}
+
+	} else {
+		// Create a PageData struct
+		pageData = models.PageData{
+			PageDataArray: CurrentData,
+			Pagination:    pagination,
+			SearchQuery:   searchQuery,
+		}
+
 	}
 
 	// Render the HTML page with the PageData struct
@@ -84,7 +121,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	keyvault := c.PostForm("keyvault")
 	metadata := c.PostForm("metadata")
 	//we generate dummy data value
-	expireddate, err := displaySecretExpiration(secret, keyvault)
+	expireddate, err := helpers.DisplaySecretExpiration(secret, keyvault)
 	if err != nil {
 		expireddate = ""
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -95,7 +132,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 
 	}
 
-	kvkey := KVKey{
+	kvkey := models.KVKey{
 		Secret:      secret,
 		Keyvault:    keyvault,
 		Expireddate: expireddate,
@@ -108,7 +145,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 		return
 	}
 
-	kvName, err := extractKVName(keyvault)
+	kvName, err := helpers.ExtractKVName(keyvault)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -142,7 +179,7 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 	keyvault := c.PostForm("keyvault")
 
 	// Generate the key for the album
-	kvName, err := extractKVName(keyvault)
+	kvName, err := helpers.ExtractKVName(keyvault)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -172,3 +209,82 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 // 	sec := rand.Int63n(delta) + min
 // 	return time.Unix(sec, 0)
 //}
+
+func (h *Handlers) UpdateHandler(c *gin.Context) {
+	// Fetch all keys from the Redis cache
+	keys, err := h.client.Keys("KvKeys:*").Result()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "failed to fetch all keys from redis",
+		})
+		return
+	}
+	for _, key := range keys {
+		kvkeysJSON, err := h.client.Get(key).Result()
+		// if err == nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{
+
+		// 		"message":  key,
+		// 		"message1": kvkeysJSON,
+		// 	})
+		// }
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   err.Error(),
+				"message": "failed to fetch key in json",
+			})
+			return
+		}
+
+		var kvkey models.KVKey
+		err = json.Unmarshal([]byte(kvkeysJSON), &kvkey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		expireddate, err := helpers.DisplaySecretExpiration(kvkey.Secret, kvkey.Keyvault)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   err.Error(),
+				"message": kvkey})
+
+			// Redirect to the main page after adding the album
+			c.Redirect(http.StatusSeeOther, "/")
+			return
+		}
+		fromRedis, fromKV, err := helpers.ConvertToTime(kvkey, expireddate)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if fromRedis != fromKV {
+			kvkey.Expireddate = expireddate
+			kvName, err := helpers.ExtractKVName(kvkey.Keyvault)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(kvkey.Secret), strings.ToLower(kvName))
+
+			albumJSON, err := json.Marshal(kvkey)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			err = h.client.Set(newkey, albumJSON, 0).Err()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+
+			}
+
+		}
+
+	}
+	// Redirect to the home page after deleting the key
+	c.Redirect(http.StatusSeeOther, "/")
+
+}

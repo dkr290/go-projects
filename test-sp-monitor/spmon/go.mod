@@ -1,4 +1,4 @@
-module test-sp-monitor
+module sp-monitoring
 
 go 1.20
 
