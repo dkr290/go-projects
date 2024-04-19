@@ -23,3 +23,8 @@ type PageData struct {
 	Pagination    []PageInfo
 	SearchQuery   string
 }
+
+// Message represents the structure of the message to be sent to Microsoft Teams
+type Message struct {
+	Text string `json:"text"`
+}
