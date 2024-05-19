@@ -1,40 +1,76 @@
-{{ define "body"}}
+{{ define "body" }}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card mt-5">
+        <div class="card-header bg-primary text-white text-center">
+          <h2>RSVP</h2>
+        </div>
+        <div class="card-body">
+          {{ if gt (len .Errors) 0 }}
+          <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+              {{ range .Errors }}
+              <li>{{ . }}</li>
+              {{ end }}
+            </ul>
+          </div>
+          {{ end }}
 
-<div class="h5 bg-primary text-white text-center m-2 p-2">RSVP</div>
-
-{{ if gt (len .Errors) 0}}
-<ul class="text-danger mt-3">
-  {{ range .Errors }}
-  <li>{{ . }}</li>
-  {{ end }}
-</ul>
-{{ end }}
-
-<form method="POST" class="m-2">
-  <div class="form-group my-1">
-    <label>Your name:</label>
-    <input name="name" class="form-control" value="{{.Name}}" />
+          <form method="POST">
+            <div class="form-group">
+              <label for="name">Your name:</label>
+              <input
+                type="text"
+                name="name"
+                class="form-control"
+                id="name"
+                value="{{ .Name }}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">Your email:</label>
+              <input
+                type="email"
+                name="email"
+                class="form-control"
+                id="email"
+                value="{{ .Email }}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="phone">Your phone number:</label>
+              <input
+                type="tel"
+                name="phone"
+                class="form-control"
+                id="phone"
+                value="{{ .Phone }}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="willattend">Will you attend?</label>
+              <select
+                name="willattend"
+                class="form-control"
+                id="willattend"
+                required
+              >
+                <option value="true" {{ if .Willattend }}selected{{ end }}>
+                  Yes, I'll be there
+                </option>
+                <option value="false" {{ if not .Willattend }}selected{{ end }}>
+                  No, I can't come
+                </option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-3">
+              Submit RSVP
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="form-group my-1">
-    <label>Your email:</label>
-    <input name="email" class="form-control" value="{{.Email}}" />
-  </div>
-  <div class="form-group my-1">
-    <label>Your phone number:</label>
-    <input name="phone" class="form-control" value="{{.Phone}}" />
-  </div>
-  <div class="form-group my-1">
-    <label>Will you attend?</label>
-    <select name="willattend" class="form-select">
-      <option value="true" {{if .WillAttend}}selected{{end}}>
-        Yes, I'll be there
-      </option>
-      <option value="false" {{if not .WillAttend}}selected{{end}}>
-        No, I can't come
-      </option>
-    </select>
-  </div>
-  <button class="btn btn-primary mt-3" type="submit">Submit RSVP</button>
-</form>
-
+</div>
 {{ end }}
