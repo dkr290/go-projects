@@ -29,6 +29,15 @@ func main() {
 		redisPassword = ""
 	}
 
+	userName := os.Getenv("USERNAME")
+	if len(userName) == 0 {
+		userName = "admin"
+	}
+	password := os.Getenv("PASSWORD")
+	if len(password) == 0 {
+		password = "password"
+	}
+
 	webhookURL := os.Getenv("TEAMS_WEBHOOK_URL") // Get the webhook URL from environment variable
 
 	if webhookURL == "" {
@@ -59,7 +68,7 @@ func main() {
 	// 	)
 	// }))
 	// passing the redis cache to the handlers
-	hand := handlers.NewHandlers(r, cl)
+	hand := handlers.NewHandlers(r, cl, userName, password)
 
 	teamsalerts.Get_envs(webhookURL, cl)
 
@@ -88,15 +97,15 @@ func main() {
 	}).ParseFiles("templates/index.html")))
 	//r.SetHTMLTemplate(template.Must(template.ParseFiles("templates/index.html")).Funcs(template.FuncMap{"mod": func(i, j int) bool { return i%j == 0 }}))
 	r.GET("/", hand.GetHandler)
+	r.GET("/login", hand.LoginPageHandler)
+	r.POST("/login-submit", hand.LoginHandler)
 	r.POST("/add", hand.AddHandler)
 	r.POST("/update", hand.UpdateHandler)
 
 	r.POST("/delete", hand.DeleteHandler)
 
 	// Run the server
-	if err := r.Run(":8080"); err != nil {
-		log.Fatalln(err)
-	}
+	r.Run(":8080")
 
 }
 

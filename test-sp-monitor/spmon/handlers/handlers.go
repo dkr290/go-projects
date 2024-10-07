@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 
 	"sp-monitoring/helpers"
 	"sp-monitoring/models"
@@ -15,19 +17,41 @@ import (
 )
 
 type Handlers struct {
-	r      *gin.Engine
-	client *redis.Client
+	r        *gin.Engine
+	client   *redis.Client
+	userName string
+	password string
 }
 
-func NewHandlers(r *gin.Engine, rc *redis.Client) *Handlers {
+// defining the New function as factory pattern
+func NewHandlers(r *gin.Engine, rc *redis.Client, user, pass string) *Handlers {
 	return &Handlers{
-		r:      r,
-		client: rc,
+		r:        r,
+		client:   rc,
+		userName: user,
+		password: pass,
+	}
+}
+
+// Handler function for the login page
+func (h *Handlers) LoginPageHandler(c *gin.Context) {
+	var tmpl = template.Must(template.ParseFiles("templates/login.html"))
+
+	// Render the login page template
+	err := tmpl.ExecuteTemplate(c.Writer, "login.html", nil)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 }
 
 // Define routes
 func (h *Handlers) GetHandler(c *gin.Context) {
+	if !isAuthenticated(c) {
+		// Redirect to the login page if not authenticated
+		c.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
 
 	// Get the current page number from the query parameters
 	pageStr := c.Request.URL.Query().Get("page")
@@ -138,8 +162,8 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 		Expireddate: expireddate,
 		Metadata:    metadata,
 	}
-	// Convert the Album struct to JSON
-	albumJSON, err := json.Marshal(kvkey)
+	// Convert the KVKey  struct to JSON
+	kvkeysJSON, err := json.Marshal(kvkey)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -160,7 +184,7 @@ func (h *Handlers) AddHandler(c *gin.Context) {
 	// c.Request.Header.Add("X-Debug-JSON", string(albumJSON))
 
 	// Add the album to the Redis cache
-	err = h.client.Set(newkey, albumJSON, 0).Err()
+	err = h.client.Set(newkey, kvkeysJSON, 0).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -212,7 +236,9 @@ func (h *Handlers) DeleteHandler(c *gin.Context) {
 
 func (h *Handlers) UpdateHandler(c *gin.Context) {
 	// Fetch all keys from the Redis cache
+	errorChan := make(chan CustomError, 1)
 	keys, err := h.client.Keys("KvKeys:*").Result()
+	var wg sync.WaitGroup
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -221,70 +247,118 @@ func (h *Handlers) UpdateHandler(c *gin.Context) {
 		})
 		return
 	}
+	// Start a goroutine to close the error channel once all goroutines are done
+	go func() {
+		wg.Wait()
+		close(errorChan)
+	}()
+
 	for _, key := range keys {
-		kvkeysJSON, err := h.client.Get(key).Result()
-		// if err == nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{
+		wg.Add(1)
+		go h.checkKvKeysRedis(key, errorChan, &wg)
+	}
 
-		// 		"message":  key,
-		// 		"message1": kvkeysJSON,
-		// 	})
-		// }
+	// Collect and handle errors from the error channel
+	for customErr := range errorChan {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   customErr.Err.Error(),
+			"message": customErr.Message,
+		})
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/")
+}
+
+// Handler function for the login form submission
+func (h *Handlers) LoginHandler(c *gin.Context) {
+
+	// Get the username and password from the form
+	submittedUsername := c.PostForm("username")
+	submittedPassword := c.PostForm("password")
+
+	// Check if the username and password are correct
+	if submittedUsername == h.userName && submittedPassword == h.password {
+		// Set a session cookie to indicate that the user is authenticated
+		c.SetCookie("authenticated", "true", 3600, "/", "", false, true)
+
+		// Redirect to the home page
+		c.Redirect(http.StatusSeeOther, "/")
+		return
+	}
+	var tmpl = template.Must(template.ParseFiles("templates/login.html"))
+	// Render the login page with an error message
+	err := tmpl.ExecuteTemplate(c.Writer, "login.html", "Invalid username or password")
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+// Helper function to check if the user is authenticated
+func isAuthenticated(c *gin.Context) bool {
+	// Check if the "authenticated" cookie is present
+	_, err := c.Cookie("authenticated")
+	return err == nil
+}
+
+type CustomError struct {
+	Err     error
+	Message string
+}
+
+// goroutines to check and compare from redis when update is clicked for changes in keyvault expiration
+func (h *Handlers) checkKvKeysRedis(key string, errorChan chan CustomError, wg *sync.WaitGroup) {
+	defer wg.Done()
+	kvkeysJSON, err := h.client.Get(key).Result()
+	// if err == nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{
+
+	// 		"message":  key,
+	// 		"message1": kvkeysJSON,
+	// 	})
+	// }
+	if err != nil {
+		errorChan <- CustomError{Err: err, Message: "failed to fetch key in json"}
+		return
+	}
+	// unmarshal
+	var kvkey models.KVKey
+	err = json.Unmarshal([]byte(kvkeysJSON), &kvkey)
+	if err != nil {
+		errorChan <- CustomError{Err: err, Message: "error unmarshaling items"}
+		return
+	}
+	//helper function to check for secrets expiration from the keyvault
+	expireddate, err := helpers.DisplaySecretExpiration(kvkey.Secret, kvkey.Keyvault)
+	if err != nil {
+		errorChan <- CustomError{Err: err, Message: "error fetch secret expiration"}
+		return
+	}
+	fromRedis, fromKV, err := helpers.ConvertToTime(kvkey, expireddate)
+	if err != nil {
+		errorChan <- CustomError{Err: err, Message: "Error convert to time"}
+		return
+	}
+
+	if fromRedis != fromKV {
+		kvkey.Expireddate = expireddate
+		kvName, err := helpers.ExtractKVName(kvkey.Keyvault)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":   err.Error(),
-				"message": "failed to fetch key in json",
-			})
+			errorChan <- CustomError{Err: err, Message: "error extracting keyvault name"}
 			return
 		}
+		newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(kvkey.Secret), strings.ToLower(kvName))
 
-		var kvkey models.KVKey
-		err = json.Unmarshal([]byte(kvkeysJSON), &kvkey)
+		kvKeysJSON, err := json.Marshal(kvkey)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			errorChan <- CustomError{Err: err, Message: "error marshaling the new values"}
 			return
 		}
-		expireddate, err := helpers.DisplaySecretExpiration(kvkey.Secret, kvkey.Keyvault)
+		err = h.client.Set(newkey, kvKeysJSON, 0).Err()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":   err.Error(),
-				"message": kvkey})
-
-			// Redirect to the main page after adding the album
-			c.Redirect(http.StatusSeeOther, "/")
+			errorChan <- CustomError{Err: err, Message: "error saving the new value to redis"}
 			return
-		}
-		fromRedis, fromKV, err := helpers.ConvertToTime(kvkey, expireddate)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		if fromRedis != fromKV {
-			kvkey.Expireddate = expireddate
-			kvName, err := helpers.ExtractKVName(kvkey.Keyvault)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			newkey := fmt.Sprintf("KvKeys:%s:%s", strings.ToLower(kvkey.Secret), strings.ToLower(kvName))
-
-			albumJSON, err := json.Marshal(kvkey)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			err = h.client.Set(newkey, albumJSON, 0).Err()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-
-			}
-
 		}
 
 	}
-	// Redirect to the home page after deleting the key
-	c.Redirect(http.StatusSeeOther, "/")
-
 }
