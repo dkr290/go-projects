@@ -13,7 +13,7 @@ type DbConfig struct {
 	DBName     string
 }
 
-func initConfig() DbConfig {
+func InitConfig() DbConfig {
 	return DbConfig{
 		Host:       getEnv("HOST", "localhost"),
 		Port:       getEnv("PORT", 5432),
