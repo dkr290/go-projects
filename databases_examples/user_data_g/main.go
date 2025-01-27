@@ -35,4 +35,10 @@ func main() {
 	for _, v := range u {
 		fmt.Printf("FirstName: %s, Lastname: %s with email: %s\n", v.FirstName, v.LastName, v.Email)
 	}
+
+	u1, err := database.FindUser("Jao", "Daniel")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Firstname is %s and lastname is %s", u1.FirstName, u1.LastName)
 }

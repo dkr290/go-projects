@@ -64,3 +64,13 @@ func (p *PsqlDatabase) GetAllRecords() (m []models.User, custerr error) {
 
 	return
 }
+
+func (p *PsqlDatabase) FindUser(fn string, ln string) (models.User, error) {
+	var u models.User
+	res := p.Db.First(&u, "last_name = ? AND first_name = ?", ln, fn)
+	if res.Error != nil {
+		return models.User{}, res.Error
+	}
+
+	return u, nil
+}
