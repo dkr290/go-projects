@@ -9,54 +9,63 @@ templ TemplateIndex(customer models.Customer) {
 <html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
 <nav class="navbar" role="navigation" aria-label="main navigation">
-  <div id="navbarBasicExample" class="navbar-menu">
-    <div class="navbar-start">
-      <a class="navbar-item">
-        Home
-      </a>
-      <a class="navbar-item">
-        Documentation
-      </a>
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          More
-        </a>
-      </div>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <div class="buttons">
-          <a class="button is-primary">
-            <strong>Sign up</strong>
-          </a>
-          <a class="button is-light">
-            Log in
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div>
-    <h1>Customer { customer.Id } </h1>
-    if customer.Id {
-    <p>Details </p>
-    <ul>
-      if customer.Name != "" {
-      <li>
-        Name: { customer.Name }
-      </li>
-      }
-      if customer.Surname != "" {
-      <li>
-        Surname: { customer.Surname }
-      </li>
-      } else {
-      { fmt.Sprintln("Data is not available") }
-      }
-      }
-    </ul>
-  </div>
+	<div id="navbarBasicExample" class="navbar-menu">
+		<div class="navbar-start">
+			<a class="navbar-item">
+				Home
+			</a>
+			<a class="navbar-item">
+				Documentation
+			</a>
+			<div class="navbar-item has-dropdown is-hoverable">
+				<a class="navbar-link">
+					More
+				</a>
+			</div>
+		</div>
+		<div class="navbar-end">
+			<div class="navbar-item">
+				<div class="buttons">
+					<a class="button is-primary">
+						<strong>Sign up</strong>
+					</a>
+					<a class="button is-light">
+						Log in
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </nav>
+<!-- Main Container -->
+<div class="container mt-5">
+	<h1 class="title">Customer Details</h1>
+	<!-- Row Layout -->
+	<div class="columns is-centered">
+		<div class="column is-half">
+			<div class="card">
+				<div class="card-content">
+					if customer.Id != 0 {
+					<p class="title">ID: { fmt.Sprintln(customer.Id) }</p>
+					<ul>
+						if customer.Name != "" {
+						<li><strong>Name:</strong> { customer.Name }</li>
+						}
+						if customer.Surname != "" {
+						<li><strong>Surname:</strong> { customer.Surname }</li>
+						}
+						if customer.Age != 0 {
+						<li><strong>Age:</strong> { fmt.Sprintln(customer.Age) }</li>
+						}
+					</ul>
+					} else {
+					<p class="has-text-danger">Data not available</p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 </html>
 }
