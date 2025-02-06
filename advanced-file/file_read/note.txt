@@ -1,7 +1,0 @@
-This is some note in file
-This is line 1
-this is line 2
-{
-"some data like json":"value 1"
-"key2":"value2"
-}

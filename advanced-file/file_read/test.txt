@@ -1,2 +1,0 @@
-This is write with bytes
-This is writestring to a file
