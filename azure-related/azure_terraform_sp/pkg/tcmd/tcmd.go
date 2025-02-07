@@ -12,11 +12,13 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 )
 
-func ExecuteTerraform() error {
+func ExecuteTerraform(tversion string) error {
 	// Specify the version you want to install or use the latest
+	// Prompt for ARM_SUBSCRIPTION_ID
+
 	installer := &releases.ExactVersion{
 		Product: product.Terraform,
-		Version: version.Must(version.NewVersion("1.10.5")),
+		Version: version.Must(version.NewVersion(tversion)),
 	}
 	// Install Terraform and get the path to the binary
 	execPath, err := installer.Install(context.Background())
@@ -39,8 +41,10 @@ func ExecuteTerraform() error {
 		return fmt.Errorf("error running terraform init: %v", err)
 	}
 	// tf plan
-	if err := CustomTfplan(tf); err != nil {
+	if b, err := CustomTfplan(tf); err != nil {
 		return err
+	} else if b {
+		goto message
 	}
 	// Show the plan output
 	if err := Tfshow(tf); err != nil {
@@ -48,10 +52,13 @@ func ExecuteTerraform() error {
 	}
 
 	// Apply state
-	if err := TfApply(tf); err != nil {
+	if b, err := TfApply(tf); err != nil {
 		return err
+	} else if b {
+		goto message
 	}
 
+message:
 	var response string
 	color.Blue("Remove the tf.plan file - y/n or yes/no: ")
 	if _, err := fmt.Scanln(&response); err != nil {
@@ -62,5 +69,16 @@ func ExecuteTerraform() error {
 		os.Remove("tf.plan")
 		color.Green("removed tf.plan file")
 	}
+
+	color.Blue("Remove the local cache .cache - y/n or yes/no: ")
+	if _, err := fmt.Scanln(&response); err != nil {
+		return fmt.Errorf("%v", err)
+	}
+
+	if response == "y" || response == "Y" || response == "yes" {
+		os.RemoveAll(".cache")
+		color.Green("removed local cache")
+	}
+
 	return nil
 }

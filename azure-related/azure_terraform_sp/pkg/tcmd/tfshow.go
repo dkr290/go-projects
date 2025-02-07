@@ -24,5 +24,6 @@ func Tfshow(tf *tfexec.Terraform) error {
 	color.Green("Plan file content:")
 	color.Green(planFile)
 	color.Green("Format state file version:", state.FormatVersion)
+	fmt.Println("")
 	return nil
 }

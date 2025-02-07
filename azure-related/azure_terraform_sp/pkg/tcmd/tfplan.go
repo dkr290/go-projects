@@ -9,14 +9,14 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 )
 
-func CustomTfplan(tf *tfexec.Terraform) error {
+func CustomTfplan(tf *tfexec.Terraform) (bool, error) {
 	var response string
 	tf.SetStdout(os.Stdout)
 	tf.SetStderr(os.Stderr)
 
 	color.Green("Execute terraform plan - y/n or yes/no: ")
 	if _, err := fmt.Scanln(&response); err != nil {
-		return fmt.Errorf("%v", err)
+		return false, fmt.Errorf("%v", err)
 	}
 	if response == "y" || response == "Y" || response == "yes" {
 		planOptions := []tfexec.PlanOption{
@@ -25,11 +25,11 @@ func CustomTfplan(tf *tfexec.Terraform) error {
 		}
 		// Example of running terraform plan
 		if _, err := tf.Plan(context.Background(), planOptions...); err != nil {
-			return fmt.Errorf("error running terraform plan: %v", err)
+			return false, fmt.Errorf("error running terraform plan: %v", err)
 		}
 	} else {
-		color.Blue("Exitting...")
-		os.Exit(0)
+		color.Green("Exitting...")
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
