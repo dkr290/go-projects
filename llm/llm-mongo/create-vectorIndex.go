@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -19,6 +22,28 @@ func CreateVectorIndex(client *mongo.Client) error {
 		Path:          "embedding",
 		Similarity:    "cosine",
 	}
+	collection := client.Database(dbName).Collection(collectionName)
+	return createVectorIndex(collection, settings)
+}
 
-	return nil
+func createVectorIndex(collection *mongo.Collection, settings VectorIndexSettings) error {
+	// Define the vector search index model
+	indexModel := mongo.SearchIndexModel{
+		Definition: bson.D{
+			{Key: "name", Value: indexName},
+			{Key: "mappings", Value: bson.D{
+				{Key: "dynamic", Value: true},
+				{Key: "fields", Value: bson.D{
+					{Key: settings.Path, Value: bson.D{
+						{Key: "type", Value: "knnVector"},
+						{Key: "dimensions", Value: settings.NumDimensions},
+						{Key: "similarity", Value: settings.Similarity},
+					}},
+				}},
+			}},
+		},
+	}
+	// Create the search index
+	_, err := collection.SearchIndexes().CreateOne(context.Background(), indexModel)
+	return err
 }

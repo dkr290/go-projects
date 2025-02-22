@@ -57,5 +57,9 @@ func run() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	err = CreateVectorIndex(client)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	return nil
 }

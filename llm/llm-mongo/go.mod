@@ -2,10 +2,7 @@ module llm-mongo
 
 go 1.23.0
 
-require (
-	go.mongodb.org/mongo-driver v1.17.2
-	go.mongodb.org/mongo-driver/v2 v2.0.1
-)
+require go.mongodb.org/mongo-driver/v2 v2.0.1
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
