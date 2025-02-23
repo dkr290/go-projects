@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"llm-elastic-vector/pkg/document"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
@@ -26,7 +28,10 @@ func createVectorIndex(
 	mapping := map[string]interface{}{
 		"settings": map[string]interface{}{
 			"index": map[string]interface{}{
-				"knn": true, // Enable k-NN search
+				"knn":                true, // Enable k-NN search
+				"knn.space_type":     "cosinesimil",
+				"number_of_shards":   2,
+				"number_of_replicas": 1,
 			},
 		},
 		"mappings": map[string]interface{}{
@@ -80,6 +85,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating OpenSearch client: %s", err)
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	// Define vector index settings
 	settings := VectorIndexSettings{
@@ -96,4 +103,12 @@ func main() {
 	}
 
 	log.Println("Vector index created successfully")
+
+	// storing sample documents
+	err = document.StoreDocument(ctx, client, indexName)
+	if err != nil {
+		log.Fatalf("Failed to store the document: %s", err)
+	}
+
+	log.Println("The documents sample data has been stored")
 }
