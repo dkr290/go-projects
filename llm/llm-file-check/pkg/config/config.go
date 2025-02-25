@@ -8,21 +8,21 @@ import (
 // HelmValues represents the structure of values.yaml
 
 type Config struct {
-	ValuesFile string
-	ChartFile  string
+	File string
 }
 
-func (c *Config) ReadHelmValues() ([]byte, []byte, error) {
+func NewConfig(file string) *Config {
+	return &Config{
+		File: file,
+	}
+}
+
+func (c *Config) ReadHelmValues() ([]byte, error) {
 	// Read values.yaml
-	valuesFile, err := os.ReadFile(c.ValuesFile)
+	valuesFile, err := os.ReadFile(c.File)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error reading %v", err)
+		return nil, fmt.Errorf("error reading %v", err)
 	}
 
-	chartFile, err := os.ReadFile(c.ChartFile)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error reading %v", err)
-	}
-
-	return valuesFile, chartFile, nil
+	return valuesFile, nil
 }

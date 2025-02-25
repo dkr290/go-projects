@@ -13,7 +13,9 @@ func main() {
 	// Define flags
 	model := flag.String("model", "", "The model to use")
 	serverURL := flag.String("server", "", "The server URL")
-	file := flag.String("file", "", "The values file")
+	valuesFile := flag.String("values", "", "The values file")
+	chartFile := flag.String("chart", "", "The chart file")
+	internalRegisty := flag.String("registry", "", "The internal registry to replace")
 	help := flag.Bool("help", false, "Show usage information")
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -23,23 +25,26 @@ func main() {
 		showUsage()
 	}
 
-	if *model == "" || *serverURL == "" || *file == "" {
+	if *model == "" || *serverURL == "" || *valuesFile == "" || *chartFile == "" ||
+		*internalRegisty == "" {
 		showUsage()
 	}
 
-	config := config.NewConfig(*file)
-	f, err := config.ReadHelmValues()
+	config := config.NewConfig(*valuesFile, *chartFile)
+	values, chart, err := config.ReadHelmValues()
 	if err != nil {
 		logger.Error("Error read helm values", "error", err)
 	}
-	llm.LLmreplace(f, *serverURL, *model)
+	llm.LLmreplace(values, chart, *internalRegisty, *serverURL, *model)
 }
 
 func showUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  -model model to serve")
 	fmt.Println("  -server the http or https address to ollama server")
-	fmt.Println("  -file the helm values file")
+	fmt.Println("  -values the helm values file")
+	fmt.Println("  -chart the chart file")
+	fmt.Println("  -registry the internal registry")
 
 	os.Exit(0)
 }

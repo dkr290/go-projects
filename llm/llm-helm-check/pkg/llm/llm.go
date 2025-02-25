@@ -11,25 +11,28 @@ import (
 )
 
 func LLmreplace(
-	file []byte,
+	valuesFile, chartFile []byte,
+	internalRegistry string,
 	ollamaHost string,
 	model string,
 ) {
 	prompt := fmt.Sprintf(`
-
-You are an assistant that categorizes and sorts grocery items.
-
-Here is a list of grocery items:
+Here is a Helm values.yaml file:
 
 %s
 
-Please:
+And here is the Chart.yaml file:
 
-1. Categorize these items into appropriate categories such as Produce, Dairy, Meat, Bakery, Beverages, etc.
-2. Sort the items alphabetically within each category.
-3. Present the categorized list in a clear and organized manner, using bullet points or numbering.
+%s
 
-`, string(file))
+Please update the values.yaml file based on these rules:
+1️⃣ Replace any Docker images from "docker.io" with "%s".
+2️⃣ If an image has no tag or tag is null, use "appVersion" from Chart.yaml.
+3️⃣ If only "repository: image/name" is given, assume it belongs to "docker.io".
+4️⃣ Keep the output **valid YAML**.
+
+Only return the corrected YAML. Do **not** add extra text.
+`, string(valuesFile), string(chartFile), internalRegistry)
 
 	fmt.Println(prompt)
 	os.Setenv("OLLAMA_HOST", ollamaHost) // Default value
@@ -57,10 +60,10 @@ Please:
 		log.Fatal("Error generating response from Ollama:", err)
 	}
 	// Write modified YAML to a new file
-	err = os.WriteFile("categorized_grocery_list.txt", []byte(fullResponse), 0644)
+	err = os.WriteFile("modified_values.yaml", []byte(fullResponse), 0644)
 	if err != nil {
-		log.Fatal("Error writing categorized_grocery_list:", err)
+		log.Fatal("Error writing modified_values.yaml:", err)
 	}
 
-	fmt.Println("✅ Updated grocery_list.txt saved as categorized_grocery_list.txt!")
+	fmt.Println("✅ Updated values.yaml saved as modified_values.yaml!")
 }
