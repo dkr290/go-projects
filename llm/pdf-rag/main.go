@@ -22,14 +22,15 @@ func main() {
 	}
 	// Initialize OpenSearch client
 	client, err := ops.NewClient(ops.Config{
-		Addresses: []string{"http://api.172.22.0.3.nip.io"}, // OpenSearch server address
+		Addresses: []string{"http://api.172.22.0.4.nip.io"}, // OpenSearch server address
 		Username:  "admin",
 		Password:  "admin",
 	})
 	if err != nil {
 		slog.Error("Error creating OpenSearch client: %s", "error", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
 	defer cancel()
 
 	err = vector_embed(chunks, ctx, client)
@@ -39,7 +40,10 @@ func main() {
 }
 
 func vector_embed(chunks []schema.Document, ctx context.Context, client *ops.Client) error {
-	ollamaLLM, err := ollama.New(ollama.WithModel("nomic-embed-text"))
+	ollamaLLM, err := ollama.New(
+		ollama.WithModel("nomic-embed-text"),
+		ollama.WithServerURL("http://172.22.0.4/ollama"),
+	)
 	if err != nil {
 		return fmt.Errorf("cannot load ollama model %v", err)
 	}
@@ -54,6 +58,11 @@ func vector_embed(chunks []schema.Document, ctx context.Context, client *ops.Cli
 	if err != nil {
 		return err
 	}
+	_, err = store.CreateIndex(ctx, "vector_index")
+	if err != nil {
+		return fmt.Errorf("error creating index %v", err)
+	}
+
 	_, err = store.AddDocuments(ctx, chunks)
 	if err != nil {
 		return err
