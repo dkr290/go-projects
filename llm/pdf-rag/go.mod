@@ -3,8 +3,8 @@ module pdf-rag
 go 1.23.0
 
 require (
+	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/tmc/langchaingo v0.1.13
-	rsc.io/pdf v0.1.1
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.6 // indirect
-	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80 // indirect
+	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
