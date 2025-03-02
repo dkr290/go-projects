@@ -3,23 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
-	"pdf-rag/llmquery"
+	"test-rag/llmquery"
 	"time"
 
 	ops "github.com/opensearch-project/opensearch-go"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
 )
 
 func main() {
-	// ctx := context.Background()
-	// chunks, err := documents.PdfLoader("./data/how-to-code-in-go.pdf", ctx)
-	// if err != nil {
-	// 	slog.Error("erro chunking the file", "error", err)
-	// }
 	// Initialize OpenSearch client
 	client, err := ops.NewClient(ops.Config{
 		Addresses: []string{"http://api.172.22.0.4.nip.io"}, // OpenSearch server address
@@ -33,10 +30,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
 	defer cancel()
 	//
-	// err = vector_embed(chunks, ctx, client)
-	// if err != nil {
-	// 	slog.Error("vector_embed error", "error", err)
-	// }
+	err = vector_embed(ctx, client)
+	if err != nil {
+		slog.Error("vector_embed error", "error", err)
+	}
 	if err := llmquery.QuestionResponse(
 		ctx,
 		"nomic-embed-text",
@@ -46,7 +43,7 @@ func main() {
 	}
 }
 
-func vector_embed(chunks []schema.Document, ctx context.Context, client *ops.Client) error {
+func vector_embed(ctx context.Context, client *ops.Client) error {
 	ollamaLLM, err := ollama.New(
 		ollama.WithModel("nomic-embed-text"),
 		ollama.WithServerURL("http://172.22.0.4/ollama"),
@@ -69,11 +66,65 @@ func vector_embed(chunks []schema.Document, ctx context.Context, client *ops.Cli
 	if err != nil {
 		return fmt.Errorf("error creating index %v", err)
 	}
-
-	res, err := store.AddDocuments(ctx, chunks)
+	a := []schema.Document{
+		{
+			PageContent: "A city in texas",
+			Metadata: map[string]any{
+				"area": 3251,
+			},
+		},
+		{
+			PageContent: "A country in Asia",
+			Metadata: map[string]any{
+				"area": 2342,
+			},
+		},
+		{
+			PageContent: "A country in South America",
+			Metadata: map[string]any{
+				"area": 432,
+			},
+		},
+		{
+			PageContent: "An island nation in the Pacific Ocean",
+			Metadata: map[string]any{
+				"area": 6531,
+			},
+		},
+		{
+			PageContent: "A mountainous country in Europe",
+			Metadata: map[string]any{
+				"area": 1211,
+			},
+		},
+		{
+			PageContent: "A lost city in the Amazon",
+			Metadata: map[string]any{
+				"area": 1223,
+			},
+		},
+		{
+			PageContent: "A city in England",
+			Metadata: map[string]any{
+				"area": 4324,
+			},
+		},
+	}
+	resp, err := store.AddDocuments(ctx, a)
 	if err != nil {
 		return err
 	}
-	fmt.Println("added documents response", res)
+	log.Println(resp)
+	// Search for similar documents using score threshold.
+	docs, err := store.SimilaritySearch(
+		ctx,
+		"american places",
+		10,
+		vectorstores.WithScoreThreshold(0.80),
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(docs)
 	return nil
 }
