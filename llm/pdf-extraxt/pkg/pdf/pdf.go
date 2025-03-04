@@ -3,6 +3,7 @@ package pdf
 import (
 	"fmt"
 	"os/exec"
+	"time"
 
 	"github.com/tmc/langchaingo/textsplitter"
 )
@@ -42,4 +43,35 @@ func (p *PDF) SplitText() ([]string, error) {
 	}
 
 	return chunks, nil
+}
+
+func (p *PDF) AddMetadata(chunks []string, docTitle string) ([]map[string]any, error) {
+	type metadata struct {
+		title  string
+		author string
+		date   string
+	}
+
+	var metadataChunks []map[string]interface{}
+
+	// Loop through each chunk
+	for _, c := range chunks {
+		// Create a metadata struct for the current chunk
+		md := metadata{
+			title:  docTitle,
+			author: "US Business Bureau",
+			date:   time.Now().Format("2006-01-02 15:04:05"), // Format the time
+		}
+
+		// Create a map for the current chunk and its metadata
+		chunkMap := map[string]interface{}{
+			"text":     c,
+			"metadata": md,
+		}
+
+		// Append the map to the slice
+		metadataChunks = append(metadataChunks, chunkMap)
+	}
+
+	return metadataChunks, nil
 }
