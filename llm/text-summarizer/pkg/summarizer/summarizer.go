@@ -10,15 +10,13 @@ import (
 type Config struct {
 	client *api.Client
 	model  string
-	prompt string
 	ctx    context.Context
 }
 
-func New(client *api.Client, model, prompt string, ctx context.Context) *Config {
+func New(client *api.Client, model string, ctx context.Context) *Config {
 	return &Config{
 		model:  model,
 		client: client,
-		prompt: prompt,
 		ctx:    ctx,
 	}
 }
@@ -27,20 +25,22 @@ func toPtr[T any](t T) *T {
 	return &t
 }
 
-func (c *Config) SummarizeText() (string, error) {
+func (c *Config) SummarizeText(text string) (string, error) {
+	var summary string
+
 	req := &api.GenerateRequest{
 		Model:  c.model,
-		Prompt: c.prompt,
+		Prompt: fmt.Sprintf("Summarize the following text in **3 bullet points**:\n\n%s", text),
 		Stream: toPtr(false),
 	}
 	respFunc := func(resp api.GenerateResponse) error {
-		fmt.Println(resp.Response)
+		summary = resp.Response
 		return nil
 	}
 	err := c.client.Generate(c.ctx, req, respFunc)
 	if err != nil {
-		return fmt.Errorf("cannot query ollama %v", err)
+		return "", fmt.Errorf("cannot query ollama %v", err)
 	}
 
-	return nil
+	return summary, nil
 }

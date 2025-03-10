@@ -10,12 +10,12 @@ import (
 )
 
 type Handlers struct {
-	template     template.Template
+	template     *template.Template
 	ollamaClient *api.Client
 	summarizer   *summarizer.Config
 }
 
-func New(s *summarizer.Config, olClient *api.Client, temp template.Template) *Handlers {
+func New(s *summarizer.Config, olClient *api.Client, temp *template.Template) *Handlers {
 	return &Handlers{
 		template:     temp,
 		ollamaClient: olClient,
@@ -38,30 +38,24 @@ func (h *Handlers) SummarizeHandler(w http.ResponseWriter, r *http.Request) erro
 
 	text := r.FormValue("text")
 	if text == "" {
-		renderResult(w, "Error: Please input text to summarize", true)
-		return fmt.Errorf("error no text")
+		return fmt.Errorf("error: Please input text to summarize")
 	}
 
-	err := h.summarizer.SummarizeText()
+	summary, err := h.summarizer.SummarizeText(text)
 	if err != nil {
-		renderResult(w, "Error: Failed to generate summary: "+err.Error(), true)
 		return err
 	}
+	fmt.Println(summary)
 
-	renderResult(w, summary, false)
-}
-
-func renderResult(w http.ResponseWriter, message string, isError bool) {
-	data := struct {
-		Message string
-		IsError bool
-	}{
-		Message: message,
-		IsError: isError,
-	}
-
-	err := templates.ExecuteTemplate(w, "result.html", data)
+	// Instead of rendering a full template, send a partial HTML response for HTMX
+	w.Header().Set("Content-Type", "text/html")
+	_, err = fmt.Fprintf(
+		w,
+		`<div class="result"><h3>Summary:</h3><p>%s</p></div>`,
+		template.HTMLEscapeString(summary),
+	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return fmt.Errorf("failed to write response: %v", err)
 	}
+	return nil
 }
