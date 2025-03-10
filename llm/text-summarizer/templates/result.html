@@ -1,8 +1,0 @@
-{{ define "result" }} {{ if .IsError }}
-<div class="result" style="color: red" id="result">{{ .Message }}</div>
-{{ else }}
-<div class="result" id="result">
-  <h3>Summary:</h3>
-  <p>{{ .Message }}</p>
-</div>
-{{ end }} {{ end }}
