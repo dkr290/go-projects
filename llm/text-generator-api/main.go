@@ -43,10 +43,9 @@ func Run() error {
 	defer cancel() // Always call cancel to release resources
 	h := app.New(ctx, client, *model)
 
-	a := fiber.New()
-	api := a.Group("api/v1")
+	api := fiber.New()
 	api.Post("/generate", h.GenerateText)
-	return a.Listen(port)
+	return api.Listen(port)
 }
 
 func getEnvs() {

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 	"text-generator-api/helpers"
 	"text-generator-api/models"
 
@@ -41,7 +42,13 @@ func (h *Handlers) GenerateText(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).
 			JSON(fiber.Map{"error": "Cannot generate the text: " + err.Error()})
 	}
+	// Format the generated text to include new lines
+	formattedText := fmt.Sprintf("<think>\n%s", generatedText)
+
+	// Replace double new lines with single new lines (if needed)
+	formattedText = strings.ReplaceAll(formattedText, "\n\n", "\n")
+
 	return c.JSON(fiber.Map{
-		"generated_text": generatedText,
+		"generated_text": formattedText,
 	})
 }
