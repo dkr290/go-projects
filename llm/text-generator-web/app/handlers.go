@@ -45,13 +45,12 @@ func (h *Handlers) GenerateText(c *fiber.Ctx) error {
 
 	generatedText, err := helpers.GenerareText(ctx, h.client, promt, h.model)
 	if err != nil {
-		log.Println(err)
 		return c.Status(fiber.StatusInternalServerError).
 			SendString(fmt.Sprintf("Failed to generate text: %v", err))
 	}
 
 	// Return the generated text as the response
-	log.Println(generatedText)
+	// log.Println(generatedText)
 	return c.SendString(generatedText)
 }
 
@@ -69,18 +68,8 @@ func ensureModelExists(ctx context.Context, client *api.Client, model string) er
 	}
 
 	// If the error indicates that the model is missing, pull it
-	if isModelMissingError(err) {
-		log.Printf("Model %s not found locally. Pulling...\n", model)
-		return helpers.PullModel(ctx, client, model)
-	}
 
+	log.Printf("Model %s not found locally. Pulling...\n", model)
+	return helpers.PullModel(ctx, client, model)
 	// Return other errors
-	return fmt.Errorf("failed to check if model exists: %v", err)
-}
-
-// isModelMissingError checks if the error indicates that the model is missing
-func isModelMissingError(err error) bool {
-	// Check if the error message indicates that the model is missing
-	// This is a heuristic and may need to be adjusted based on the actual error message
-	return err != nil && (err.Error() == "model not found" || err.Error() == "model does not exist")
 }
