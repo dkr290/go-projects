@@ -24,6 +24,7 @@ func main() {
 	h := handlers.New()
 	// sample group
 	sample := app.Group("/sample/v21")
+	sample.Static("/static", "./public")
 
 	// Home API Endpoints
 	sample.Get("/", h.IndexHandler)

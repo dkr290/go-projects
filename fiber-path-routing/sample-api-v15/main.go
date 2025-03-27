@@ -19,11 +19,11 @@ func main() {
 	// Add logger middleware
 	app.Use(logger.New())
 	// Serve static files (for CSS, JS, etc.)
-	app.Static("/static", "./public")
 
 	h := handlers.New()
 	// sample group
 	sample := app.Group("/sample/v15")
+	sample.Static("/static", "./public")
 
 	// Home API Endpoints
 	sample.Get("/", h.IndexHandler)
