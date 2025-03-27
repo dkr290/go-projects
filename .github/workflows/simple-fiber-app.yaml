@@ -39,15 +39,11 @@ jobs:
         run: |
           cd fiber-path-routing/sample-api-v21
           docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego  Dockerfile
-          cd fiber-path-routing/sample-api-v15
-          docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego  Dockerfile
 
       - name: Build an image from Dockerfile
         run: |
           cd fiber-path-routing/sample-api-v21
           docker build -t $FIBER_APP_DOCKER_IMAGE-21:${{ github.sha }} .
-          de fiber-path-routing/sample-api-v15
-          docker build -t $FIBER_APP_DOCKER_IMAGE-15:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner to notes-app docker image after build
         uses: aquasecurity/trivy-action@master
