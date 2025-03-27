@@ -76,10 +76,13 @@ jobs:
           docker image prune -a -f
           docker container prune -f
 
-      - name: Build fiber_app
+      - name: Build fiber_app21
         run: |
           cd fiber-path-routing/sample-api-v21
           docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE21
+
+      - name: Build fiber_app15
+        run: |
           cd fiber-path-routing/sample-api-v15
           docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE15
 
