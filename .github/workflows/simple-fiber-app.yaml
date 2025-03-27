@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  FIBER_APP_DOCKER_IMAGE: ghcr.io/${{ github.repository }}/sample-fiber-app
+  FIBER_APP_DOCKER_IMAGE: ghcr.io/${{ github.repository }}/fiber-path-routing
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
