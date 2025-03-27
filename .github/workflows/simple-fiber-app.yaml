@@ -40,7 +40,7 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           cd fiber-path-routing 
-          docker build -t $TODOFIBER_DOCKER_IMAGE:${{ github.sha }} .
+          docker build -t $FIBER_APP_DOCKER_IMAGE:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner to notes-app docker image after build
         uses: aquasecurity/trivy-action@master
