@@ -20,10 +20,10 @@ on:
   workflow_dispatch:
 
 env:
-  FIBER_APP_DOCKER_IMAGE-21: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v21
-  FIBER_APP_DOCKER_IMAGE-15: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v15
-  FIBER_APP_DOCKER_IMAGE_VERSION-21: v21
-  FIBER_APP_DOCKER_IMAGE_VERSION-15: v15
+  FIBER_APP_DOCKER_IMAGE21: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v21
+  FIBER_APP_DOCKER_IMAGE15: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v15
+  FIBER_APP_DOCKER_IMAGE_VERSION21: v21
+  FIBER_APP_DOCKER_IMAGE_VERSION15: v15
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -43,7 +43,7 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           cd fiber-path-routing/sample-api-v21
-          docker build -t $FIBER_APP_DOCKER_IMAGE-21:${{ github.sha }} .
+          docker build -t $FIBER_APP_DOCKER_IMAGE21:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner to notes-app docker image after build
         uses: aquasecurity/trivy-action@master
@@ -79,9 +79,9 @@ jobs:
       - name: Build fiber_app
         run: |
           cd fiber-path-routing/sample-api-v21
-          docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE-21
+          docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE21
           cd fiber-path-routing/sample-api-v15
-          docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE-15
+          docker build . -f Dockerfile -t $FIBER_APP_DOCKER_IMAGE15
 
       - if: github.event_name != 'pull_request'
         name: docker login and push all the images
@@ -89,16 +89,16 @@ jobs:
         run: |
           echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           VERSION=${GITHUB_SHA::8}
-          echo FIBER_APP_DOCKER_IMAGE-15=$FIBER_APP_DOCKER_IMAGE-15
-          echo VERSION=$FIBER_APP_DOCKER_IMAGE_VERSION-15
-          docker tag $FIBER_APP_DOCKER_IMAGE-15 $FIBER_APP_DOCKER_IMAGE-15:$VERSION 
-          docker push $FIBER_APP_DOCKER_IMAGE-15:$VERSION
-          docker push $FIBER_APP_DOCKER_IMAGE-15
-          echo FIBER_APP_DOCKER_IMAGE-21=$FIBER_APP_DOCKER_IMAGE-21
-          echo VERSION=$FIBER_APP_DOCKER_IMAGE_VERSION-21
-          docker tag $FIBER_APP_DOCKER_IMAGE-21 $FIBER_APP_DOCKER_IMAGE-21:$VERSION 
-          docker push $FIBER_APP_DOCKER_IMAGE-21:$VERSION
-          docker push $FIBER_APP_DOCKER_IMAGE-21
+          echo FIBER_APP_DOCKER_IMAGE15=$FIBER_APP_DOCKER_IMAGE15
+          echo VERSION=$FIBER_APP_DOCKER_IMAGE_VERSION15
+          docker tag $FIBER_APP_DOCKER_IMAGE15 $FIBER_APP_DOCKER_IMAGE15:$VERSION 
+          docker push $FIBER_APP_DOCKER_IMAGE15:$VERSION
+          docker push $FIBER_APP_DOCKER_IMAGE15
+          echo FIBER_APP_DOCKER_IMAGE21=$FIBER_APP_DOCKER_IMAGE21
+          echo VERSION=$FIBER_APP_DOCKER_IMAGE_VERSION21
+          docker tag $FIBER_APP_DOCKER_IMAGE21 $FIBER_APP_DOCKER_IMAGE21:$VERSION 
+          docker push $FIBER_APP_DOCKER_IMAGE21:$VERSION
+          docker push $FIBER_APP_DOCKER_IMAGE21
 
       - name: list docker images
         run: |
