@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>sample Dashboard</h1>
+        <nav>
+          <a href="/sample/v15">Home</a>
+          <a href="/sample/v15/health">Health</a>
+          <a href="/sample/v15/metrics">Metrics</a>
+          <a href="/sample/v15/docs">Documentation</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="status-cards">
+          <div class="card">
+            <h3>System Status</h3>
+            <div class="status operational">Operational</div>
+            <a href="/sample/v15/status" class="btn">Details</a>
+          </div>
+
+          <div class="card">
+            <h3>API Health</h3>
+            <div class="status healthy">Healthy</div>
+            <a href="/sample/v15/health" class="btn">Details</a>
+          </div>
+
+          <div class="card">
+            <h3>Performance</h3>
+            <div class="metrics">32ms avg response</div>
+            <a href="/sample/v15/metrics" class="btn">View Metrics</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -23,7 +23,7 @@ func main() {
 
 	h := handlers.New()
 	// sample group
-	sample := app.Group("/sample")
+	sample := app.Group("/sample/v15")
 
 	// Home API Endpoints
 	sample.Get("/", h.IndexHandler)
@@ -35,7 +35,7 @@ func main() {
 	sample.Get("/redoc", h.RedocHandler)
 
 	// Predict API group under sample
-	predict := sample.Group("/v21")
+	predict := sample.Group("/v15")
 	predict.Get("/", h.PredictIndexHandler)
 	predict.Get("/home", h.PredictHomeHandler)
 	predict.Get("/docs", h.PredictDocsHandler)
