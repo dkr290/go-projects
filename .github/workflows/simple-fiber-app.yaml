@@ -22,8 +22,8 @@ on:
 env:
   FIBER_APP_DOCKER_IMAGE-21: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v21
   FIBER_APP_DOCKER_IMAGE-15: ghcr.io/${{ github.repository }}/fiber-path-routing/sample-api-v15
-  FIBER_APP_DOCKER_IMAGE_VERSION-21: "21"
-  FIBER_APP_DOCKER_IMAGE_VERSION-15: "15"
+  FIBER_APP_DOCKER_IMAGE_VERSION-21: v21
+  FIBER_APP_DOCKER_IMAGE_VERSION-15: v15
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
