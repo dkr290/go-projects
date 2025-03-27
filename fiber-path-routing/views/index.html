@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>sample API</h1>
+        <p>Welcome to the sample API service</p>
+      </header>
+
+      <div class="sections">
+        <section class="home-api">
+          <h2>Home API Endpoints</h2>
+          <ul class="endpoint-list">
+            <li><a href="/sample/home">GET /home</a> - Home Dashboard</li>
+            <li><a href="/sample/health">GET /health</a> - Health Check</li>
+            <li><a href="/sample/status">GET /status</a> - Status</li>
+            <li><a href="/sample/metrics">GET /metrics</a> - Metrics</li>
+            <li><a href="/sample/docs">GET /docs</a> - Swagger UI</li>
+            <li><a href="/sample/redoc">GET /redoc</a> - ReDoc</li>
+          </ul>
+        </section>
+
+        <section class="predict-api">
+          <h2>Predict API Endpoints</h2>
+          <ul class="endpoint-list">
+            <li><a href="/sample/v21/">GET /v21/</a> - Predict API Index</li>
+            <li>
+              <a href="/sample/v21/home">GET /v21/home</a> - Predict API Home
+            </li>
+            <li><a href="/sample/v21/docs">GET /v21/docs</a> - Swagger UI</li>
+            <li><a href="/sample/v21/redoc">GET /v21/redoc</a> - ReDoc UI</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
