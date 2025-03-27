@@ -15,6 +15,9 @@ RUN addgroup -g 1000 -S vmapi && \
   adduser -u 1000 -h /cmd -G vmapi -S vmapi
 #Copy from stage 0 builder only the binary files
 COPY --from=builder --chown=vmapi:vmapi /build/fiber-path-routing /cmd
+COPY --from=builder /build/views ./cmd/views
+COPY --from=builder /build/public ./cmd/public
+
 WORKDIR /cmd
 USER vmapi
 RUN ls -lR
