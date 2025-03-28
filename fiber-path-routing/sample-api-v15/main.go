@@ -19,22 +19,21 @@ func main() {
 	// Add logger middleware
 	app.Use(logger.New())
 	// Serve static files (for CSS, JS, etc.)
-	app.Static("/static", "./public")
+	app.Static("/", "./public")
 	h := handlers.New()
 	// sample group
-	sample := app.Group("/sample/v15")
 
 	// Home API Endpoints
-	sample.Get("/", h.IndexHandler)
-	sample.Get("/home", h.HomeHandler)
-	sample.Get("/health", h.HealthHandler)
-	sample.Get("/status", h.StatusHandler)
-	sample.Get("/metrics", h.MetricsHandler)
-	sample.Get("/docs", h.DocsHandler)
-	sample.Get("/redoc", h.RedocHandler)
+	app.Get("/", h.IndexHandler)
+	app.Get("/home", h.HomeHandler)
+	app.Get("/health", h.HealthHandler)
+	app.Get("/status", h.StatusHandler)
+	app.Get("/metrics", h.MetricsHandler)
+	app.Get("/docs", h.DocsHandler)
+	app.Get("/redoc", h.RedocHandler)
 
-	// Predict API group under sample
-	predict := sample.Group("/v15")
+	// Predict API group under p
+	predict := app.Group("/v15")
 	predict.Get("/", h.PredictIndexHandler)
 	predict.Get("/home", h.PredictHomeHandler)
 	predict.Get("/docs", h.PredictDocsHandler)

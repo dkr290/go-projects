@@ -66,9 +66,9 @@ func (h *Handlers) PredictIndexHandler(c *fiber.Ctx) error {
 		"message": "Predict API Index",
 		"version": "v15",
 		"endpoints": fiber.Map{
-			"home":  "/sample/v15/home",
-			"docs":  "/sample/v15/docs",
-			"redoc": "/sample/v15/redoc",
+			"home":  "/v15/home",
+			"docs":  "/v15/docs",
+			"redoc": "/v15/redoc",
 		},
 	})
 }
