@@ -1,7 +1,13 @@
 package config
 
-type Application struct{}
+import "testing-api/internal/cmiddleware"
 
-func New() *Application {
-	return &Application{}
+type Application struct {
+	CMiddlewares *cmiddleware.MW
+}
+
+func New(m *cmiddleware.MW) *Application {
+	return &Application{
+		CMiddlewares: m,
+	}
 }

@@ -18,7 +18,10 @@ func New(app *config.Application) *Handlers {
 }
 
 func (h *Handlers) Home(c fuego.ContextNoBody) (fuego.CtxRenderer, error) {
-	render, err := c.Render("home.page.html", fuego.H{})
+	dataIP := h.app.CMiddlewares.GetIpFromContext(c.Context())
+	render, err := c.Render("home.page.html", fuego.H{
+		"IP": dataIP,
+	})
 	if err != nil {
 		// Handle the error appropriately, e.g., log it and return an internal server error
 		log.Printf("Error rendering template: %v", err)

@@ -4,6 +4,7 @@ import (
 	"embed"
 	"html/template"
 	"log"
+	"testing-api/internal/cmiddleware"
 	"testing-api/internal/config"
 	"testing-api/internal/handlers"
 
@@ -15,29 +16,27 @@ import (
 var templateFS embed.FS
 
 func main() {
-	app := config.New()
-	s := routes(app)
+	newIpMiddleware := cmiddleware.New()
+
+	app := config.New(newIpMiddleware)
+	routes(app)
+}
+
+func routes(app *config.Application) {
+	tmpls := template.Must(template.ParseFS(templateFS,
+		"templates/*.page.html",
+	))
+
+	s := fuego.NewServer(
+		fuego.WithGlobalMiddlewares(middleware.Recoverer, app.CMiddlewares.AddIpToContext),
+		fuego.WithTemplateFS(templateFS),
+		fuego.WithTemplates(tmpls),
+	)
+	h := handlers.New(app)
+	fuego.Get(s, "/", h.Home)
 
 	log.Println("Starting the server on port :9999")
 	if err := s.Run(); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func routes(app *config.Application) *fuego.Server {
-	tmpls := template.Must(template.ParseFS(templateFS,
-		"templates/*.page.html",
-	))
-	s := fuego.NewServer(
-		fuego.WithGlobalMiddlewares(middleware.Recoverer),
-		fuego.WithTemplateFS(templateFS),
-		fuego.WithTemplates(tmpls),
-	)
-	h := handlers.New(app)
-
-	// register routes
-	fuego.Get(s, "/", h.Home)
-	// static access
-
-	return s
 }
