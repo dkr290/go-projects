@@ -1,0 +1,5 @@
+POST http://localhost:8080/shorten
+Content-Type: application/x-www-form-urlencoded
+
+
+key=go&url=https://go.dev

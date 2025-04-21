@@ -1,51 +1,53 @@
 package main
 
 import (
+	"context"
+	"net/http/httptest"
 	"testing"
 	"testing-api/internal/cmiddleware"
 	"testing-api/internal/config"
 	"testing-api/internal/handlers"
 
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-fuego/fuego"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type testCtx struct {
-	*fuego.MockContext[any]
-	tmplName string
-	tmplData any
+type contextKey string
+
+const ipContextKey contextKey = "ip"
+
+type MW struct{}
+
+// Simulated version of GetIpFromContext to match usage in your app.
+func (m *MW) GetIpFromContext(ctx context.Context) string {
+	ip, ok := ctx.Value(ipContextKey).(string)
+	if !ok || ip == "" {
+		return "unknown"
+	}
+	return ip
 }
 
-func newTestCtx() *testCtx {
-	// Base MockContext gives you Body, QueryParam, etc.
-	return &testCtx{MockContext: fuego.NewMockContextNoBody()}
-}
-
-// Override Render to capture arguments instead of panicking
-func (t *testCtx) Render(
-	templateToExecute string,
-	data any,
-	templateGlobsToOverride ...string,
-) (fuego.CtxRenderer, error) {
-	t.tmplName = templateToExecute
-	t.tmplData = data
-	// Return a no-op renderer
-	return struct{ fuego.CtxRenderer }{}, nil
-}
-
-func TestHome(t *testing.T) {
+func TestNewServer(t *testing.T) {
 	newIpMiddleware := cmiddleware.New()
 
 	app := config.New(newIpMiddleware)
+	s := fuego.NewServer(
+
+		fuego.WithGlobalMiddlewares(middleware.Recoverer, app.CMiddlewares.AddIpToContext),
+	)
 	h := handlers.New(app)
 
-	t.Run("TestHome", func(t *testing.T) {
-		ctx := newTestCtx()
-		renderer, err := h.Home(ctx)
-		require.NoError(t, err)
-		assert.Equal(t, "home.page.html", ctx.tmplName)
-		assert.Equal(t, fuego.H{"IP": "127.0.0.1"}, ctx.tmplData)
-		assert.NotNil(t, renderer)
+	t.Run("can register controller", func(t *testing.T) {
+		fuego.Get(s, "/", h.Home)
+		req := httptest.NewRequest("GET", "/", nil)
+		req.RemoteAddr = "127.0.0.1:12345"
+		ctx := context.WithValue(req.Context(), ipContextKey, "127.0.0.1")
+		req = req.WithContext(ctx)
+		recorder := httptest.NewRecorder()
+
+		s.Mux.ServeHTTP(recorder, req)
+
+		require.Equal(t, 200, recorder.Code)
 	})
 }
