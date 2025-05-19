@@ -1,0 +1,139 @@
+/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package controller
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/Masterminds/semver"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	appsbankingcirclenetv1alpha1 "api-operator/api/v1alpha1"
+
+	apiv1 "api-operator/api/v1alpha1"
+)
+
+// AppVersionReconciler reconciles a AppVersion object
+type AppVersionReconciler struct {
+	client.Client
+	Scheme *runtime.Scheme
+}
+
+// +kubebuilder:rbac:groups=apps.bankingcircle.net.bankingcircle.net,resources=appversions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps.bankingcircle.net.bankingcircle.net,resources=appversions/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps.bankingcircle.net.bankingcircle.net,resources=appversions/finalizers,verbs=update
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
+// the AppVersion object against the actual cluster state, and then
+// perform operations to make the cluster state reflect the state specified by
+// the user.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
+func (r *AppVersionReconciler) Reconcile(
+	ctx context.Context,
+	req ctrl.Request,
+) (ctrl.Result, error) {
+	var app apiv1.AppVersion
+	if err := r.Get(ctx, req.NamespacedName, &app); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	raw := app.Spec.Version // e.g. "v1.2.3" or "1.2.3"
+	norm := strings.TrimPrefix(raw, "v")
+	v, err := semver.NewVersion(norm)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("invalid version %q: %w", raw, err)
+	}
+	// 3) Compute previous patch version
+
+	major := v.Major()
+
+	prevPatch := major
+	if major > 0 {
+		prevPatch = major - 1
+	}
+	prevTag := fmt.Sprintf("v%d", prevPatch)
+	curTag := fmt.Sprintf("v%d", major)
+
+	app.Status.Previous = prevTag
+	app.Status.Current = curTag
+
+	// 5) Ensure Deployments for previous & current
+	repo := app.Spec.ImageRepo
+	for _, tag := range []string{prevTag, curTag} {
+		deploy := &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-%s", app.Name, tag),
+				Namespace: app.Namespace,
+				Labels: map[string]string{
+					"app":     app.Name,
+					"version": tag,
+				},
+			},
+		}
+		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, deploy, func() error {
+			deploy.Spec = appsv1.DeploymentSpec{
+				Replicas: int32Ptr(1),
+				Selector: &metav1.LabelSelector{
+					MatchLabels: map[string]string{"app": app.Name, "version": tag},
+				},
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: map[string]string{"app": app.Name, "version": tag},
+					},
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{{
+							Name:  "app",
+							Image: fmt.Sprintf("%s:%s", repo, tag),
+						}},
+					},
+				},
+			}
+			return controllerutil.SetControllerReference(&app, deploy, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf(
+				"failed to reconcile Deployment %s: %w",
+				deploy.Name,
+				err,
+			)
+		}
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *AppVersionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&appsbankingcirclenetv1alpha1.AppVersion{}).
+		Complete(r)
+}
+
+func int32Ptr(i int32) *int32 {
+	return &i
+}

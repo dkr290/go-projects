@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- apps.bankingcircle.net_v1alpha1_appversion.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

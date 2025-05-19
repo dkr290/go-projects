@@ -1,0 +1,9 @@
+apiVersion: apps.bankingcircle.net.bankingcircle.net/v1alpha1
+kind: AppVersion
+metadata:
+  labels:
+    app.kubernetes.io/name: api-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: appversion-sample
+spec:
+  # TODO(user): Add fields here
