@@ -234,3 +234,15 @@ func main() {
         os.Exit(1)
     }
 }
+make docker-build docker-push IMG=<your-image-name>
+make deploy IMG=<your-image-name>
+apiVersion: apiversions.myorg/v1alpha1
+kind: AppVersion
+metadata:
+  name: my-api-version
+  namespace: default
+spec:
+  image: "myregistry/my-api:v22"
+  version: "v22"
+  port: 80
+  replicas: 2
