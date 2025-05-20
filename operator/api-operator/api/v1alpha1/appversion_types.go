@@ -29,16 +29,16 @@ type AppVersionSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of AppVersion. Edit appversion_types.go to remove/update
-	ImageRepo string `json:"imageRepo"`
-	Version   string `json:"version"`
+	Image    string `json:"image"`
+	Version  string `json:"version"`
+	Port     int32  `json:"port"`
+	Replicas *int32 `json:"replicas"`
 }
 
 // AppVersionStatus defines the observed state of AppVersion
 type AppVersionStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Current  string `json:"current,omitempty"`
-	Previous string `json:"previous,omitempty"`
 }
 
 // +kubebuilder:object:root=true
