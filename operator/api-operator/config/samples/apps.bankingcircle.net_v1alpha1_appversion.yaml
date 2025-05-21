@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: appversion-sample
 spec:
-  image: "aabccontainerregistry.azurecr.io/go-simple-app:v2"
-  version: "v2"
+  image: "aabccontainerregistry.azurecr.io/go-simple-app:v6"
+  version: "v6"
   port: 80
   replicas: 1
   # TODO(user): Add fields here

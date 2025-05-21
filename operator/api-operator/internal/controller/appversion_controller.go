@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -113,6 +114,11 @@ func (r *AppVersionReconciler) Reconcile(
 		if err := controllerutil.SetControllerReference(&appVersion, service, r.Scheme); err != nil {
 			return ctrl.Result{}, err
 		}
+		// actual creation of the service was missing so adding
+		if err := r.Create(ctx, service); err != nil {
+			logger.Error(err, "Failed to create Service", "Service", service)
+			return ctrl.Result{}, err
+		}
 		// adding desired version ,adding to our collection of existing versions
 		existingVersions[desiredVersion] = deployment
 
@@ -122,6 +128,11 @@ func (r *AppVersionReconciler) Reconcile(
 	if len(sortedVersions) > 2 {
 		toDelete := sortedVersions[:len(sortedVersions)-2]
 		for _, ver := range toDelete {
+			if ver == desiredVersion {
+				// trying to fix here the rollback case (rollback case)
+				logger.Info("Existing versions found:", "versions", sortedVersions)
+				continue
+			}
 			logger.Info("Deleting old deployment and service for version", "version", ver)
 			// Delete the old deployment
 			if dep, ok := existingVersions[ver]; ok {
@@ -252,6 +263,7 @@ func (r *AppVersionReconciler) reconcileIngress(
 	namespace string,
 ) error {
 	ingress := &networkingv1.Ingress{}
+	var appVersion *appsbankingcirclenetv1alpha1.AppVersion
 
 	// Check if the Ingress already exists
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: ingressName}, ingress)
@@ -259,12 +271,19 @@ func (r *AppVersionReconciler) reconcileIngress(
 	if err != nil && errors.IsNotFound(err) {
 		// ingress does not exists and creating new one
 		ingress = r.constructIngress(versions, namespace)
+		if err := controllerutil.SetControllerReference(&appVersion, ingress, r.Scheme); err != nil {
+			return err
+		}
 		return r.Create(ctx, ingress)
 	} else if err != nil {
 		return err
 	}
 	newIngress := r.constructIngress(versions, namespace)
 	ingress.Spec = newIngress.Spec
+	// this is kind of ensure ownership because the ingress not gets deleted but all the others does
+	if err := controllerutil.SetControllerReference(&appVersion, ingress, r.Scheme); err != nil {
+		return err
+	}
 	return r.Update(ctx, ingress)
 }
 
@@ -295,11 +314,15 @@ func (r *AppVersionReconciler) constructIngress(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ingressName,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				"nginx.ingress.kubernetes.io/rewrite-target": "/",
+			},
 		},
 		Spec: networkingv1.IngressSpec{
+			IngressClassName: ptr.To("nginx"),
 			Rules: []networkingv1.IngressRule{
 				{
-					Host: "my-api.bankingcircle.net",
+					// Host: "my-api.bankingcircle.net",
 					IngressRuleValue: networkingv1.IngressRuleValue{
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: paths,
@@ -307,12 +330,12 @@ func (r *AppVersionReconciler) constructIngress(
 					},
 				},
 			},
-			TLS: []networkingv1.IngressTLS{
-				{
-					Hosts:      []string{"my-api.bankingcircle.net"},
-					SecretName: "my-api-tls-secret",
-				},
-			},
+			// TLS: []networkingv1.IngressTLS{
+			// 	{
+			// 		Hosts:      []string{"my-api.bankingcircle.net"},
+			// 		SecretName: "my-api-tls-secret",
+			// 	},
+			// },
 		},
 	}
 	return ingress
