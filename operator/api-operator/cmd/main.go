@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"api-operator/internal/controller"
 	"crypto/tls"
 	"flag"
 	"os"
@@ -36,7 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	appsbankingcirclenetv1alpha1 "api-operator/api/v1alpha1"
-	"api-operator/internal/controller"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -59,14 +59,28 @@ func main() {
 	var secureMetrics bool
 	var enableHTTP2 bool
 	var tlsOpts []func(*tls.Config)
-	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
-		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(
+		&metricsAddr,
+		"metrics-bind-address",
+		"0",
+		"The address the metrics endpoint binds to. "+
+			"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.",
+	)
+	flag.StringVar(
+		&probeAddr,
+		"health-probe-bind-address",
+		":8081",
+		"The address the probe endpoint binds to.",
+	)
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.BoolVar(&secureMetrics, "metrics-secure", true,
-		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
+	flag.BoolVar(
+		&secureMetrics,
+		"metrics-secure",
+		true,
+		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.",
+	)
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	opts := zap.Options{
@@ -168,81 +182,16 @@ func main() {
 		os.Exit(1)
 	}
 }
-package main
 
-import (
-    "flag"
-    "os"
-
-    "k8s.io/apimachinery/pkg/runtime"
-    utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-    clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-
-    apiv1alpha1 "github.com/myorg/my-operator/api/v1alpha1"
-    "github.com/myorg/my-operator/controllers"
-
-    ctrl "sigs.k8s.io/controller-runtime"
-)
-
-var (
-    scheme   = runtime.NewScheme()
-    setupLog = ctrl.Log.WithName("setup")
-)
-
-func init() {
-    // Register Kubernetes built-in types.
-    utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-    // Register the AppVersion types.
-    utilruntime.Must(apiv1alpha1.AddToScheme(scheme))
-    // +kubebuilder:scaffold:scheme
-}
-
-func main() {
-    var metricsAddr string
-    var enableLeaderElection bool
-
-    flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-    flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
-        "Enable leader election for controller manager. Only one active controller is allowed.")
-    flag.Parse()
-
-    mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-        Scheme:             scheme,
-        MetricsBindAddress: metricsAddr,
-        Port:               9443,
-        LeaderElection:     enableLeaderElection,
-        LeaderElectionID:   "unique-id.myorg.com",
-    })
-    if err != nil {
-        setupLog.Error(err, "Unable to start manager.")
-        os.Exit(1)
-    }
-
-    if err = (&controllers.AppVersionReconciler{
-        Client: mgr.GetClient(),
-        Scheme: mgr.GetScheme(),
-    }).SetupWithManager(mgr); err != nil {
-        setupLog.Error(err, "Unable to create controller", "controller", "AppVersion")
-        os.Exit(1)
-    }
-
-    // +kubebuilder:scaffold:builder
-
-    setupLog.Info("Starting manager.")
-    if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-        setupLog.Error(err, "Problem running manager.")
-        os.Exit(1)
-    }
-}
-make docker-build docker-push IMG=<your-image-name>
-make deploy IMG=<your-image-name>
-apiVersion: apiversions.myorg/v1alpha1
-kind: AppVersion
-metadata:
-  name: my-api-version
-  namespace: default
-spec:
-  image: "myregistry/my-api:v22"
-  version: "v22"
-  port: 80
-  replicas: 2
+// make docker-build docker-push IMG=<your-image-name>
+// make deploy IMG=<your-image-name>
+// apiVersion: apiversions.myorg/v1alpha1
+// kind: AppVersion
+// metadata:
+//   name: my-api-version
+//   namespace: default
+// spec:
+//   image: "myregistry/my-api:v22"
+//   version: "v22"
+//   port: 80
+//   replicas: 2
