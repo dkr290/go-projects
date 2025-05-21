@@ -152,3 +152,9 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/<org>/api-operator/<tag or branch>/dist/install.yaml
 ```
+
+```
+golangci-lint run -v
+https://golangci-lint.run/product/migration-guide/
+golangci-lint migrate
+```
