@@ -317,7 +317,7 @@ func serviceName(version string) string {
 	return fmt.Sprintf("my-api-%s-service", strings.ToLower(version))
 }
 
-// sortVersions sorts the version strings (assuming formats like "v21", "v22") Only thoose are accepted in thsi application
+// sortVersions sorts the version strings (assuming formats like "v21", "v22") Only thoose are accepted in this application
 func sortVersions(versions map[string]*appsv1.Deployment) []string {
 	var vers []string
 	for ver := range versions {
