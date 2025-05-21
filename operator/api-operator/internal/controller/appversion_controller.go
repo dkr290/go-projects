@@ -157,10 +157,6 @@ func (r *AppVersionReconciler) Reconcile(
 	return ctrl.Result{}, nil
 }
 
-func int32Ptr(i int32) *int32 {
-	return &i
-}
-
 func (r *AppVersionReconciler) constructDeployment(
 	appVersion appsbankingcirclenetv1alpha1.AppVersion,
 ) *appsv1.Deployment {
