@@ -39,26 +39,26 @@ spec:
           spec:
             description: AppVersionSpec defines the desired state of AppVersion
             properties:
-              imageRepo:
+              image:
                 description: Foo is an example field of AppVersion. Edit appversion_types.go
                   to remove/update
                 type: string
+              port:
+                format: int32
+                type: integer
+              replicas:
+                format: int32
+                type: integer
               version:
                 type: string
             required:
-            - imageRepo
+            - image
+            - port
+            - replicas
             - version
             type: object
           status:
             description: AppVersionStatus defines the observed state of AppVersion
-            properties:
-              current:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                type: string
-              previous:
-                type: string
             type: object
         type: object
     served: true

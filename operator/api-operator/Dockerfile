@@ -3,6 +3,11 @@ FROM golang:1.22 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
+COPY zscaler-root-ca.crt /usr/local/share/ca-certificates/zscaler-root-ca.crt
+RUN apt-get update && \
+  apt-get install -y ca-certificates && \
+  update-ca-certificates
+
 WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod

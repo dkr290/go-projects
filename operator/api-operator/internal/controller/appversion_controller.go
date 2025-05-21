@@ -39,9 +39,10 @@ import (
 )
 
 const (
-	appLabel     = "my-api"
-	versionLabel = "version"
-	ingressName  = "my-api-ingress"
+	appLabel        = "my-api"
+	versionLabel    = "version"
+	ingressName     = "my-api-ingress"
+	imagePullsecret = "regcred"
 )
 
 // AppVersionReconciler reconciles a AppVersion object
@@ -193,6 +194,11 @@ func (r *AppVersionReconciler) constructDeployment(
 						Ports: []corev1.ContainerPort{
 							{ContainerPort: appVersion.Spec.Port},
 						},
+					},
+				},
+				ImagePullSecrets: []corev1.LocalObjectReference{
+					{
+						Name: imagePullsecret,
 					},
 				},
 			},
