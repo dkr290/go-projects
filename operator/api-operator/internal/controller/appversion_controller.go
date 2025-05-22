@@ -263,7 +263,7 @@ func (r *AppVersionReconciler) reconcileIngress(
 	namespace string,
 ) error {
 	ingress := &networkingv1.Ingress{}
-	var appVersion *appsbankingcirclenetv1alpha1.AppVersion
+	var appVersion appsbankingcirclenetv1alpha1.AppVersion
 
 	// Check if the Ingress already exists
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: ingressName}, ingress)

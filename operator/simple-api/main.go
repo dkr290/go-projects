@@ -7,18 +7,21 @@ import (
 	"os"
 )
 
+var v string
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	version := os.Getenv("VERSION")
-	if version == "" {
-		version = "unknown"
-	}
-	if _, err := fmt.Fprintf(w, "<h1 style='font-size:24px;'>Version: %s</h1>\n", version); err != nil {
+	if _, err := fmt.Fprintf(w, "<h1 style='font-size:24px;'>Version: %s</h1>\n", v); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func main() {
-	http.HandleFunc("/", handler)
+	v = os.Getenv("VERSION")
+	if v == "" {
+		v = "unknown"
+	}
+
+	http.HandleFunc("/"+v, handler)
 	port := ":9090"
 	fmt.Println("Server running on", port)
 	if err := http.ListenAndServe(port, nil); err != nil {
